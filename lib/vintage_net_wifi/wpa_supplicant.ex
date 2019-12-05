@@ -141,7 +141,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     # The wpa_supplicant won't set the appropriate flag to make
     # this happen, so call a C program to do it.
 
-    force_ap_scan = Application.app_dir(:vintage_net, ["priv", "force_ap_scan"])
+    force_ap_scan = Application.app_dir(:vintage_net_wifi, ["priv", "force_ap_scan"])
 
     case System.cmd(force_ap_scan, [state.ifname]) do
       {_output, 0} ->
