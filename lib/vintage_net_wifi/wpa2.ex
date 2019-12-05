@@ -107,7 +107,7 @@ defmodule VintageNetWiFi.WPA2 do
   @spec validate_ssid(String.t()) :: :ok | {:error, invalid_ssid_error()}
   def validate_ssid(ssid) when byte_size(ssid) == 0, do: {:error, :ssid_too_short}
   def validate_ssid(ssid) when byte_size(ssid) <= 32, do: :ok
-  def validate_ssid(_ssid), do: {:error, :ssid_too_long}
+  def validate_ssid(ssid) when is_binary(ssid), do: {:error, :ssid_too_long}
 
   defp all_ascii(<<c, rest::binary>>) when c >= 32 and c <= 126 do
     all_ascii(rest)

@@ -215,6 +215,16 @@ defmodule VintageNetWiFiTest do
         }
       })
     end
+
+    # Non-strings
+    assert_raise FunctionClauseError, fn ->
+      VintageNetWiFi.normalize(%{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [%{ssid: 123, key_mgmt: :none}]
+        }
+      })
+    end
   end
 
   test "normalization converts passphrases to PSKs" do
