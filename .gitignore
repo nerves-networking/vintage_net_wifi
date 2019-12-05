@@ -24,3 +24,6 @@ vintage_net_wifi-*.tar
 
 # Don't put anything in the /priv directory. The Makefile "owns" it.
 /priv
+
+# Ignore temporary directory used for unit tests.
+/test_tmp
