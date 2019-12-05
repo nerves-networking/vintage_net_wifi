@@ -30,7 +30,7 @@ defmodule VintageNetWiFiTest do
 
     assert capture_log(fn ->
              assert normalized_input == VintageNetWiFi.normalize(input)
-    end) =~ "deprecated"
+           end) =~ "deprecated"
   end
 
   test "old way of specifying ap mode works" do
@@ -182,6 +182,39 @@ defmodule VintageNetWiFiTest do
     }
 
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+  end
+
+  test "normalization raises on bad ssids and psks" do
+    # WPA2 PSK configs
+    assert_raise ArgumentError, fn ->
+      VintageNetWiFi.normalize(%{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [
+            %{ssid: "123456789012345678901234567890123", psk: "supersecret", key_mgmt: :wpa_psk}
+          ]
+        }
+      })
+    end
+
+    # No security configs
+    assert_raise ArgumentError, fn ->
+      VintageNetWiFi.normalize(%{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [%{ssid: "", key_mgmt: :none}]
+        }
+      })
+    end
+
+    assert_raise ArgumentError, fn ->
+      VintageNetWiFi.normalize(%{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [%{ssid: "123456789012345678901234567890123", key_mgmt: :none}]
+        }
+      })
+    end
   end
 
   test "normalization converts passphrases to PSKs" do

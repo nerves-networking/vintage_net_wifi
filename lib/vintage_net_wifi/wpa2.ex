@@ -12,6 +12,7 @@ defmodule VintageNetWiFi.WPA2 do
   @type psk :: <<_::512>>
 
   @type invalid_passphrase_error :: :password_too_short | :password_too_long | :invalid_characters
+  @type invalid_ssid_error :: :ssid_too_short | :ssid_too_long
 
   @doc """
   Convert a WiFi WPA2 passphrase into a PSK
@@ -23,17 +24,17 @@ defmodule VintageNetWiFi.WPA2 do
   """
   @spec to_psk(String.t(), psk() | String.t()) ::
           {:ok, psk()}
-          | {:error, :ssid_too_long | invalid_passphrase_error()}
+          | {:error, invalid_ssid_error() | invalid_passphrase_error()}
   def to_psk(ssid, psk) when byte_size(psk) == 64 do
-    with :ok <- psk_ok(psk),
-         :ok <- ssid_ok(ssid) do
+    with :ok <- validate_psk(psk),
+         :ok <- validate_ssid(ssid) do
       {:ok, psk}
     end
   end
 
   def to_psk(ssid, passphrase) when is_binary(passphrase) do
     with :ok <- validate_passphrase(passphrase),
-         :ok <- ssid_ok(ssid) do
+         :ok <- validate_ssid(ssid) do
       {:ok, compute_psk(ssid, passphrase)}
     end
   end
@@ -94,12 +95,19 @@ defmodule VintageNetWiFi.WPA2 do
     :crypto.hmac(:sha, password, digest)
   end
 
-  defp psk_ok(psk) when byte_size(psk) == 64 do
+  defp validate_psk(psk) when byte_size(psk) == 64 do
     all_hex_digits(psk)
   end
 
-  defp ssid_ok(ssid) when byte_size(ssid) <= 32, do: :ok
-  defp ssid_ok(_ssid), do: {:error, :ssid_too_long}
+  @doc """
+  Validate the length of the SSID
+
+  A valid SSID is between 1 and 32 characters long.
+  """
+  @spec validate_ssid(String.t()) :: :ok | {:error, invalid_ssid_error()}
+  def validate_ssid(ssid) when byte_size(ssid) == 0, do: {:error, :ssid_too_short}
+  def validate_ssid(ssid) when byte_size(ssid) <= 32, do: :ok
+  def validate_ssid(_ssid), do: {:error, :ssid_too_long}
 
   defp all_ascii(<<c, rest::binary>>) when c >= 32 and c <= 126 do
     all_ascii(rest)

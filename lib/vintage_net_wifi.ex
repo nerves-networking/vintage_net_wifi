@@ -161,14 +161,26 @@ defmodule VintageNetWiFi do
           "invalid wifi mode #{inspect(other_mode)}. Specify :infrastructure, :ap, or :ibss"
   end
 
+  defp assert_ssid(ssid) do
+    case WPA2.validate_ssid(ssid) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        raise ArgumentError, "Invalid WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
+    end
+  end
+
   # WEP
   defp normalize_network(
          %{
            key_mgmt: :none,
-           ssid: _ssid,
+           ssid: ssid,
            wep_tx_keyidx: _wep_tx_keyidx
          } = network_config
        ) do
+    assert_ssid(ssid)
+
     Map.take(
       network_config,
       [:wep_key0, :wep_key1, :wep_key2, :wep_key3, :wep_tx_keyidx | @common_network_keys]
@@ -176,7 +188,8 @@ defmodule VintageNetWiFi do
   end
 
   # No Security
-  defp normalize_network(%{key_mgmt: :none} = network_config) do
+  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) do
+    assert_ssid(ssid)
     Map.take(network_config, @common_network_keys)
   end
 
@@ -188,20 +201,16 @@ defmodule VintageNetWiFi do
         |> Map.take([:wpa_ptk_rekey, :pairwise | @common_network_keys])
         |> Map.put(:psk, real_psk)
 
-      {:error, :invalid_characters} ->
-        raise ArgumentError, "Invalid characters in SSID #{inspect(ssid)} or its password"
-
-      {:error, :password_too_long} ->
-        raise ArgumentError, "Passphrase for SSID #{inspect(ssid)} is too long"
-
-      {:error, :ssid_too_long} ->
-        raise ArgumentError, "SSID #{inspect(ssid)} is too long"
+      {:error, reason} ->
+        raise ArgumentError, "Invalid WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
     end
   end
 
   # WPA-EAP or IEEE8021X (TODO)
-  defp normalize_network(%{key_mgmt: key_mgmt, ssid: _ssid} = network_config)
+  defp normalize_network(%{key_mgmt: key_mgmt, ssid: ssid} = network_config)
        when key_mgmt in [:wpa_eap, :IEEE8021X] do
+    assert_ssid(ssid)
+
     Map.take(network_config, [
       :anonymous_identity,
       :ca_cert,
