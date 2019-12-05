@@ -3,6 +3,7 @@
 [![Hex version](https://img.shields.io/hexpm/v/vintage_net_wifi.svg "Hex version")](https://hex.pm/packages/vintage_net_wifi)
 [![API docs](https://img.shields.io/hexpm/v/vintage_net_wifi.svg?label=hexdocs "API docs")](https://hexdocs.pm/vintage_net_wifi/VintageNet.html)
 [![CircleCI](https://circleci.com/gh/nerves-networking/vintage_net_wifi.svg?style=svg)](https://circleci.com/gh/nerves-networking/vintage_net_wifi)
+[![Coverage Status](https://coveralls.io/repos/github/nerves-networking/vintage_net_wifi/badge.svg?branch=master)](https://coveralls.io/github/nerves-networking/vintage_net_wifi?branch=master)
 
 `VintageNetWiFi` makes it easy to add WiFi support for your device. This can be
 as simple as connecting to a WiFi access point or starting a WiFi access point

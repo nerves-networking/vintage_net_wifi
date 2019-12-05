@@ -10,6 +10,7 @@ defmodule VintageNetWiFi.MixProject do
       version: @version,
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
+      test_coverage: [tool: ExCoveralls],
       start_permanent: Mix.env() == :prod,
       build_embedded: true,
       compilers: [:elixir_make | Mix.compilers()],
@@ -60,6 +61,7 @@ defmodule VintageNetWiFi.MixProject do
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, "~> 0.19", only: :docs, runtime: false},
+      {:excoveralls, "~> 0.8", only: :test, runtime: false},
       {:vintage_net, "~> 0.7.0-dev",
        github: "nerves-networking/vintage_net", branch: "the-split", override: true}
     ]
