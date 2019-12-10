@@ -32,7 +32,7 @@ end
 > In Buildroot, check that `BR2_PACKAGE_WPA_SUPPLICANT` is enabled.
 >
 > If you are using access point mode, check that `CONFIG_UDHCPD` is enabled
-> in Busybox and `BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT is enabled in Buildroot.
+> in Busybox and `BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT` is enabled in Buildroot.
 
 WiFi network interfaces typically have names like `"wlan0"` or `"wlan1"` when
 using Nerves. Most of the time, there's only one WiFi interface and its
