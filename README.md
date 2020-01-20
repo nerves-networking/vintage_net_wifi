@@ -45,17 +45,20 @@ An example WiFi configuration looks like this:
 config :vintage_net,
   config: [
     {"wlan0",
-     %{
-       type: VintageNetWiFi,
-       vintage_net_wifi: %{
-         key_mgmt: :wpa_psk,
-         psk: "a_passphrase_or_psk",
-         ssid: "my_network_ssid"
-       },
-       ipv4: %{
-         method: :dhcp
-       }
-     }}
+      %{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [
+            %{
+              key_mgmt: :wpa_psk,
+              ssid: "my_network_ssid"
+              psk: "a_passphrase_or_psk",
+            }
+          ]
+        },
+        ipv4: %{method: :dhcp},
+      }
+    }
   ]
 ```
 
