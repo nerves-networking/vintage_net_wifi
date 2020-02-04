@@ -51,7 +51,7 @@ config :vintage_net,
           networks: [
             %{
               key_mgmt: :wpa_psk,
-              ssid: "my_network_ssid"
+              ssid: "my_network_ssid",
               psk: "a_passphrase_or_psk",
             }
           ]
