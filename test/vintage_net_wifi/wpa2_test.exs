@@ -15,6 +15,11 @@ defmodule VintageNetWiFi.WPA2Test do
     assert WPA2.to_psk("SSID", "0123456") === {:error, :password_too_short}
   end
 
+  test "emojis in SSIDs work" do
+    assert WPA2.to_psk("🐢🐢🐢🐢🐢", "nervestraining") ==
+             {:ok, "EA188BD3959A678D78D0D12D0E5F2E7B070A0F787AACAEA4F3F0D856AE5D6F14"}
+  end
+
   test "returns error on bad SSIDs" do
     assert WPA2.to_psk("12345678901234567890123456789012345", "password")
   end
