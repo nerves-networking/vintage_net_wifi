@@ -87,6 +87,9 @@ The `:vintage_net_wifi` key has the following common fields:
     * `:infrastructure` (default) - Normal operation. Associate with an AP
     * `:ap` - access point mode
     * `:ibss` - peer to peer mode (not supported)
+    * `:p2p_go` - P2P Go mode (not supported)
+    * `:p2p_group_formation` - P2P Group Formation mode (not supported)
+    * `:mesh` - mesh mode
   * `:ssid` - The SSID for the network
   * `:key_mgmt` - WiFi security mode (`:wpa_psk` for WPA2, `:none` for no
     password or WEP)

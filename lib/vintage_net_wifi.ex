@@ -150,14 +150,15 @@ defmodule VintageNetWiFi do
   # Convert mode names to their 802.11 operation mode name
   # :client and :host were used in vintage_net 0.6.2 and earlier
   defp normalized_mode_name(:client), do: :infrastructure
-  defp normalized_mode_name(:infrastructure), do: :infrastructure
   defp normalized_mode_name(:host), do: :ap
-  defp normalized_mode_name(:ap), do: :ap
-  defp normalized_mode_name(:ibss), do: :ibss
+
+  defp normalized_mode_name(known)
+       when known in [:ap, :ibss, :infrastructure, :p2p_go, :p2p_group_formation, :mesh],
+       do: known
 
   defp normalized_mode_name(other_mode) do
     raise ArgumentError,
-          "invalid wifi mode #{inspect(other_mode)}. Specify :infrastructure, :ap, or :ibss"
+          "invalid wifi mode #{inspect(other_mode)}. Specify :infrastructure, :ap, :ibss, or :mesh"
   end
 
   defp assert_ssid(ssid) do
@@ -334,6 +335,9 @@ defmodule VintageNetWiFi do
   defp mode_to_string(:infrastructure), do: "0"
   defp mode_to_string(:ibss), do: "1"
   defp mode_to_string(:ap), do: "2"
+  defp mode_to_string(:p2p_go), do: "3"
+  defp mode_to_string(:p2p_group_formation), do: "4"
+  defp mode_to_string(:mesh), do: "5"
 
   defp bgscan_to_string(:simple), do: "\"simple\""
   defp bgscan_to_string({:simple, args}), do: "\"simple:#{args}\""
@@ -588,13 +592,14 @@ defmodule VintageNetWiFi do
     end)
   end
 
-  defp ap_mode?(%{vintage_net_wifi: %{networks: [%{mode: mode}]}}) when mode in [:ap, :ibss],
-    do: true
+  defp ap_mode?(%{vintage_net_wifi: %{networks: [%{mode: mode}]}})
+       when mode in [:ap, :ibss, :mesh],
+       do: true
 
   defp ap_mode?(_config), do: false
 
   defp ctrl_interface_paths(ifname, dir, %{vintage_net_wifi: %{networks: [%{mode: mode}]}})
-       when mode in [:ap, :ibss] do
+       when mode in [:ap, :ibss, :mesh] do
     # Some WiFi drivers expose P2P interfaces and those should be cleaned up too.
     [Path.join(dir, "p2p-dev-#{ifname}"), Path.join(dir, ifname)]
   end
