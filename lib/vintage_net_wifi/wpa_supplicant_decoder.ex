@@ -107,6 +107,36 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
     {:event, "AP-STA-DISCONNECTED", String.trim_trailing(mac)}
   end
 
+  # MESH-PEER-DISCONNECTED 00:00:00:00:00:00
+  def decode_notification(<<"MESH-PEER-DISCONNECTED ", mac::binary>>) do
+    {:event, "MESH-PEER-DISCONNECTED", String.trim_trailing(mac)}
+  end
+
+  # MESH-PEER-CONNECTED 00:00:00:00:00:00
+  def decode_notification(<<"MESH-PEER-CONNECTED ", mac::binary>>) do
+    {:event, "MESH-PEER-CONNECTED", String.trim_trailing(mac)}
+  end
+
+  # MESH-GROUP-STARTED ssid=\"my-mesh\" id=1
+  def decode_notification(<<"MESH-GROUP-STARTED ", rest::binary>>) do
+    decode_kv_notification("MESH-GROUP-STARTED", rest)
+  end
+
+  # MESH-GROUP-REMOVED mesh0
+  def decode_notification(<<"MESH-GROUP-REMOVED ", ifname::binary>>) do
+    {:event, "MESH-GROUP-REMOVED", String.trim_trailing(ifname)}
+  end
+
+  # MESH-SAE-AUTH-FAILURE addr=00:00:00:00:00:00
+  def decode_notification(<<"MESH-SAE-AUTH-FAILURE ", rest::binary>>) do
+    decode_kv_notification("MESH-SAE-AUTH-FAILURE", rest)
+  end
+
+  # MESH-SAE-AUTH-BLOCKED addr=00:00:00:00:00:00 duration=5
+  def decode_notification(<<"MESH-SAE-AUTH-BLOCKED ", rest::binary>>) do
+    decode_kv_notification("MESH-SAE-AUTH-BLOCKED", rest)
+  end
+
   def decode_notification(string) do
     {:info, String.trim_trailing(string)}
   end

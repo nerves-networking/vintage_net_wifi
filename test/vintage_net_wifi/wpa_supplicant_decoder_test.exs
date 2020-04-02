@@ -510,4 +510,29 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
                   "/C=US/ST=California/L=San Luis Obispo/O=FarmBot Inc/CN=Connor Rigby/emailAddress=connor@farmbot.io"
               }}
   end
+
+  test "decodes mesh messages" do
+    assert WPASupplicantDecoder.decode_notification("MESH-GROUP-STARTED ssid=\"my-mesh\" id=1") ==
+             {:event, "MESH-GROUP-STARTED", %{"id" => "1", "ssid" => "my-mesh"}}
+
+    assert WPASupplicantDecoder.decode_notification("MESH-GROUP-REMOVED mesh0") ==
+             {:event, "MESH-GROUP-REMOVED", "mesh0"}
+
+    assert WPASupplicantDecoder.decode_notification(
+             "MESH-SAE-AUTH-FAILURE addr=00:00:00:00:00:00"
+           ) ==
+             {:event, "MESH-SAE-AUTH-FAILURE", %{"addr" => "00:00:00:00:00:00"}}
+
+    assert WPASupplicantDecoder.decode_notification(
+             "MESH-SAE-AUTH-BLOCKED addr=00:00:00:00:00:00 duration=1"
+           ) ==
+             {:event, "MESH-SAE-AUTH-BLOCKED",
+              %{"addr" => "00:00:00:00:00:00", "duration" => "1"}}
+
+    assert WPASupplicantDecoder.decode_notification("MESH-PEER-CONNECTED 00:00:00:00:00:00") ==
+             {:event, "MESH-PEER-CONNECTED", "00:00:00:00:00:00"}
+
+    assert WPASupplicantDecoder.decode_notification("MESH-PEER-DISCONNECTED 00:00:00:00:00:00") ==
+             {:event, "MESH-PEER-DISCONNECTED", "00:00:00:00:00:00"}
+  end
 end
