@@ -70,6 +70,7 @@ defmodule VintageNetWiFi.WPASupplicant do
       verbose: verbose,
       access_points: %{},
       clients: [],
+      peers: [],
       current_ap: nil,
       eap_status: %EAPStatus{},
       ll: nil
@@ -385,6 +386,32 @@ defmodule VintageNetWiFi.WPASupplicant do
     state
   end
 
+  defp handle_notification({:event, "MESH-PEER-CONNECTED", peer}, state) do
+    case get_access_point_info(state.ll, peer) do
+      {:ok, peer} ->
+        peers = [peer | state.peers]
+        new_state = %{state | peers: peers}
+        update_peers_property(new_state)
+        new_state
+
+      {:error, reason} ->
+        _ = Logger.error("Failed to get information about mesh peer: #{peer} #{inspect(reason)}")
+        state
+    end
+  end
+
+  defp handle_notification({:event, "MESH-PEER-DISCONNECTED", peer}, state) do
+    peers =
+      Enum.reject(state.peers, fn
+        %{bssid: ^peer} -> true
+        _ -> false
+      end)
+
+    new_state = %{state | peers: peers}
+    update_peers_property(new_state)
+    new_state
+  end
+
   defp handle_notification({:event, "CTRL-EVENT-TERMINATING"}, _state) do
     # This really shouldn't happen. The only way I know how to cause this
     # is to send a SIGTERM to the wpa_supplicant.
@@ -461,6 +488,10 @@ defmodule VintageNetWiFi.WPASupplicant do
         empty when empty == %{} ->
           {:error, :unknown}
 
+        %{"mesh_id" => _} = mesh_response ->
+          peer = VintageNetWiFi.MeshPeer.new(mesh_response)
+          {:ok, peer}
+
         response ->
           frequency = String.to_integer(response["freq"])
           signal_dbm = String.to_integer(response["level"])
@@ -489,6 +520,14 @@ defmodule VintageNetWiFi.WPASupplicant do
       VintageNet,
       ["interface", state.ifname, "wifi", "clients"],
       state.clients
+    )
+  end
+
+  defp update_peers_property(state) do
+    VintageNet.PropertyTable.put(
+      VintageNet,
+      ["interface", state.ifname, "wifi", "peers"],
+      state.peers
     )
   end
 

@@ -220,6 +220,53 @@ iex> VintageNet.configure("wlan0", %{
 })
 ```
 
+Network adapters that can be configured to support 80211s mesh networking can be configured
+as follows:
+(Raspberry Pi internal WiFi chips do **not** support 80211s meshing)
+
+```elixir
+VintageNet.configure("mesh0", %{
+  type: VintageNetWiFi,
+  vintage_net_wifi: %{
+    user_mpm: 1,
+    networks: [
+      %{
+        ssid: mesh_id,
+        key_mgmt: :none,
+        mode: :mesh
+      }
+    ]
+  }
+})
+```
+
+```elixir
+# With SAE key management.
+# note this currently does not work yet.
+VintageNet.configure("mesh0", %{
+  type: VintageNetWiFi,
+  vintage_net_wifi: %{
+    user_mpm: 1,
+    networks: [
+      %{
+        ssid: mesh_id,
+        # see note. This currently does not work.
+        key_mgmt: :sae,
+        sae_password: "super secret",
+        mode: :mesh
+      }
+    ]
+  }
+})
+```
+
+Note that the example mesh configuration does not contain ip address settings. All standard
+ip schemes are acceptable, but which one to use depends on the network configuration. The
+simplest way to test the mesh network is have every node configure a static
+predictable ip address. DHCP will also work, but this forces a "client/server" configuration
+meaning that nodes joining the network will need to decide if they should be a dhcp server or
+client.
+
 ## Properties
 
 In addition to the common `vintage_net` properties for all interface types, this technology reports the following:
@@ -229,6 +276,7 @@ Property        | Values           | Description
 `access_points` | [%AccessPoint{}] | A list of access points as found by the most recent scan
 `clients`       | ["11:22:33:44:55:66"] | A list of clients connected to the access point when using `mode: :ap`
 `current_ap`    | %AccessPoint{}   | The currently associated access point
+`peers`         | [%MeshPeer{}]    | a list of mesh peers that the current node knows about when using `mode: :mesh`
 
 Access points are identified by their BSSID. Information about an access point
 has the following form:
@@ -243,6 +291,38 @@ has the following form:
   signal_dbm: -76,
   signal_percent: 57,
   ssid: "MyNetwork"
+}
+```
+
+Mesh peers are identified by their BSSID. Information about a peer has the following form:
+
+```elixir
+%VintageNetWiFi.MeshPeer{
+  active_path_selection_metric_id: 1,
+  active_path_selection_protocol_id: 1,
+  age: 2339,
+  authentication_protocol_id: 0,
+  band: :wifi_2_4_ghz,
+  beacon_int: 1000,
+  bss_basic_rate_set: "10 20 55 110 60 120 240",
+  bssid: "f8:a2:d6:b5:d4:07",
+  capabilities: 0,
+  channel: 5,
+  congestion_control_mode_id: 0,
+  est_throughput: 65000,
+  flags: [:mesh],
+  frequency: 2432,
+  id: 7,
+  mesh_capability: 9,
+  mesh_formation_info: 2,
+  mesh_id: "my-mesh",
+  noise_dbm: -89,
+  quality: 0,
+  signal_dbm: -27,
+  signal_percent: 97,
+  snr: 62,
+  ssid: "my-mesh",
+  synchronization_method_id: 1
 }
 ```
 

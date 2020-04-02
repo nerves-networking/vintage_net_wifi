@@ -3,6 +3,10 @@ defmodule VintageNetWiFi.Utils do
   Various utility functions for handling WiFi information
   """
 
+  @doc "Converts 1 to true, 0 to false"
+  def bit_to_boolean(1), do: true
+  def bit_to_boolean(0), do: false
+
   @type frequency_info() :: %{
           band: VintageNetWiFi.AccessPoint.band(),
           channel: non_neg_integer(),
