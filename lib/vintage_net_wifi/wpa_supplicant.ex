@@ -1,8 +1,8 @@
 defmodule VintageNetWiFi.WPASupplicant do
   use GenServer
 
-  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
   alias VintageNet.Interface.EAPStatus
+  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
   require Logger
 
   @moduledoc """

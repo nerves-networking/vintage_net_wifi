@@ -1,4 +1,6 @@
 defmodule VintageNetWiFi.WPASupplicantDecoder do
+  @moduledoc false
+
   @doc """
   Decode notifications from the wpa_supplicant
   """

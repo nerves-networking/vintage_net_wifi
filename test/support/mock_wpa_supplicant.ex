@@ -1,6 +1,8 @@
 defmodule VintageNetWiFiTest.MockWPASupplicant do
   use GenServer
 
+  @moduledoc false
+
   @spec start_link(Path.t()) :: GenServer.on_start()
   def start_link(path) do
     GenServer.start_link(__MODULE__, path)

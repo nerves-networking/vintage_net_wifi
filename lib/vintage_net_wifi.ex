@@ -3,9 +3,9 @@ defmodule VintageNetWiFi do
 
   require Logger
 
-  alias VintageNetWiFi.{WPA2, WPASupplicant}
   alias VintageNet.Interface.RawConfig
-  alias VintageNet.IP.{IPv4Config, DhcpdConfig, DnsdConfig}
+  alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
+  alias VintageNetWiFi.{WPA2, WPASupplicant}
 
   # These configuration keys are common to all network specifications
   # and allowed to pass through network normalization.

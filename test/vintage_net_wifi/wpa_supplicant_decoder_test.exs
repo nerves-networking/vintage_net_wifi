@@ -380,14 +380,31 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
     assert WPASupplicantDecoder.decode_notification("WPS-SUCCESS") == {:event, "WPS-SUCCESS"}
     assert WPASupplicantDecoder.decode_notification("WPS-TIMEOUT") == {:event, "WPS-TIMEOUT"}
 
-    # assert WPASupplicantDecoder.decode_notification("WPS-ENROLLEE-SEEN 02:00:00:00:01:00\n572cf82f-c957-5653-9b16-b5cfb298abf1 1-0050F204-1 0x80 4 1\n[Wireless Client]") ==
-    #                                      {:'WPS-ENROLLEE-SEEN', "02:00:00:00:01:00", "572cf82f-c957-5653-9b16-b5cfb298abf1", "1-0050F204-1", 0x80, 4, 1, "[Wireless Client]"}
+    # assert WPASupplicantDecoder.decode_notification(
+    #       """
+    #       WPS-ENROLLEE-SEEN 02:00:00:00:01:00
+    #       572cf82f-c957-5653-9b16-b5cfb298abf1 1-0050F204-1 0x80 4 1
+    #       [Wireless Client]
+    #       """
+    #       ) ==
+    #         {:"WPS-ENROLLEE-SEEN", "02:00:00:00:01:00", "572cf82f-c957-5653-9b16-b5cfb298abf1",
+    #          "1-0050F204-1", 0x80, 4, 1, "[Wireless Client]"}
 
-    # assert WPASupplicantDecoder.decode_notification("WPS-ER-AP-ADD 87654321-9abc-def0-1234-56789abc0002 02:11:22:33:44:55\npri_dev_type=6-0050F204-1 wps_state=1 |Very friendly name|Company|\nLong description of the model|WAP|http://w1.fi/|http://w1.fi/hostapd/") ==
-    #                                     {:'WPS-ER-AP-ADD', "87654321-9abc-def0-1234-56789abc0002", "02:11:22:33:44:55", "pri_dev_type=6-0050F204-1 wps_state=1", "Very friendly name", "Company", "Long description of the model", "WAP",  "http://w1.fi/", "http://w1.fi/hostapd/"}
+    # assert WPASupplicantDecoder.decode_notification(
+    #         """
+    #         WPS-ER-AP-ADD 87654321-9abc-def0-1234-56789abc0002 02:11:22:33:44:55
+    #         pri_dev_type=6-0050F204-1 wps_state=1 |Very friendly name|Company|
+    #         Long description of the model|WAP|http://w1.fi/|http://w1.fi/hostapd/
+    #         """
+    #       ) ==
+    #         {:"WPS-ER-AP-ADD", "87654321-9abc-def0-1234-56789abc0002", "02:11:22:33:44:55",
+    #          "pri_dev_type=6-0050F204-1 wps_state=1", "Very friendly name", "Company",
+    #          "Long description of the model", "WAP", "http://w1.fi/", "http://w1.fi/hostapd/"}
 
-    # assert WPASupplicantDecoder.decode_notification("WPS-ER-AP-REMOVE 87654321-9abc-def0-1234-56789abc0002") ==
-    #                                      {:'WPS-ER-AP-ADD', "87654321-9abc-def0-1234-56789abc0002"}
+    # assert WPASupplicantDecoder.decode_notification(
+    #        "WPS-ER-AP-REMOVE 87654321-9abc-def0-1234-56789abc0002"
+    #       ) ==
+    #         {:"WPS-ER-AP-ADD", "87654321-9abc-def0-1234-56789abc0002"}
 
     # WPS-ER-ENROLLEE-ADD 2b7093f1-d6fb-5108-adbb-bea66bb87333
     # 02:66:a0:ee:17:27 M1=1 config_methods=0x14d dev_passwd_id=0
