@@ -45,7 +45,7 @@ jobs:
       - run: MIX_ENV=test mix coveralls.circle
       - run: mix format --check-formatted
       - run: MIX_ENV=docs mix docs
-      - run: mix dialyzer --halt-exit-status
+      - run: mix dialyzer
       - run: mix hex.build
       - save_cache:
           key: v1-mix-cache-{{ checksum "mix.lock" }}
