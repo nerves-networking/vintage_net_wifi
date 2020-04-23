@@ -281,6 +281,7 @@ defmodule VintageNetWiFi do
       ifname: ifname,
       type: __MODULE__,
       source_config: normalized_config,
+      required_ifnames: [ifname],
       files: files,
       cleanup_files: control_interface_paths,
       restart_strategy: :rest_for_one,

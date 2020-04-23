@@ -123,6 +123,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -163,6 +164,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -283,6 +285,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -338,6 +341,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -389,6 +393,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -433,6 +438,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -483,6 +489,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -545,6 +552,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -609,6 +617,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -675,6 +684,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -744,6 +754,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -813,6 +824,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -884,6 +896,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -953,6 +966,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1024,6 +1038,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1084,6 +1099,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1147,6 +1163,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1214,6 +1231,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1279,6 +1297,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1340,6 +1359,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1395,6 +1415,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1468,6 +1489,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1539,6 +1561,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1623,6 +1646,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
@@ -1715,6 +1739,7 @@ defmodule WiFiCompatibilityTest do
       ifname: "wlan0",
       type: VintageNetWiFi,
       source_config: VintageNet.Technology.WiFi.normalize(input),
+      required_ifnames: ["wlan0"],
       child_specs: [
         {VintageNetWiFi.WPASupplicant,
          [
