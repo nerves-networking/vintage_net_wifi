@@ -27,7 +27,8 @@ defmodule VintageNetWiFi do
     :bgscan,
     :passive_scan,
     :regulatory_domain,
-    :user_mpm
+    :user_mpm,
+    :root_interface
   ]
 
   @moduledoc """
@@ -217,7 +218,7 @@ defmodule VintageNetWiFi do
     end
   end
 
-  # ASE
+  # SAE
   defp normalize_network(%{key_mgmt: :sae, sae_password: _} = network_config) do
     network_config
     |> Map.take([:sae_password | @common_network_keys])
@@ -310,10 +311,12 @@ defmodule VintageNetWiFi do
       ifname: ifname,
       type: __MODULE__,
       source_config: normalized_config,
-      required_ifnames: [ifname],
+      required_ifnames: required_ifnames(ifname, config),
       files: files,
       cleanup_files: control_interface_paths,
       restart_strategy: :rest_for_one,
+      up_cmds: up_cmds(ifname, config),
+      down_cmds: down_cmds(ifname, config),
       child_specs: [
         {WPASupplicant, wpa_supplicant_options}
       ]
@@ -637,6 +640,50 @@ defmodule VintageNetWiFi do
     do: true
 
   defp ap_mode?(_config), do: false
+
+  # if mesh mode, the interface name is not a real interface yet. it needs to be brought up
+  defp required_ifnames(_ifname, %{
+         vintage_net_wifi: %{root_interface: root_interface, networks: [%{mode: :mesh}]}
+       }) do
+    [root_interface]
+  end
+
+  defp required_ifnames(_ifname, %{vintage_net_wifi: %{networks: [%{mode: :mesh}]}}) do
+    raise ArgumentError, "`root_interface` is a required key when specifying `mode: :mesh`"
+  end
+
+  # any other mode just relies on the actual interface name
+  defp required_ifnames(ifname, _) do
+    [ifname]
+  end
+
+  defp up_cmds(ifname, %{vintage_net_wifi: %{root_interface: root_interface}}) do
+    mesh_mode = Application.app_dir(:vintage_net_wifi, ["priv", "mesh_mode"])
+
+    [
+      {:run, mesh_mode, [root_interface, ifname, "add"]},
+      {:fun,
+       fn ->
+         Process.sleep(1000)
+       end}
+    ]
+  end
+
+  defp up_cmds(_, _), do: []
+
+  defp down_cmds(ifname, %{vintage_net_wifi: %{root_interface: root_interface}}) do
+    mesh_mode = Application.app_dir(:vintage_net_wifi, ["priv", "mesh_mode"])
+
+    [
+      {:run, mesh_mode, [root_interface, ifname, "del"]},
+      {:fun,
+       fn ->
+         Process.sleep(1000)
+       end}
+    ]
+  end
+
+  defp down_cmds(_, _), do: []
 
   defp ctrl_interface_paths(ifname, dir, %{vintage_net_wifi: %{networks: [%{mode: mode}]}})
        when mode in [:ap, :ibss] do
