@@ -251,6 +251,28 @@ scanning networks once or twice. A better way is to subscribe to the
 The `"access_points"` property updates as soon as the WiFi module notifies that
 it is complete so applications don't need to guess how long to wait.
 
+## Signal quality info in STA (client) mode
+
+You can send `ioctl` command to get information about signal level, quality and other info when connected to network in STA mode. Run:
+
+```elixir
+VintageNet.ioctl("wlan0", :signal_poll)
+```
+
+Example output:
+
+```elixir
+{:ok, %VintageNetWiFi.SignalInfo{
+  center_frequency1: 2462,
+  center_frequency2: 0,
+  frequency: 2472,
+  linkspeed: 300,
+  signal_dbm: -32,
+  signal_percent: 94,
+  width: "40 MHz"
+}}
+```
+
 ## Debugging
 
 Unfortunately, when you're getting started for the very first time, WiFi can be

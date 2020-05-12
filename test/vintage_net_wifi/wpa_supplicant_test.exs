@@ -408,4 +408,52 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     refute_receive {VintageNet, ^current_ap_property, _, _, _}
   end
+
+  test "get signal info using SIGNAL_POLL", context do
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "SIGNAL_POLL" => "RSSI=-32\nLINKSPEED=300\nNOISE=9999\nFREQUENCY=2472\nWIDTH=40 MHz\nCENTER_FRQ1=2462\n"
+    })
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path}
+      )
+
+    correct_response = %VintageNetWiFi.SignalInfo{
+      center_frequency1: 2462,
+      center_frequency2: 0,
+      frequency: 2472,
+      linkspeed: 300,
+      signal_dbm: -32,
+      signal_percent: 94,
+      width: "40 MHz"
+    }
+
+    assert {:ok, correct_response} == WPASupplicant.signal_poll("test_wlan0")
+  end
+
+  test "fail to get signal info using SIGNAL_POLL", context do
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "SIGNAL_POLL" => "FAIL\n"
+    })
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path}
+      )
+
+    assert {:error, "FAIL"} == WPASupplicant.signal_poll("test_wlan0")
+  end
 end
