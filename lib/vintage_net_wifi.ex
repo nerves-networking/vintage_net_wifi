@@ -299,6 +299,11 @@ defmodule VintageNetWiFi do
     WPASupplicant.scan(ifname)
   end
 
+  @impl true
+  def ioctl(ifname, :signal_poll, _args) do
+    WPASupplicant.signal_poll(ifname)
+  end
+
   def ioctl(_ifname, _command, _args) do
     {:error, :unsupported}
   end

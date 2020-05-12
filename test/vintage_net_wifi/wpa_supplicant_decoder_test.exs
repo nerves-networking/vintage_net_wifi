@@ -210,6 +210,23 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
                "id" => "2"
              }
 
+    # signal_poll response
+    assert WPASupplicantDecoder.decode_kv_response("""
+           RSSI=-32
+           LINKSPEED=300
+           NOISE=9999
+           FREQUENCY=2472
+           WIDTH=40 MHz
+           CENTER_FRQ1=2462
+           """) == %{
+             "RSSI" => "-32",
+             "LINKSPEED" => "300",
+             "NOISE" => "9999",
+             "FREQUENCY" => "2472",
+             "WIDTH" => "40 MHz",
+             "CENTER_FRQ1" => "2462"
+           }
+
     # Empty BSS response
     assert WPASupplicantDecoder.decode_kv_response("\n") == %{}
   end

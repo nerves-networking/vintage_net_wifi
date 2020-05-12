@@ -41,6 +41,14 @@ defmodule VintageNetWiFi.WPASupplicant do
     GenServer.call(via_name(ifname), :scan)
   end
 
+  @doc """
+  Polls for signal level info
+  """
+  @spec signal_poll(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
+  def signal_poll(ifname) do
+    GenServer.call(via_name(ifname), :signal_poll)
+  end
+
   @impl true
   def init(args) do
     wpa_supplicant = Keyword.fetch!(args, :wpa_supplicant)
@@ -161,6 +169,12 @@ defmodule VintageNetWiFi.WPASupplicant do
         error -> error
       end
 
+    {:reply, response, state}
+  end
+
+  @impl true
+  def handle_call(:signal_poll, _from, state) do
+    response = get_signal_info(state.ll)
     {:reply, response, state}
   end
 
@@ -386,6 +400,29 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp handle_notification(unhandled, state) do
     _ = Logger.info("WPASupplicant ignoring #{inspect(unhandled)}")
     state
+  end
+
+  defp get_signal_info(ll) do
+    with {:ok, raw_response} <- WPASupplicantLL.control_request(ll, "SIGNAL_POLL") do
+      case raw_response do
+        <<"FAIL", _rest::binary>> -> {:error, "FAIL"}
+        _ -> case WPASupplicantDecoder.decode_kv_response(raw_response) do
+          empty when empty == %{} ->
+            {:error, :unknown}
+
+          response ->
+            center_frequency1 = response["CENTER_FRQ1"] |> String.to_integer(10)
+            center_frequency2 = if response["CENTER_FRQ2"] != nil, do: response["CENTER_FRQ2"] |> String.to_integer(10), else: 0
+            frequency = response["FREQUENCY"] |> String.to_integer(10)
+            linkspeed = response["LINKSPEED"] |> String.to_integer(10)
+            signal_dbm = response["RSSI"] |> String.to_integer(10)
+            width = response["WIDTH"]
+
+            signal_info = VintageNetWiFi.SignalInfo.new(center_frequency1, center_frequency2, frequency, linkspeed, signal_dbm, width)
+            {:ok, signal_info}
+        end
+      end
+    end
   end
 
   defp get_access_points(ll) do
