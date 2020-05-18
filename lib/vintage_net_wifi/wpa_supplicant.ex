@@ -405,22 +405,39 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp get_signal_info(ll) do
     with {:ok, raw_response} <- WPASupplicantLL.control_request(ll, "SIGNAL_POLL") do
       case raw_response do
-        <<"FAIL", _rest::binary>> -> {:error, "FAIL"}
-        _ -> case WPASupplicantDecoder.decode_kv_response(raw_response) do
-          empty when empty == %{} ->
-            {:error, :unknown}
+        <<"FAIL", _rest::binary>> ->
+          {:error, "FAIL"}
 
-          response ->
-            center_frequency1 = response["CENTER_FRQ1"] |> String.to_integer(10)
-            center_frequency2 = if response["CENTER_FRQ2"] != nil, do: response["CENTER_FRQ2"] |> String.to_integer(10), else: 0
-            frequency = response["FREQUENCY"] |> String.to_integer(10)
-            linkspeed = response["LINKSPEED"] |> String.to_integer(10)
-            signal_dbm = response["RSSI"] |> String.to_integer(10)
-            width = response["WIDTH"]
+        _ ->
+          case WPASupplicantDecoder.decode_kv_response(raw_response) do
+            empty when empty == %{} ->
+              {:error, :unknown}
 
-            signal_info = VintageNetWiFi.SignalInfo.new(center_frequency1, center_frequency2, frequency, linkspeed, signal_dbm, width)
-            {:ok, signal_info}
-        end
+            response ->
+              center_frequency1 = response["CENTER_FRQ1"] |> String.to_integer(10)
+
+              center_frequency2 =
+                if response["CENTER_FRQ2"] != nil,
+                  do: response["CENTER_FRQ2"] |> String.to_integer(10),
+                  else: 0
+
+              frequency = response["FREQUENCY"] |> String.to_integer(10)
+              linkspeed = response["LINKSPEED"] |> String.to_integer(10)
+              signal_dbm = response["RSSI"] |> String.to_integer(10)
+              width = response["WIDTH"]
+
+              signal_info =
+                VintageNetWiFi.SignalInfo.new(
+                  center_frequency1,
+                  center_frequency2,
+                  frequency,
+                  linkspeed,
+                  signal_dbm,
+                  width
+                )
+
+              {:ok, signal_info}
+          end
       end
     end
   end

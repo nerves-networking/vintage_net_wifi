@@ -13,7 +13,15 @@ defmodule VintageNetWiFi.SignalInfo do
   * `:width` - channel width
   """
 
-  defstruct [:center_frequency1, :center_frequency2, :frequency, :linkspeed, :signal_dbm, :signal_percent, :width]
+  defstruct [
+    :center_frequency1,
+    :center_frequency2,
+    :frequency,
+    :linkspeed,
+    :signal_dbm,
+    :signal_percent,
+    :width
+  ]
 
   @type t :: %__MODULE__{
           center_frequency1: non_neg_integer(),
@@ -28,7 +36,14 @@ defmodule VintageNetWiFi.SignalInfo do
   @doc """
   Create a new SignalInfo struct
   """
-  @spec new(non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer(), integer(), String.t()) ::
+  @spec new(
+          non_neg_integer(),
+          non_neg_integer(),
+          non_neg_integer(),
+          non_neg_integer(),
+          integer(),
+          String.t()
+        ) ::
           VintageNetWiFi.SignalInfo.t()
   def new(center_frequency1, center_frequency2, frequency, linkspeed, signal_dbm, width) do
     info = Utils.frequency_info(frequency)
@@ -42,6 +57,5 @@ defmodule VintageNetWiFi.SignalInfo do
       signal_percent: info.dbm_to_percent.(signal_dbm),
       width: width
     }
-
   end
 end

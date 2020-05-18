@@ -413,7 +413,8 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
-      "SIGNAL_POLL" => "RSSI=-32\nLINKSPEED=300\nNOISE=9999\nFREQUENCY=2472\nWIDTH=40 MHz\nCENTER_FRQ1=2462\n"
+      "SIGNAL_POLL" =>
+        "RSSI=-32\nLINKSPEED=300\nNOISE=9999\nFREQUENCY=2472\nWIDTH=40 MHz\nCENTER_FRQ1=2462\n"
     })
 
     _supplicant =
