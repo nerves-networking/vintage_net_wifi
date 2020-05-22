@@ -105,7 +105,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     if pid do
       send(pid, {__MODULE__, priority - ?0, notification})
     else
-      _ = Logger.info("wpa_supplicant_ll dropping notification: #{notification}")
+      Logger.info("wpa_supplicant_ll dropping notification: #{notification}")
     end
 
     {:noreply, state}
@@ -115,7 +115,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   def handle_info({:udp, socket, _, 0, response}, %{socket: socket} = state) do
     case List.pop_at(state.requests, 0) do
       {nil, _requests} ->
-        _ = Logger.warn("wpa_supplicant sent an unexpected message: '#{response}'")
+        Logger.warn("wpa_supplicant sent an unexpected message: '#{response}'")
         {:noreply, state}
 
       {from, new_requests} ->

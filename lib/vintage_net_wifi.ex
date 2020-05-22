@@ -112,10 +112,9 @@ defmodule VintageNetWiFi do
     # If user specified a standalone ssid, move it to the first spot
     # in the networks list so that networks are only stored in one place.
 
-    _ =
-      Logger.warn(
-        "Passing Wi-Fi network parameters outside of `:networks` for ssid '#{ssid}' is deprecated. See `VintageNet.info` for the fixed configuration."
-      )
+    Logger.warn(
+      "Passing Wi-Fi network parameters outside of `:networks` for ssid '#{ssid}' is deprecated. See `VintageNet.info` for the fixed configuration."
+    )
 
     # Rather than figure out which keys are relevant, move them all to
     # the first place in networks and let the network normalization code

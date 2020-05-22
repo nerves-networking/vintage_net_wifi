@@ -216,7 +216,7 @@ defmodule VintageNetWiFi.WPASupplicant do
         new_state
 
       _error ->
-        _ = Logger.warn("AP added and then removed before we could get info on it: #{bssid}")
+        Logger.warn("AP added and then removed before we could get info on it: #{bssid}")
         state
     end
   end
@@ -250,7 +250,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, "completed", _}, state) do
-    _ = Logger.info("Connected to AP: #{bssid}")
+    Logger.info("Connected to AP: #{bssid}")
 
     case get_access_point_info(state.ll, bssid) do
       {:ok, ap} ->
@@ -259,8 +259,7 @@ defmodule VintageNetWiFi.WPASupplicant do
         new_state
 
       _error ->
-        _ =
-          Logger.warn("Connected and disconnected to AP before we could get info on it: #{bssid}")
+        Logger.warn("Connected and disconnected to AP before we could get info on it: #{bssid}")
 
         new_state = %{state | current_ap: nil}
         update_current_access_point_property(new_state)
@@ -269,14 +268,14 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, status, _}, state) do
-    _ = Logger.warn("Unknown AP connection status: #{bssid} #{status}")
+    Logger.warn("Unknown AP connection status: #{bssid} #{status}")
     new_state = %{state | current_ap: nil}
     update_current_access_point_property(new_state)
     new_state
   end
 
   defp handle_notification({:event, "CTRL-EVENT-DISCONNECTED", bssid, _}, state) do
-    _ = Logger.warn("AP disconnected: #{bssid}")
+    Logger.warn("AP disconnected: #{bssid}")
     new_state = %{state | current_ap: nil}
     update_current_access_point_property(new_state)
     new_state
@@ -393,12 +392,12 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:info, message}, state) do
-    _ = Logger.info("wpa_supplicant(#{state.ifname}): #{message}")
+    Logger.info("wpa_supplicant(#{state.ifname}): #{message}")
     state
   end
 
   defp handle_notification(unhandled, state) do
-    _ = Logger.info("WPASupplicant ignoring #{inspect(unhandled)}")
+    Logger.info("WPASupplicant ignoring #{inspect(unhandled)}")
     state
   end
 
