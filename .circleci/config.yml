@@ -42,10 +42,10 @@ jobs:
           keys:
             - v1-mix-cache-{{ checksum "mix.lock" }}
       - run: mix deps.get
-      - run: MIX_ENV=test mix coveralls.circle
+      - run: mix coveralls.circle
       - run: mix format --check-formatted
-      - run: MIX_ENV=docs mix docs
-      - run: MIX_ENV=docs mix hex.build
+      - run: mix docs
+      - run: mix hex.build
       - run: mix dialyzer
       - save_cache:
           key: v1-mix-cache-{{ checksum "mix.lock" }}
