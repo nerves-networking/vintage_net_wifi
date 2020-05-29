@@ -63,7 +63,7 @@ defmodule VintageNetWiFi.MixProject do
       {:dialyxir, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, "~> 0.19", only: :docs, runtime: false},
-      {:excoveralls, "~> 0.8", only: :test, runtime: false}
+      {:excoveralls, "~> 0.13", only: :test, runtime: false}
     ]
   end
 
