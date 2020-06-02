@@ -1310,7 +1310,7 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
-  test "configuration blacklisting two APs" do
+  test "configuration denying two APs" do
     input = %{
       type: VintageNetWiFi,
       vintage_net_wifi: %{
@@ -1319,7 +1319,7 @@ defmodule VintageNetWiFiTest do
             ssid: "example",
             key_mgmt: :wpa_psk,
             psk: "very secret passphrase",
-            bssid_blacklist: "02:11:22:33:44:55 02:22:aa:44:55:66"
+            bssid_denylist: "02:11:22:33:44:55 02:22:aa:44:55:66"
           }
         ]
       },
@@ -1380,7 +1380,7 @@ defmodule VintageNetWiFiTest do
             ssid: "example",
             key_mgmt: :wpa_psk,
             psk: "very secret passphrase",
-            bssid_whitelist:
+            bssid_allowlist:
               "02:55:ae:bc:00:00/ff:ff:ff:ff:00:00 00:00:77:66:55:44/00:00:ff:ff:ff:ff"
           }
         ]

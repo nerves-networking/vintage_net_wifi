@@ -14,8 +14,8 @@ defmodule VintageNetWiFi do
     :key_mgmt,
     :ssid,
     :bssid,
-    :bssid_whitelist,
-    :bssid_blacklist,
+    :bssid_allowlist,
+    :bssid_denylist,
     :priority,
     :scan_ssid,
     :frequency
@@ -356,8 +356,8 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :key_mgmt),
       into_config_string(wifi, :scan_ssid),
       into_config_string(wifi, :priority),
-      into_config_string(wifi, :bssid_whitelist),
-      into_config_string(wifi, :bssid_blacklist),
+      into_config_string(wifi, :bssid_allowlist),
+      into_config_string(wifi, :bssid_denylist),
       into_config_string(wifi, :wps_disabled),
       into_config_string(wifi, :mode),
       into_config_string(wifi, :frequency),
@@ -565,11 +565,11 @@ defmodule VintageNetWiFi do
     "pcsc=#{inspect(value)}"
   end
 
-  defp wifi_opt_to_config_string(_wifi, :bssid_blacklist, value) do
+  defp wifi_opt_to_config_string(_wifi, :bssid_denylist, value) do
     "bssid_blacklist=#{value}"
   end
 
-  defp wifi_opt_to_config_string(_wifi, :bssid_whitelist, value) do
+  defp wifi_opt_to_config_string(_wifi, :bssid_allowlist, value) do
     "bssid_whitelist=#{value}"
   end
 
