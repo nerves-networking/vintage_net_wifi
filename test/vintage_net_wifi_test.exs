@@ -1821,4 +1821,17 @@ defmodule VintageNetWiFiTest do
 
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
+
+  test "check_system" do
+    result =
+      VintageNetWiFi.check_system(
+        bin_wpa_supplicant: "/bin/pwd",
+        bin_udhcpc: "/bin/pwd",
+        bin_udhcpd: "/bin/pwd",
+        bin_dnsd: "/bin/pwd",
+        bin_ip: "/bin/pwd"
+      )
+
+    assert result == :ok
+  end
 end

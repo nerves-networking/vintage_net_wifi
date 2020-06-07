@@ -3,6 +3,7 @@ defmodule VintageNetWiFi do
 
   require Logger
 
+  alias VintageNet.Command
   alias VintageNet.Interface.RawConfig
   alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
   alias VintageNetWiFi.{WPA2, WPASupplicant}
@@ -310,9 +311,14 @@ defmodule VintageNetWiFi do
   end
 
   @impl true
-  def check_system(_opts) do
-    # TODO
-    :ok
+  def check_system(opts) do
+    with :ok <- Command.verify_program(opts, :bin_wpa_supplicant),
+         :ok <- Command.verify_program(opts, :bin_udhcpc),
+         :ok <- Command.verify_program(opts, :bin_udhcpd),
+         :ok <- Command.verify_program(opts, :bin_dnsd),
+         :ok <- Command.verify_program(opts, :bin_ip) do
+      :ok
+    end
   end
 
   defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
