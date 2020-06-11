@@ -231,7 +231,7 @@ VintageNet.configure("mesh0", %{
     user_mpm: 1,
     networks: [
       %{
-        ssid: mesh_id,
+        ssid: "my-mesh",
         key_mgmt: :none,
         mode: :mesh
       }
@@ -249,8 +249,7 @@ VintageNet.configure("mesh0", %{
     user_mpm: 1,
     networks: [
       %{
-        ssid: mesh_id,
-        # see note. This currently does not work.
+        ssid: "my-mesh-secure",
         key_mgmt: :sae,
         sae_password: "super secret",
         mode: :mesh
