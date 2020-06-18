@@ -18,7 +18,9 @@ defmodule VintageNetWiFi do
     :bssid_denylist,
     :priority,
     :scan_ssid,
-    :frequency
+    :frequency,
+    :mesh_hwmp_rootmode,
+    :mesh_gate_announcements
   ]
 
   @root_level_keys [
@@ -30,6 +32,8 @@ defmodule VintageNetWiFi do
     :user_mpm,
     :root_interface
   ]
+
+  @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
 
   @moduledoc """
   WiFi support for VintageNet
@@ -657,8 +661,16 @@ defmodule VintageNetWiFi do
     [ifname]
   end
 
-  defp up_cmds(ifname, %{vintage_net_wifi: %{root_interface: root_interface}}) do
+  defp up_cmds(ifname, %{vintage_net_wifi: %{root_interface: root_interface} = config}) do
     mesh_mode = Application.app_dir(:vintage_net_wifi, ["priv", "mesh_mode"])
+    mesh_param = Application.app_dir(:vintage_net_wifi, ["priv", "mesh_param"])
+    mesh_params = Map.take(config, @mesh_param_keys)
+
+    mesh_params_up_cmds =
+      Enum.map(mesh_params, fn
+        {param, value} when is_integer(value) ->
+          {:run, mesh_param, [ifname, param, value]}
+      end)
 
     [
       {:run, mesh_mode, [root_interface, ifname, "add"]},
@@ -666,7 +678,7 @@ defmodule VintageNetWiFi do
        fn ->
          Process.sleep(1000)
        end}
-    ]
+    ] ++ mesh_params_up_cmds
   end
 
   defp up_cmds(_, _), do: []

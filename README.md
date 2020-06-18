@@ -259,6 +259,29 @@ VintageNet.configure("mesh0", %{
 })
 ```
 
+Mesh nodes connected to external networks can
+set so called "meshgate" params. 
+See [this document](https://github.com/o11s/open80211s/wiki/HOWTO#mesh-gate)
+for more information
+
+```elixir
+VintageNet.configure("mesh0", %{
+  type: VintageNetWiFi,
+  vintage_net_wifi: %{
+    user_mpm: 1,
+    networks: [
+      %{
+        ssid: mesh_id,
+        key_mgmt: :none,
+        mode: :mesh,
+        mesh_hwmp_rootmode: 4,
+        mesh_gate_announcements: 1
+      }
+    ]
+  }
+})
+```
+
 Note that the example mesh configuration does not contain ip address settings. All standard
 ip schemes are acceptable, but which one to use depends on the network configuration. The
 simplest way to test the mesh network is have every node configure a static

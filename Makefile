@@ -58,7 +58,8 @@ else
 endif
 DEFAULT_TARGETS ?= $(PREFIX) \
 		   $(PREFIX)/force_ap_scan \
-		   $(PREFIX)/mesh_mode
+		   $(PREFIX)/mesh_mode \
+		   $(PREFIX)/mesh_param
 
 # Enable for debug messages
 # CFLAGS += -DDEBUG
@@ -87,12 +88,16 @@ $(PREFIX)/force_ap_scan: $(BUILD)/force_ap_scan.o
 $(PREFIX)/mesh_mode: $(BUILD)/mesh_mode.o
 	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
 
+$(PREFIX)/mesh_param: $(BUILD)/mesh_param.o
+	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
+
 $(PREFIX) $(BUILD):
 	mkdir -p $@
 
 clean:
 	$(RM) $(PREFIX)/force_ap_scan \
 	$(RM) $(PREFIX)/mesh_mode \
+	$(RM) $(PREFIX)/mesh_param \
 	    $(BUILD)/*.o
 
 format:
