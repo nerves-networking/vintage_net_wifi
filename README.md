@@ -240,25 +240,6 @@ VintageNet.configure("mesh0", %{
 })
 ```
 
-```elixir
-# With SAE key management.
-# note this currently does not work yet.
-VintageNet.configure("mesh0", %{
-  type: VintageNetWiFi,
-  vintage_net_wifi: %{
-    user_mpm: 1,
-    networks: [
-      %{
-        ssid: "my-mesh-secure",
-        key_mgmt: :sae,
-        sae_password: "super secret",
-        mode: :mesh
-      }
-    ]
-  }
-})
-```
-
 Mesh nodes connected to external networks can
 set so called "meshgate" params. 
 See [this document](https://github.com/o11s/open80211s/wiki/HOWTO#mesh-gate)
