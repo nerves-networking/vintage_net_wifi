@@ -127,10 +127,11 @@ defmodule VintageNetWiFi do
   defp normalize_first_network(wifi), do: wifi
 
   defp normalize_networks(%{networks: networks} = wifi) do
-    # Normalize the networks and remove any dupes
+    # Normalize the networks and remove any dupes and empty configs
     new_networks =
       networks
-      |> Enum.map(fn network -> network |> normalize_network() |> normalize_network_mode() end)
+      |> Enum.map(fn network -> network |> normalize_network_mode() |> normalize_network() end)
+      |> Enum.filter(fn net -> net != %{} end)
       |> Enum.uniq()
 
     %{wifi | networks: new_networks}
@@ -188,13 +189,14 @@ defmodule VintageNetWiFi do
   end
 
   # No Security
-  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) do
+  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) when not is_nil(ssid) do
     assert_ssid(ssid)
     Map.take(network_config, @common_network_keys)
   end
 
   # WPA-PSK
-  defp normalize_network(%{key_mgmt: :wpa_psk, ssid: ssid, psk: psk} = network_config) do
+  defp normalize_network(%{key_mgmt: :wpa_psk, ssid: ssid, psk: psk} = network_config)
+       when not is_nil(ssid) and not is_nil(psk) do
     case WPA2.to_psk(ssid, psk) do
       {:ok, real_psk} ->
         network_config
@@ -208,7 +210,7 @@ defmodule VintageNetWiFi do
 
   # WPA-EAP or IEEE8021X (TODO)
   defp normalize_network(%{key_mgmt: key_mgmt, ssid: ssid} = network_config)
-       when key_mgmt in [:wpa_eap, :IEEE8021X] do
+       when key_mgmt in [:wpa_eap, :IEEE8021X] and not is_nil(ssid) do
     assert_ssid(ssid)
 
     Map.take(network_config, [
@@ -235,11 +237,21 @@ defmodule VintageNetWiFi do
     ])
   end
 
-  defp normalize_network(%{ssid: _ssid} = network) do
+  defp normalize_network(%{ssid: ssid} = network) when not is_nil(ssid) do
     # Default to no security and try again.
     network
     |> Map.put(:key_mgmt, :none)
     |> normalize_network()
+  end
+
+  defp normalize_network(%{ssid: nil} = network) do
+    # This case happens when the user gets the ssid from the application
+    # environment or somewhere else and that place returns `nil`. Rather
+    # than crash this configuration, the expected thing seems to be to
+    # drop this network so that scan-only WiFi mode is available.
+
+    Logger.warn("Dropping network with `nil` SSID: #{inspect(network)}")
+    %{}
   end
 
   defp normalize_network(network) do
