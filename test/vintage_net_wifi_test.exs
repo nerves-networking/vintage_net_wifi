@@ -89,6 +89,30 @@ defmodule VintageNetWiFiTest do
     assert normalized_input == VintageNetWiFi.normalize(input)
   end
 
+  test "normalizing an old config with unset fields goes to scan-only mode" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        key_mgmt: :wpa_psk,
+        psk: nil,
+        ssid: nil
+      },
+      ipv4: %{
+        method: :dhcp
+      }
+    }
+
+    normalized_input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{networks: []},
+      ipv4: %{method: :dhcp}
+    }
+
+    assert capture_log(fn ->
+             assert normalized_input == VintageNetWiFi.normalize(input)
+           end) =~ "Dropping network with `nil` SSID"
+  end
+
   test "normalizing an empty config works" do
     # An empty config should be normalized to a configuration that
     # allows the user to scan for networks.
