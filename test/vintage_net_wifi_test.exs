@@ -1845,4 +1845,153 @@ defmodule VintageNetWiFiTest do
 
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
+
+  test "create a mesh network" do
+    input = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :disabled},
+      vintage_net_wifi: %{
+        root_interface: "wlan0",
+        networks: [
+          %{
+            mode: :mesh,
+            ssid: "mesh",
+            key_mgmt: :none,
+            frequency: 2412
+          }
+        ]
+      },
+      hostname: "unit_test"
+    }
+
+    assert match?(
+             %RawConfig{
+               child_specs: [
+                 {
+                   VintageNetWiFi.WPASupplicant,
+                   [
+                     wpa_supplicant: "wpa_supplicant",
+                     ifname: "mesh0",
+                     wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.mesh0",
+                     control_path: "/tmp/vintage_net/wpa_supplicant",
+                     ap_mode: false,
+                     verbose: false
+                   ]
+                 }
+               ],
+               cleanup_files: ["/tmp/vintage_net/wpa_supplicant/mesh0"],
+               down_cmd_millis: 5000,
+               down_cmds: [
+                 {:run, _, ["wlan0", "mesh0", "del"]},
+                 {:fun, _},
+                 {:run_ignore_errors, "ip", ["addr", "flush", "dev", "mesh0", "label", "mesh0"]},
+                 {:run, "ip", ["link", "set", "mesh0", "down"]}
+               ],
+               files: [
+                 {"/tmp/vintage_net/wpa_supplicant.conf.mesh0",
+                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nnetwork={\nssid=\"mesh\"\nkey_mgmt=NONE\nmode=5\nfrequency=2412\n}\n"}
+               ],
+               ifname: "mesh0",
+               required_ifnames: ["wlan0"],
+               restart_strategy: :rest_for_one,
+               retry_millis: 30000,
+               source_config: %{
+                 hostname: "unit_test",
+                 ipv4: %{method: :disabled},
+                 type: VintageNetWiFi,
+                 vintage_net_wifi: %{
+                   networks: [%{frequency: 2412, key_mgmt: :none, mode: :mesh, ssid: "mesh"}],
+                   root_interface: "wlan0"
+                 }
+               },
+               type: VintageNetWiFi,
+               up_cmd_millis: 5000,
+               up_cmds: [
+                 {:run, _, ["wlan0", "mesh0", "add"]},
+                 {:fun, _},
+                 {:run, "ip", ["link", "set", "mesh0", "up"]}
+               ]
+             },
+             VintageNetWiFi.to_raw_config("mesh0", input, default_opts())
+           )
+  end
+
+  test "create a mesh network with sae" do
+    input = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :disabled},
+      vintage_net_wifi: %{
+        root_interface: "wlan0",
+        networks: [
+          %{
+            mode: :mesh,
+            ssid: "mesh",
+            key_mgmt: :sae,
+            sae_password: "password",
+            frequency: 2412
+          }
+        ]
+      },
+      hostname: "unit_test"
+    }
+
+    assert match?(
+             %RawConfig{
+               child_specs: [
+                 {
+                   VintageNetWiFi.WPASupplicant,
+                   [
+                     wpa_supplicant: "wpa_supplicant",
+                     ifname: "mesh0",
+                     wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.mesh0",
+                     control_path: "/tmp/vintage_net/wpa_supplicant",
+                     ap_mode: false,
+                     verbose: false
+                   ]
+                 }
+               ],
+               cleanup_files: ["/tmp/vintage_net/wpa_supplicant/mesh0"],
+               down_cmd_millis: 5000,
+               down_cmds: [
+                 {:run, _, ["wlan0", "mesh0", "del"]},
+                 {:fun, _},
+                 {:run_ignore_errors, "ip", ["addr", "flush", "dev", "mesh0", "label", "mesh0"]},
+                 {:run, "ip", ["link", "set", "mesh0", "down"]}
+               ],
+               files: [
+                 {"/tmp/vintage_net/wpa_supplicant.conf.mesh0",
+                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nnetwork={\nssid=\"mesh\"\nkey_mgmt=SAE\nmode=5\nfrequency=2412\nsae_password=\"password\"\n}\n"}
+               ],
+               ifname: "mesh0",
+               required_ifnames: ["wlan0"],
+               restart_strategy: :rest_for_one,
+               retry_millis: 30000,
+               source_config: %{
+                 hostname: "unit_test",
+                 ipv4: %{method: :disabled},
+                 type: VintageNetWiFi,
+                 vintage_net_wifi: %{
+                   networks: [
+                     %{
+                       frequency: 2412,
+                       key_mgmt: :sae,
+                       sae_password: "password",
+                       mode: :mesh,
+                       ssid: "mesh"
+                     }
+                   ],
+                   root_interface: "wlan0"
+                 }
+               },
+               type: VintageNetWiFi,
+               up_cmd_millis: 5000,
+               up_cmds: [
+                 {:run, _, ["wlan0", "mesh0", "add"]},
+                 {:fun, _},
+                 {:run, "ip", ["link", "set", "mesh0", "up"]}
+               ]
+             },
+             VintageNetWiFi.to_raw_config("mesh0", input, default_opts())
+           )
+  end
 end
