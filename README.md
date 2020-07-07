@@ -145,8 +145,8 @@ iex> VintageNet.configure("wlan0", %{
 ```
 
 Enterprise Wi-Fi (WPA-EAP) support mostly passes through to the
-`wpa_supplicant`. Instructions for enterprise network for Linux
-should map. For example:
+`wpa_supplicant`. Instructions for enterprise network for Linux should map. For
+example:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
@@ -220,9 +220,10 @@ iex> VintageNet.configure("wlan0", %{
 })
 ```
 
-Network adapters that can be configured to support 80211s mesh networking can be configured
-as follows:
-(Raspberry Pi internal WiFi chips do **not** support 80211s meshing)
+Network adapters that can be configured to support 80211s mesh networking can be
+configured as follows:
+
+(Raspberry Pi internal WiFi modules do **not** support 80211s meshing)
 
 ```elixir
 VintageNet.configure("mesh0", %{
@@ -240,10 +241,9 @@ VintageNet.configure("mesh0", %{
 })
 ```
 
-Mesh nodes connected to external networks can
-set so called "meshgate" params. 
-See [this document](https://github.com/o11s/open80211s/wiki/HOWTO#mesh-gate)
-for more information
+Mesh nodes connected to external networks can set so called "meshgate" params.
+See [this document](https://github.com/o11s/open80211s/wiki/HOWTO#mesh-gate) for
+more information
 
 ```elixir
 VintageNet.configure("mesh0", %{
@@ -263,16 +263,17 @@ VintageNet.configure("mesh0", %{
 })
 ```
 
-Note that the example mesh configuration does not contain ip address settings. All standard
-ip schemes are acceptable, but which one to use depends on the network configuration. The
-simplest way to test the mesh network is have every node configure a static
-predictable ip address. DHCP will also work, but this forces a "client/server" configuration
-meaning that nodes joining the network will need to decide if they should be a dhcp server or
-client.
+Note that the example mesh configuration does not contain IP address settings.
+All standard IP schemes are acceptable, but which one to use depends on the
+network configuration. The simplest way to test the mesh network is to have
+every node configure a static predictable IP address. DHCP will also work, but
+this forces a "client/server" configuration meaning that nodes joining the
+network will need to decide if they should be a DHCP server or client.
 
 ## Properties
 
-In addition to the common `vintage_net` properties for all interface types, this technology reports the following:
+In addition to the common `vintage_net` properties for all interface types, this
+technology reports the following:
 
 Property        | Values           | Description
  -------------- | ---------------- | -----------
@@ -339,7 +340,8 @@ it is complete so applications don't need to guess how long to wait.
 
 ## Signal quality info in STA (client) mode
 
-You can send `ioctl` command to get information about signal level, quality and other info when connected to network in STA mode. Run:
+You can send `ioctl` command to get information about signal level, quality and
+other info when connected to network in STA mode. Run:
 
 ```elixir
 VintageNet.ioctl("wlan0", :signal_poll)
