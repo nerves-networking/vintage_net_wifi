@@ -1994,4 +1994,53 @@ defmodule VintageNetWiFiTest do
              VintageNetWiFi.to_raw_config("mesh0", input, default_opts())
            )
   end
+
+  test "check_system/1 required programs" do
+    :ok = File.write("/tmp/vintage_net/check_system_exists", "test")
+
+    success_opts = [
+      bin_wpa_supplicant: "/tmp/vintage_net/check_system_exists",
+      bin_ip: "/tmp/vintage_net/check_system_exists",
+      bin_udhcpc: "/tmp/vintage_net/check_system_exists",
+      bin_udhcpd: "/tmp/vintage_net/check_system_exists",
+      bin_dnsd: "/tmp/vintage_net/check_system_exists"
+    ]
+
+    assert %{warnings: [], errors: []} = VintageNetWiFi.check_system(success_opts)
+
+    error_opts = [
+      bin_wpa_supplicant: "/tmp/vintage_net/bin_wpa_supplicant",
+      bin_ip: "/tmp/vintage_net/bin_ip",
+      bin_udhcpc: "/tmp/vintage_net/check_system_exists",
+      bin_udhcpd: "/tmp/vintage_net/check_system_exists",
+      bin_dnsd: "/tmp/vintage_net/check_system_exists"
+    ]
+
+    assert %{
+             errors: [
+               "Can't find /tmp/vintage_net/bin_ip",
+               "Can't find /tmp/vintage_net/bin_wpa_supplicant"
+             ]
+           } = VintageNetWiFi.check_system(error_opts)
+  end
+
+  test "check_system/1 optional programs" do
+    :ok = File.write("/tmp/vintage_net/check_system_exists", "test")
+
+    warn_opts = [
+      bin_wpa_supplicant: "/tmp/vintage_net/check_system_exists",
+      bin_ip: "/tmp/vintage_net/check_system_exists",
+      bin_udhcpc: "/tmp/vintage_net/bin_udhcpc",
+      bin_udhcpd: "/tmp/vintage_net/bin_udhcpd",
+      bin_dnsd: "/tmp/vintage_net/bin_dnsd"
+    ]
+
+    assert %{
+             warnings: [
+               "Can't find /tmp/vintage_net/bin_dnsd",
+               "Can't find /tmp/vintage_net/bin_udhcpd",
+               "Can't find /tmp/vintage_net/bin_udhcpc"
+             ]
+           } = VintageNetWiFi.check_system(warn_opts)
+  end
 end

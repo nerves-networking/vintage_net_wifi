@@ -1,5 +1,6 @@
 defmodule VintageNetWiFi do
   @behaviour VintageNet.Technology
+  alias VintageNet.Technology.SystemCheck
 
   require Logger
 
@@ -344,10 +345,40 @@ defmodule VintageNetWiFi do
     {:error, :unsupported}
   end
 
+  @required_programs [
+    :bin_wpa_supplicant,
+    :bin_ip
+  ]
+
+  @optional_programs [
+    :bin_udhcpc,
+    :bin_udhcpd,
+    :bin_dnsd
+  ]
+
   @impl true
-  def check_system(_opts) do
-    # TODO
-    :ok
+  def check_system(opts) do
+    programs = Keyword.take(opts, @required_programs ++ @optional_programs) |> Keyword.keys()
+
+    Enum.reduce(programs, %SystemCheck{}, fn
+      program, %{errors: errors} = system_check when program in @required_programs ->
+        case VintageNet.Command.verify_program(opts, program) do
+          :ok ->
+            system_check
+
+          {:error, reason} ->
+            %{system_check | errors: [reason | errors]}
+        end
+
+      program, %{warnings: warnings} = system_check when program in @optional_programs ->
+        case VintageNet.Command.verify_program(opts, program) do
+          :ok ->
+            system_check
+
+          {:error, reason} ->
+            %{system_check | warnings: [reason | warnings]}
+        end
+    end)
   end
 
   defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
