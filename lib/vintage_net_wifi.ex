@@ -281,7 +281,6 @@ defmodule VintageNetWiFi do
 
   @impl true
   def to_raw_config(ifname, %{type: __MODULE__} = config, opts) do
-    wpa_supplicant = Keyword.fetch!(opts, :bin_wpa_supplicant)
     tmpdir = Keyword.fetch!(opts, :tmpdir)
     regulatory_domain = Keyword.fetch!(opts, :regulatory_domain)
 
@@ -303,7 +302,7 @@ defmodule VintageNetWiFi do
     ]
 
     wpa_supplicant_options = [
-      wpa_supplicant: wpa_supplicant,
+      wpa_supplicant: "wpa_supplicant",
       ifname: ifname,
       wpa_supplicant_conf_path: wpa_supplicant_conf_path,
       control_path: control_interface_dir,
