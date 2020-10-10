@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.9.1
+
+* Bug fixes
+  * Fix warnings when building with Elixir 1.11.
+
 ## v0.9.0
 
 * New features
