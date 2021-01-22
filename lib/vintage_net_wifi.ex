@@ -5,7 +5,7 @@ defmodule VintageNetWiFi do
 
   alias VintageNet.Interface.RawConfig
   alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
-  alias VintageNetWiFi.{WPA2, WPASupplicant}
+  alias VintageNetWiFi.{Cookbook, WPA2, WPASupplicant}
 
   # These configuration keys are common to all network specifications
   # and allowed to pass through network normalization.
@@ -704,4 +704,49 @@ defmodule VintageNetWiFi do
 
   defp ctrl_interface_paths(ifname, dir, _),
     do: [Path.join(dir, ifname)]
+
+  @doc """
+  Configure WiFi using the most common settings
+
+  If your network requires a password (WPA PSK networks):
+
+  ```
+  iex> VintageNetWiFi.quick_configure("ssid", "password")
+  :ok
+  ```
+
+  If you're connecting to an open network, don't pass the password. Keep in
+  mind that if you're at a cafe or other location that has a captive portal,
+  `VintageNetWiFi` isn't smart enough to bypass it.
+
+  ```
+  iex> VintageNetWiFi.quick_configure("open_wifi_ssid")
+  :ok
+  ```
+
+  Then run `VintageNet.info` to see when the network connects. If you're
+  writing a program, run `VintageNet.get(["interface", "wlan0", "connection"])`
+  to get the connection status or subscribe to that property for change
+  notifications.
+
+  If you're on an enterprise network or use static IP addresses or need any
+  other special configuration handling, you'll need to call
+  `VintageNet.configure/3` instead. See `VintageNetWiFi.Cookbook` for help with
+  creating configurations or manually construct the configuration map.
+  """
+  @spec quick_configure(String.t(), String.t() | nil) :: :ok | {:error, term()}
+  def quick_configure(ssid, passphrase \\ nil)
+
+  def quick_configure(ssid, empty_passphrase)
+      when is_nil(empty_passphrase) or empty_passphrase == "" do
+    with {:ok, config} <- Cookbook.open_wifi(ssid) do
+      VintageNet.configure("wlan0", config)
+    end
+  end
+
+  def quick_configure(ssid, passphrase) do
+    with {:ok, config} <- Cookbook.wpa_psk(ssid, passphrase) do
+      VintageNet.configure("wlan0", config)
+    end
+  end
 end
