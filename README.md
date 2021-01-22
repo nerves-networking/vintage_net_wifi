@@ -20,7 +20,7 @@ Once that's done, all that you need to do is add `:vintage_net_wifi` to your
 ```elixir
 def deps do
   [
-    {:vintage_net_wifi, "~> 0.7.0", targets: @all_targets}
+    {:vintage_net_wifi, "~> 0.9.0", targets: @all_targets}
   ]
 end
 ```
