@@ -749,4 +749,38 @@ defmodule VintageNetWiFi do
       VintageNet.configure("wlan0", config)
     end
   end
+
+  @doc """
+  Convenience function to scan for access points
+
+  This function initiates a scan, waits, and then returns all of the discovered
+  access points. It's intended for quickly seeing what's around.
+
+  If you'd like to use this in a program, but want to display access point options
+  as they're found, here's how to do it:
+
+  ```elixir
+  VintageNet.subscribe(["interface", "wlan0", "wifi", "access_points"])
+  VintageNet.scan("wlan0")
+  ```
+
+  Then wait for messages. They'll be of the form:
+
+  ```elixir
+  {VintageNet, ["interface", "wlan0", "wifi", "access_points"], old_value, new_value, meta}
+  ```
+
+  Both `old_value` and `new_value` will be lists of access points. You'll need
+  call `VintageNet.scan/1` every 30 seconds or so to repeat the scan across all
+  WiFi channels.
+  """
+  @spec quick_scan(non_neg_integer()) :: [VintageNetWiFi.AccessPoint.t()]
+  def quick_scan(wait_time_ms \\ 2_000) do
+    :ok = ioctl("wlan0", :scan, [])
+
+    # Wait a little for the access points to come in
+    Process.sleep(wait_time_ms)
+
+    VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
+  end
 end
