@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.2
+
+This release introduces helper functions for configuring the most common types
+of networks:
+
+  * `VintageNetWiFi.quick_connect("ssid", "password")` - connect to a WPA PSK
+    network on `"wlan0"`
+  * `VintageNetWiFi.quick_scan()` - scan and return access points in one call
+
+Additionally, there's now a `VintageNetWiFi.Cookbook` module with functions for
+creating the configs for various kinds of networks.
+
 ## v0.9.1
 
 * Bug fixes
