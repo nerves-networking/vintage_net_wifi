@@ -5,7 +5,7 @@
 This release introduces helper functions for configuring the most common types
 of networks:
 
-  * `VintageNetWiFi.quick_connect("ssid", "password")` - connect to a WPA PSK
+  * `VintageNetWiFi.quick_configure("ssid", "password")` - connect to a WPA PSK
     network on `"wlan0"`
   * `VintageNetWiFi.quick_scan()` - scan and return access points in one call
 
