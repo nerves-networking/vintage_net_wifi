@@ -33,6 +33,35 @@ defmodule VintageNetWiFiTest do
            end) =~ "deprecated"
   end
 
+  test "old way of specifying WPA2 PSK works" do
+    # No one should be specifying SSIDs at top level with the
+    # new module name, but it's such as easy mistake that it's
+    # nice to have normalization fix it.
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{ssid: "IEEE", key_mgmt: :wpa_psk, psk: "password"}
+    }
+
+    normalized_input = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :dhcp},
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            key_mgmt: :wpa_psk,
+            ssid: "IEEE",
+            psk: "F42C6FC52DF0EBEF9EBB4B90B38A5F902E83FE1B135A70E23AED762E9710A12E",
+            mode: :infrastructure
+          }
+        ]
+      }
+    }
+
+    assert capture_log(fn ->
+             assert normalized_input == VintageNetWiFi.normalize(input)
+           end) =~ "deprecated"
+  end
+
   test "old way of specifying ap mode works" do
     input = %{
       type: VintageNetWiFi,
