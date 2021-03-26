@@ -115,8 +115,9 @@ defmodule VintageNetWiFi.WPASupplicant do
     primary_path =
       case wait_for_control_file(control_paths) do
         [primary_path, secondary_path] ->
-          {:ok, secondary_ll} = WPASupplicantLL.start_link(secondary_path)
-          :ok = WPASupplicantLL.subscribe(secondary_ll)
+          {:ok, secondary_ll} =
+            WPASupplicantLL.start_link(path: secondary_path, notification_pid: self())
+
           {:ok, "OK\n"} = WPASupplicantLL.control_request(secondary_ll, "ATTACH")
           primary_path
 
@@ -128,8 +129,7 @@ defmodule VintageNetWiFi.WPASupplicant do
                 "Couldn't find wpa_supplicant control files: #{inspect(control_paths)}"
       end
 
-    {:ok, ll} = WPASupplicantLL.start_link(primary_path)
-    :ok = WPASupplicantLL.subscribe(ll)
+    {:ok, ll} = WPASupplicantLL.start_link(path: primary_path, notification_pid: self())
     {:ok, "OK\n"} = WPASupplicantLL.control_request(ll, "ATTACH")
 
     # Refresh the AP list

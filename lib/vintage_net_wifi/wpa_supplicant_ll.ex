@@ -8,10 +8,8 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   Example use:
 
   ```elixir
-  iex> {:ok, ws} = VintageNetWiFi.WPASupplicantLL.start_link("/tmp/vintage_net/wpa_supplicant/wlan0")
+  iex> {:ok, ws} = VintageNetWiFi.WPASupplicantLL.start_link(path: "/tmp/vintage_net/wpa_supplicant/wlan0", notification_pid: self())
   {:ok, #PID<0.1795.0>}
-  iex> VintageNetWiFi.WPASupplicantLL.subscribe(ws)
-  :ok
   iex> VintageNetWiFi.WPASupplicantLL.control_request(ws, "ATTACH")
   {:ok, "OK\n"}
   iex> VintageNetWiFi.WPASupplicantLL.control_request(ws, "SCAN")
@@ -40,11 +38,14 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   @doc """
   Start the WPASupplicant low-level interface
 
-  Pass the path to the wpa_supplicant control file
+  Pass the path to the wpa_supplicant control file.
+
+  Notifications from the wpa_supplicant are sent to the process that
+  calls this.
   """
-  @spec start_link(Path.t()) :: GenServer.on_start()
-  def start_link(path) do
-    GenServer.start_link(__MODULE__, path)
+  @spec start_link(path: Path.t(), notification_pid: pid()) :: GenServer.on_start()
+  def start_link(init_args) do
+    GenServer.start_link(__MODULE__, init_args)
   end
 
   @spec control_request(GenServer.server(), binary()) :: {:ok, binary()} | {:error, any()}
@@ -52,16 +53,11 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     GenServer.call(server, {:control_request, request})
   end
 
-  @doc """
-  Subscribe to wpa_supplicant notifications
-  """
-  @spec subscribe(GenServer.server(), pid()) :: :ok
-  def subscribe(server, pid \\ self()) do
-    GenServer.call(server, {:subscribe, pid})
-  end
-
   @impl GenServer
-  def init(path) do
+  def init(init_args) do
+    path = Keyword.fetch!(init_args, :path)
+    pid = Keyword.fetch!(init_args, :notification_pid)
+
     # Blindly create the control interface's directory in case we beat
     # wpa_supplicant.
     _ = File.mkdir_p(Path.dirname(path))
@@ -76,7 +72,12 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     {:ok, socket} =
       :gen_udp.open(0, [:local, :binary, {:active, true}, {:ip, {:local, our_path}}])
 
-    state = %State{control_file: path, socket: socket}
+    state = %State{
+      control_file: path,
+      socket: socket,
+      notification_pid: pid
+    }
+
     {:ok, state}
   end
 
@@ -92,21 +93,12 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     end
   end
 
-  def handle_call({:subscribe, pid}, _from, state) do
-    {:reply, :ok, %{state | notification_pid: pid}}
-  end
-
   @impl GenServer
   def handle_info(
         {:udp, socket, _, 0, <<?<, priority, ?>, notification::binary()>>},
         %{socket: socket, notification_pid: pid} = state
       ) do
-    if pid do
-      send(pid, {__MODULE__, priority - ?0, notification})
-    else
-      Logger.info("wpa_supplicant_ll dropping notification: #{notification}")
-    end
-
+    send(pid, {__MODULE__, priority - ?0, notification})
     {:noreply, state}
   end
 
