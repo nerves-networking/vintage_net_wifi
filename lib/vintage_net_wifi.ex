@@ -98,7 +98,7 @@ defmodule VintageNetWiFi do
   configuration.
   """
 
-  @impl true
+  @impl VintageNet.Technology
   def normalize(%{type: __MODULE__} = config) do
     config
     |> normalize_wifi()
@@ -279,7 +279,7 @@ defmodule VintageNetWiFi do
     raise ArgumentError, "don't know how to process #{inspect(network)}"
   end
 
-  @impl true
+  @impl VintageNet.Technology
   def to_raw_config(ifname, %{type: __MODULE__} = config, opts) do
     tmpdir = Keyword.fetch!(opts, :tmpdir)
     regulatory_domain = Keyword.fetch!(opts, :regulatory_domain)
@@ -329,12 +329,11 @@ defmodule VintageNetWiFi do
     |> DnsdConfig.add_config(normalized_config, opts)
   end
 
-  @impl true
+  @impl VintageNet.Technology
   def ioctl(ifname, :scan, _args) do
     WPASupplicant.scan(ifname)
   end
 
-  @impl true
   def ioctl(ifname, :signal_poll, _args) do
     WPASupplicant.signal_poll(ifname)
   end
@@ -343,7 +342,7 @@ defmodule VintageNetWiFi do
     {:error, :unsupported}
   end
 
-  @impl true
+  @impl VintageNet.Technology
   def check_system(_opts) do
     # TODO
     :ok

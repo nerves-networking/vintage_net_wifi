@@ -60,7 +60,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     GenServer.call(server, {:subscribe, pid})
   end
 
-  @impl true
+  @impl GenServer
   def init(path) do
     # Blindly create the control interface's directory in case we beat
     # wpa_supplicant.
@@ -80,7 +80,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     {:ok, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:control_request, message}, from, state) do
     case :gen_udp.send(state.socket, {:local, state.control_file}, 0, message) do
       :ok ->
@@ -92,12 +92,11 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     end
   end
 
-  @impl true
   def handle_call({:subscribe, pid}, _from, state) do
     {:reply, :ok, %{state | notification_pid: pid}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(
         {:udp, socket, _, 0, <<?<, priority, ?>, notification::binary()>>},
         %{socket: socket, notification_pid: pid} = state
@@ -111,7 +110,6 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     {:noreply, state}
   end
 
-  @impl true
   def handle_info({:udp, socket, _, 0, response}, %{socket: socket} = state) do
     case List.pop_at(state.requests, 0) do
       {nil, _requests} ->
