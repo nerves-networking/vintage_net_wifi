@@ -7,14 +7,14 @@ defmodule VintageNet.Technology.WiFi do
   This module will automatically redirect your configurations to VintageNetWiFi so
   no changes are needed to your code. New code should use the new module.
   """
-  @impl true
+  @impl VintageNet.Technology
   def normalize(%{type: __MODULE__} = config) do
     config
     |> update_config()
     |> VintageNetWiFi.normalize()
   end
 
-  @impl true
+  @impl VintageNet.Technology
   def to_raw_config(ifname, config, opts) do
     updated_config = update_config(config)
     VintageNetWiFi.to_raw_config(ifname, updated_config, opts)

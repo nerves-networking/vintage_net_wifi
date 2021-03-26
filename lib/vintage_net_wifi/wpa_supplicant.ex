@@ -49,7 +49,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     GenServer.call(via_name(ifname), :signal_poll)
   end
 
-  @impl true
+  @impl GenServer
   def init(args) do
     wpa_supplicant = Keyword.fetch!(args, :wpa_supplicant)
     wpa_supplicant_conf_path = Keyword.fetch!(args, :wpa_supplicant_conf_path)
@@ -79,7 +79,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:ok, state, {:continue, :continue}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_continue(:continue, state) do
     # The control file paths depend whether the config uses AP mode and whether
     # the driver has a separate P2P interface. We find out based on which
@@ -144,7 +144,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:noreply, new_state, state.keep_alive_interval}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:scan, _from, %{ap_mode: true} = state) do
     # When in AP mode, scans need to be forced so that they work.
     # The wpa_supplicant won't set the appropriate flag to make
@@ -161,7 +161,6 @@ defmodule VintageNetWiFi.WPASupplicant do
     end
   end
 
-  @impl true
   def handle_call(:scan, _from, state) do
     response =
       case WPASupplicantLL.control_request(state.ll, "SCAN") do
@@ -173,13 +172,12 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:reply, response, state}
   end
 
-  @impl true
   def handle_call(:signal_poll, _from, state) do
     response = get_signal_info(state.ll)
     {:reply, response, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:timeout, state) do
     case WPASupplicantLL.control_request(state.ll, "PING") do
       {:ok, <<"PONG", _rest::binary>>} ->
@@ -190,7 +188,6 @@ defmodule VintageNetWiFi.WPASupplicant do
     end
   end
 
-  @impl true
   def handle_info({VintageNetWiFi.WPASupplicantLL, _priority, message}, state) do
     notification = WPASupplicantDecoder.decode_notification(message)
 

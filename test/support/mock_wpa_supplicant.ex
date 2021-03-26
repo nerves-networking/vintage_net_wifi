@@ -23,7 +23,7 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
     GenServer.cast(server, {:send_message, message})
   end
 
-  @impl true
+  @impl GenServer
   def init(path) do
     _ = File.rm(path)
 
@@ -39,17 +39,16 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
      }}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:set_responses, responses}, _from, state) do
     {:reply, :ok, %{state | responses: responses}}
   end
 
-  @impl true
   def handle_call(:get_requests, _from, %{requests: requests} = state) do
     {:reply, requests, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(
         {:send_message, message},
         %{socket: socket, client_path: client_path} = state
@@ -65,7 +64,7 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(
         {:udp, socket, from, 0, message},
         %{socket: socket, responses: responses, requests: requests} = state
