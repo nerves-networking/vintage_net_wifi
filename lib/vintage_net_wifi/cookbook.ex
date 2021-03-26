@@ -104,10 +104,11 @@ defmodule VintageNetWiFi.Cookbook do
           {:ok, map()} | {:error, term()}
   def open_access_point(ssid, ipv4_subnet \\ "192.168.24.0") do
     with :ok <- WPA2.validate_ssid(ssid),
-         {:ok, {a, b, c, _d}} <- VintageNet.IP.ip_to_tuple(ipv4_subnet),
-         our_address = {a, b, c, 1},
-         dhcp_start = {a, b, c, 10},
-         dhcp_end = {a, b, c, 250} do
+         {:ok, {a, b, c, _d}} <- VintageNet.IP.ip_to_tuple(ipv4_subnet) do
+      our_address = {a, b, c, 1}
+      dhcp_start = {a, b, c, 10}
+      dhcp_end = {a, b, c, 250}
+
       {:ok,
        %{
          type: VintageNetWiFi,
