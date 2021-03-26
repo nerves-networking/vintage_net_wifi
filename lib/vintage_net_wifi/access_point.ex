@@ -46,7 +46,24 @@ defmodule VintageNetWiFi.AccessPoint do
         }
 
   @doc """
-  Create a new AccessPoint struct
+  Create an AccessPoint when only the BSSID is known
+  """
+  @spec new(any) :: VintageNetWiFi.AccessPoint.t()
+  def new(bssid) do
+    %__MODULE__{
+      bssid: bssid,
+      frequency: 0,
+      band: :unknown,
+      channel: 0,
+      signal_dbm: -99,
+      signal_percent: 0,
+      flags: [],
+      ssid: ""
+    }
+  end
+
+  @doc """
+  Create a new AccessPoint with all of the information
   """
   @spec new(String.t(), String.t(), non_neg_integer(), integer(), [flag()]) ::
           VintageNetWiFi.AccessPoint.t()

@@ -264,19 +264,10 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, "completed", _}, state) do
     Logger.info("Connected to AP: #{bssid}")
 
-    case get_access_point_info(state.ll, bssid) do
-      {:ok, ap} ->
-        new_state = %{state | current_ap: ap}
-        update_current_access_point_property(new_state)
-        new_state
-
-      _error ->
-        Logger.warn("Connected and disconnected to AP before we could get info on it: #{bssid}")
-
-        new_state = %{state | current_ap: nil}
-        update_current_access_point_property(new_state)
-        new_state
-    end
+    ap = state.access_points[bssid] || VintageNetWiFi.AccessPoint.new(bssid)
+    new_state = %{state | current_ap: ap}
+    update_current_access_point_property(new_state)
+    new_state
   end
 
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, status, _}, state) do
