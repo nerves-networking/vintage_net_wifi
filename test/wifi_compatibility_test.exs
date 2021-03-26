@@ -1680,7 +1680,7 @@ defmodule WiFiCompatibilityTest do
          interface wlan0
          pidfile /tmp/vintage_net/udhcpd.wlan0.pid
          lease_file /tmp/vintage_net/udhcpd.wlan0.leases
-         notify_file #{Application.app_dir(:vintage_net, ["priv", "udhcpd_handler"])}
+         notify_file #{Application.app_dir(:beam_notify, ["priv", "beam_notify"])}
 
          end 192.168.24.100
          opt dns 192.168.24.1
