@@ -18,8 +18,7 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   end
 
   test "receives notifications", context do
-    ll = start_supervised!({WPASupplicantLL, context.socket_path})
-    :ok = WPASupplicantLL.subscribe(ll, self())
+    start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
     MockWPASupplicant.send_message(context.mock, "<1>Hello")
     MockWPASupplicant.send_message(context.mock, "<2>Goodbye")
@@ -29,8 +28,7 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   end
 
   test "responds to requests", context do
-    ll = start_supervised!({WPASupplicantLL, context.socket_path})
-    :ok = WPASupplicantLL.subscribe(ll, self())
+    ll = start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
     MockWPASupplicant.set_responses(context.mock, %{"SCAN" => "OK"})
 
@@ -40,8 +38,8 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   test "ignores unexpected responses", context do
     # capture_log hides the "log message from WPASupplicantLL when it sees an unexpected message"
     capture_log(fn ->
-      ll = start_supervised!({WPASupplicantLL, context.socket_path})
-      :ok = WPASupplicantLL.subscribe(ll, self())
+      ll =
+        start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
       MockWPASupplicant.send_message(context.mock, "Bad response")
 
@@ -54,8 +52,7 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   end
 
   test "handles notifications while waiting for a response", context do
-    ll = start_supervised!({WPASupplicantLL, context.socket_path})
-    :ok = WPASupplicantLL.subscribe(ll, self())
+    ll = start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
     MockWPASupplicant.set_responses(context.mock, %{"SCAN" => ["<1>Notification", "OK"]})
 
@@ -65,8 +62,7 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   end
 
   test "multiple requests outstanding", context do
-    ll = start_supervised!({WPASupplicantLL, context.socket_path})
-    :ok = WPASupplicantLL.subscribe(ll, self())
+    ll = start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
     # Set up the responses so that REQUEST1 has to wait for REQUEST2
     # to be sent before it gets a response
