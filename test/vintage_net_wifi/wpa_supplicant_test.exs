@@ -135,13 +135,13 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     assert_receive {VintageNet, ^clients_property, nil, [], _metadata}
 
-    :ok = MockWPASupplicant.send_message(context.mock, "<1>AP-STA-CONNECTED f8:a2:d6:b5:d4:07")
+    MockWPASupplicant.send_message(context.mock, "<1>AP-STA-CONNECTED f8:a2:d6:b5:d4:07")
     assert_receive {VintageNet, ^clients_property, _old, ["f8:a2:d6:b5:d4:07"], _metadata}
 
-    :ok = MockWPASupplicant.send_message(context.mock, "<1>AP-STA-DISCONNECTED f8:a2:d6:b5:d4:07")
+    MockWPASupplicant.send_message(context.mock, "<1>AP-STA-DISCONNECTED f8:a2:d6:b5:d4:07")
     assert_receive {VintageNet, ^clients_property, _old, [], _metadata}
 
-    :ok = MockWPASupplicant.send_message(context.mock, "<1>AP-STA-DISCONNECTED f8:a2:d6:b5:d4:07")
+    MockWPASupplicant.send_message(context.mock, "<1>AP-STA-DISCONNECTED f8:a2:d6:b5:d4:07")
     refute_receive {VintageNet, ^clients_property, _old, [], _metadata}
   end
 
@@ -278,52 +278,46 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     VintageNet.PropertyTable.clear(VintageNet, eap_status_property)
     VintageNet.subscribe(eap_status_property)
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-EAP-STATUS parameter=\"\" status=\"started\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-EAP-STATUS parameter=\"\" status=\"started\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, nil, %{status: :started}, _}
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<2>CTRL-EVENT-EAP-STATUS parameter=\"PEAP\" status=\"accept proposed method\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<2>CTRL-EVENT-EAP-STATUS parameter=\"PEAP\" status=\"accept proposed method\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, _, %{method: "PEAP"}, _}
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<3>CTRL-EVENT-EAP-STATUS parameter=\"success\" status=\"remote certificate verification\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<3>CTRL-EVENT-EAP-STATUS parameter=\"success\" status=\"remote certificate verification\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, _, %{remote_certificate_verified?: true}, _}
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<3>CTRL-EVENT-EAP-STATUS parameter=\"failure\" status=\"remote certificate verification\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<3>CTRL-EVENT-EAP-STATUS parameter=\"failure\" status=\"remote certificate verification\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, _, %{remote_certificate_verified?: false},
                     _}
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<3>CTRL-EVENT-EAP-STATUS parameter=\"failure\" status=\"completion\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<3>CTRL-EVENT-EAP-STATUS parameter=\"failure\" status=\"completion\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, _, %{status: :failure}, _}
 
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<3>CTRL-EVENT-EAP-STATUS parameter=\"success\" status=\"completion\""
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<3>CTRL-EVENT-EAP-STATUS parameter=\"success\" status=\"completion\""
+    )
 
     assert_receive {VintageNet, ^eap_status_property, _, %{status: :success}, _}
   end
@@ -363,48 +357,43 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     }
 
     # Try connecting
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 completed (reauth) [id=0 id_str=]"
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 completed (reauth) [id=0 id_str=]"
+    )
 
     assert_receive {VintageNet, ^current_ap_property, nil, ^ap, _}
 
     # Try some weird status
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 other (reauth) [id=0 id_str=]"
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 other (reauth) [id=0 id_str=]"
+    )
 
     assert_receive {VintageNet, ^current_ap_property, ^ap, nil, _}
 
     # Connect again
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 completed (reauth) [id=0 id_str=]"
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 completed (reauth) [id=0 id_str=]"
+    )
 
     assert_receive {VintageNet, ^current_ap_property, nil, ^ap, _}
 
     # Disconnect properly
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-DISCONNECTED bssid=78:8a:20:87:7a:50 reason=0 locally_generated=1"
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-DISCONNECTED bssid=78:8a:20:87:7a:50 reason=0 locally_generated=1"
+    )
 
     assert_receive {VintageNet, ^current_ap_property, ^ap, nil, _}
 
     # Test race condition where AP connects and disconnects before we get around to
     # asking about it.
-    :ok =
-      MockWPASupplicant.send_message(
-        context.mock,
-        "<1>CTRL-EVENT-CONNECTED - Connection to 11:22:33:44:55:66 completed (reauth) [id=0 id_str=]"
-      )
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<1>CTRL-EVENT-CONNECTED - Connection to 11:22:33:44:55:66 completed (reauth) [id=0 id_str=]"
+    )
 
     refute_receive {VintageNet, ^current_ap_property, _, _, _}
   end
@@ -481,7 +470,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     Process.sleep(100)
 
-    :ok = MockWPASupplicant.send_message(context.mock, "<1>MESH-PEER-CONNECTED f8:a2:d6:b5:d4:07")
+    MockWPASupplicant.send_message(context.mock, "<1>MESH-PEER-CONNECTED f8:a2:d6:b5:d4:07")
 
     assert_receive {VintageNet, ^peers_property, _old,
                     [
@@ -526,19 +515,17 @@ defmodule VintageNetWiFi.WPASupplicantTest do
                       }
                     ], _metadata}
 
-    :ok =
-      MockWPASupplicant.send_message(context.mock, "<2>MESH-PEER-DISCONNECTED f8:a2:d6:b5:d4:07")
+    MockWPASupplicant.send_message(context.mock, "<2>MESH-PEER-DISCONNECTED f8:a2:d6:b5:d4:07")
 
     assert_receive {VintageNet, ^peers_property, _old, [], _metadata}
 
     # no bss command for this one
     # this is a real thing that happens.
     assert ExUnit.CaptureLog.capture_log(fn ->
-             :ok =
-               MockWPASupplicant.send_message(
-                 context.mock,
-                 "<3>MESH-PEER-CONNECTED 00:0f:00:cf:e3:df"
-               )
+             MockWPASupplicant.send_message(
+               context.mock,
+               "<3>MESH-PEER-CONNECTED 00:0f:00:cf:e3:df"
+             )
 
              Process.sleep(100)
            end) =~ "Failed to get information about mesh peer: 00:0f:00:cf:e3:df"
