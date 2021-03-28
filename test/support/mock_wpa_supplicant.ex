@@ -26,6 +26,7 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
   @impl GenServer
   def init(path) do
     _ = File.rm(path)
+    File.mkdir_p!(Path.dirname(path))
 
     {:ok, socket} = :gen_udp.open(0, [:local, :binary, {:active, true}, {:ip, {:local, path}}])
 
@@ -76,6 +77,12 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
     end)
 
     {:noreply, %{state | requests: requests ++ [message]}}
+  end
+
+  @impl GenServer
+  def terminate(_reason, state) do
+    _ = File.rm(state.socket_path)
+    state
   end
 
   defp lookup(responses, message) do
