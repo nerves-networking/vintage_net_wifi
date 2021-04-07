@@ -496,6 +496,10 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
     assert [:wpa_eap_ccmp_tkip] = WPASupplicantDecoder.parse_flags("[WPA-EAP-CCMP+TKIP]")
 
     assert [] = WPASupplicantDecoder.parse_flags("[something random]")
+
+    # Missing flags were noticed once even though this doesn't seem like it should
+    # happen. Don't crash, though.
+    assert [] == WPASupplicantDecoder.parse_flags(nil)
   end
 
   test "decodes eap cert" do

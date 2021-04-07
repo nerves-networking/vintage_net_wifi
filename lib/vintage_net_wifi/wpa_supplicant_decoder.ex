@@ -245,12 +245,14 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   @doc """
   Parse WiFi access point flags
   """
-  @spec parse_flags(String.t()) :: [VintageNetWiFi.AccessPoint.flag()]
-  def parse_flags(flags) do
+  @spec parse_flags(String.t() | nil) :: [VintageNetWiFi.AccessPoint.flag()]
+  def parse_flags(flags) when is_binary(flags) do
     flags
     |> String.split(["]", "["], trim: true)
     |> Enum.flat_map(&parse_flag/1)
   end
+
+  def parse_flags(nil), do: []
 
   defp parse_flag("WPA2-PSK-CCMP"), do: [:wpa2_psk_ccmp]
   defp parse_flag("WPA2-EAP-CCMP"), do: [:wpa2_eap_ccmp]
