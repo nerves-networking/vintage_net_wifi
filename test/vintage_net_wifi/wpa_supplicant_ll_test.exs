@@ -64,20 +64,29 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
   test "multiple requests outstanding", context do
     ll = start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
 
-    # Set up the responses so that REQUEST1 has to wait for REQUEST2
-    # to be sent before it gets a response
-    MockWPASupplicant.set_responses(context.mock, %{
-      "REQUEST1" => [],
-      "REQUEST2" => ["OK1", "OK2"]
-    })
+    # The intention here is to start up enough processes to exercise
+    # the multiple request outstanding code since it's currently not written
+    # to make this easy to test.
+    process_count = 100
 
-    spawn(fn ->
-      assert {:ok, "OK1"} = WPASupplicantLL.control_request(ll, "REQUEST1")
-    end)
+    responses = for i <- 1..process_count, into: %{}, do: {"REQUEST#{i}", "OK#{i}"}
 
-    # Make sure that REQUEST1 has time to be sent
-    Process.sleep(100)
+    MockWPASupplicant.set_responses(context.mock, responses)
+    main_process = self()
 
-    assert {:ok, "OK2"} = WPASupplicantLL.control_request(ll, "REQUEST2")
+    for i <- 1..process_count do
+      spawn(fn ->
+        request = "REQUEST#{i}"
+        expected = "OK#{i}"
+        assert {:ok, expected} == WPASupplicantLL.control_request(ll, request)
+        send(main_process, "DONE#{i}")
+      end)
+    end
+
+    # Wait for everything to complete
+    for i <- 1..process_count do
+      expected = "DONE#{i}"
+      assert_receive ^expected, 5_000
+    end
   end
 end

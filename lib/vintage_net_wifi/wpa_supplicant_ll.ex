@@ -31,7 +31,8 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     @moduledoc false
     defstruct control_file: nil,
               socket: nil,
-              requests: [],
+              request_queue: :queue.new(),
+              outstanding: nil,
               notification_pid: nil
   end
 
@@ -83,14 +84,12 @@ defmodule VintageNetWiFi.WPASupplicantLL do
 
   @impl GenServer
   def handle_call({:control_request, message}, from, state) do
-    case :gen_udp.send(state.socket, {:local, state.control_file}, 0, message) do
-      :ok ->
-        new_requests = state.requests ++ [from]
-        {:noreply, %{state | requests: new_requests}}
+    new_state =
+      state
+      |> enqueue_request(message, from)
+      |> maybe_send_request()
 
-      error ->
-        {:reply, error, state}
-    end
+    {:noreply, new_state}
   end
 
   @impl GenServer
@@ -102,15 +101,48 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     {:noreply, state}
   end
 
-  def handle_info({:udp, socket, _, 0, response}, %{socket: socket} = state) do
-    case List.pop_at(state.requests, 0) do
-      {nil, _requests} ->
-        Logger.warn("wpa_supplicant sent an unexpected message: '#{response}'")
-        {:noreply, state}
+  def handle_info({:udp, socket, _, 0, response}, %{socket: socket, outstanding: request} = state)
+      when not is_nil(request) do
+    {_message, from} = request
+    GenServer.reply(from, {:ok, response})
 
-      {from, new_requests} ->
-        GenServer.reply(from, {:ok, response})
-        {:noreply, %{state | requests: new_requests}}
+    new_state = %{state | outstanding: nil} |> maybe_send_request()
+    {:noreply, new_state}
+  end
+
+  def handle_info(message, state) do
+    Logger.error("wpa_supplicant_ll: unexpected message: #{inspect(message)}")
+    {:noreply, state}
+  end
+
+  defp enqueue_request(state, message, from) do
+    new_request_queue = :queue.in({message, from}, state.request_queue)
+
+    %{state | request_queue: new_request_queue}
+  end
+
+  defp maybe_send_request(%{outstanding: nil} = state) do
+    case :queue.out(state.request_queue) do
+      {:empty, _} ->
+        state
+
+      {{:value, request}, new_queue} ->
+        %{state | request_queue: new_queue}
+        |> do_send_request(request)
+    end
+  end
+
+  defp maybe_send_request(state), do: state
+
+  defp do_send_request(state, {message, from} = request) do
+    case :gen_udp.send(state.socket, {:local, state.control_file}, 0, message) do
+      :ok ->
+        %{state | outstanding: request}
+
+      error ->
+        Logger.error("wpa_supplicant_ll: Error sending #{inspect(message)} (#{inspect(error)})")
+        GenServer.reply(from, error)
+        maybe_send_request(state)
     end
   end
 end
