@@ -214,7 +214,8 @@ defmodule VintageNetWiFi.WPASupplicantTest do
   end
 
   test "incremental add and remove bss", context do
-    # sometimes the wpa_supplicant just reports "BSS-ADDED" and never that there are results
+    # Sometimes the wpa_supplicant only reports "BSS-ADDED" when scanning
+    # and doesn't report that there are results
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
@@ -353,8 +354,11 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     Process.sleep(100)
 
+    ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
     current_ap_property = ["interface", "test_wlan0", "wifi", "current_ap"]
     VintageNet.PropertyTable.clear(VintageNet, current_ap_property)
+    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    VintageNet.subscribe(ap_property)
     VintageNet.subscribe(current_ap_property)
 
     ap = %VintageNetWiFi.AccessPoint{
@@ -368,8 +372,9 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       ssid: "TestLAN"
     }
 
-    # Make the AP appear
+    # Make the AP appear and wait until it gets added to the known list
     MockWPASupplicant.send_message(context.mock, "<2>CTRL-EVENT-BSS-ADDED 0 78:8a:20:87:7a:50")
+    assert_receive {VintageNet, ^ap_property, nil, _ap, _}
 
     # Try connecting
     MockWPASupplicant.send_message(
@@ -428,7 +433,18 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     VintageNet.PropertyTable.clear(VintageNet, current_ap_property)
     VintageNet.subscribe(current_ap_property)
 
-    ap = VintageNetWiFi.AccessPoint.new("78:8a:20:87:7a:50")
+    unknown_ap = VintageNetWiFi.AccessPoint.new("78:8a:20:87:7a:50")
+
+    ap = %VintageNetWiFi.AccessPoint{
+      band: :wifi_2_4_ghz,
+      bssid: "78:8a:20:87:7a:50",
+      channel: 6,
+      flags: [:wpa2_psk_ccmp, :ess],
+      frequency: 2437,
+      signal_dbm: -71,
+      signal_percent: 48,
+      ssid: "TestLAN"
+    }
 
     # Try connecting even though AP hasn't been announced
     MockWPASupplicant.send_message(
@@ -436,7 +452,10 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       "<1>CTRL-EVENT-CONNECTED - Connection to 78:8a:20:87:7a:50 completed (reauth) [id=0 id_str=]"
     )
 
-    assert_receive {VintageNet, ^current_ap_property, nil, ^ap, _}
+    assert_receive {VintageNet, ^current_ap_property, nil, ^unknown_ap, _}
+
+    # It should be known shortly.
+    assert_receive {VintageNet, ^current_ap_property, ^unknown_ap, ^ap, _}
   end
 
   test "get signal info using SIGNAL_POLL", context do
@@ -573,6 +592,6 @@ defmodule VintageNetWiFi.WPASupplicantTest do
              )
 
              Process.sleep(100)
-           end) =~ "Failed to get information about mesh peer: 00:0f:00:cf:e3:df"
+           end) =~ "Ignoring error getting info on BSSID \"00:0f:00:cf:e3:df\""
   end
 end

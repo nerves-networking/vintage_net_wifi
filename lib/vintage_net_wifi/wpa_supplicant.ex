@@ -2,7 +2,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   use GenServer
 
   alias VintageNet.Interface.EAPStatus
-  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
+  alias VintageNetWiFi.{BSSIDRequester, WPASupplicantDecoder, WPASupplicantLL}
   require Logger
 
   @moduledoc """
@@ -81,7 +81,8 @@ defmodule VintageNetWiFi.WPASupplicant do
       peers: [],
       current_ap: nil,
       eap_status: %EAPStatus{},
-      ll: nil
+      ll: nil,
+      bssid_requester: nil
     }
 
     {:ok, state, {:continue, :continue}}
@@ -140,13 +141,14 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:ok, ll} = WPASupplicantLL.start_link(path: primary_path, notification_pid: self())
     {:ok, "OK\n"} = WPASupplicantLL.control_request(ll, "ATTACH")
 
-    # Refresh the AP list
-    access_points = get_access_points(ll)
+    {:ok, bssid_requester} = BSSIDRequester.start_link(ll: ll, notification_pid: self())
 
-    new_state = %{state | access_points: access_points, ll: ll}
+    # Request a new AP list
+    BSSIDRequester.get_all_access_points(bssid_requester, &update_all_access_points/2)
+
+    new_state = %{state | ll: ll, bssid_requester: bssid_requester}
 
     # Make sure that the property table is in sync with our state
-    update_access_points_property(new_state)
     update_clients_property(new_state)
 
     {:noreply, new_state, state.keep_alive_interval}
@@ -162,10 +164,10 @@ defmodule VintageNetWiFi.WPASupplicant do
 
     case System.cmd(force_ap_scan, [state.ifname]) do
       {_output, 0} ->
-        {:reply, :ok, state}
+        {:reply, :ok, state, state.keep_alive_interval}
 
       {_output, _nonzero} ->
-        {:reply, {:error, "force_ap_scan failed"}, state}
+        {:reply, {:error, "force_ap_scan failed"}, state, state.keep_alive_interval}
     end
   end
 
@@ -177,12 +179,12 @@ defmodule VintageNetWiFi.WPASupplicant do
         error -> error
       end
 
-    {:reply, response, state}
+    {:reply, response, state, state.keep_alive_interval}
   end
 
   def handle_call(:signal_poll, _from, state) do
     response = get_signal_info(state.ll)
-    {:reply, response, state}
+    {:reply, response, state, state.keep_alive_interval}
   end
 
   def handle_call(:wps_pbc, _from, state) do
@@ -192,6 +194,11 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   @impl GenServer
+  def handle_info({:bssid_result, result, cookie}, state) do
+    new_state = apply(cookie, [state, result])
+    {:noreply, new_state, state.keep_alive_interval}
+  end
+
   def handle_info(:timeout, state) do
     case WPASupplicantLL.control_request(state.ll, "PING") do
       {:ok, <<"PONG", _rest::binary>>} ->
@@ -210,34 +217,24 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "CTRL-EVENT-SCAN-RESULTS"}, state) do
-    # Collect all of the access points
-    access_points = get_access_points(state.ll)
-    new_state = %{state | access_points: access_points}
-
-    update_access_points_property(new_state)
-
-    new_state
+    # Request all of the known BSS IDs. This will be handled asynchronously
+    # since there could be a lot.
+    BSSIDRequester.get_all_access_points(state.bssid_requester, &update_all_access_points/2)
+    state
   end
 
   defp handle_notification({:event, "CTRL-EVENT-BSS-ADDED", _index, bssid}, state) do
-    case get_access_point_info(state.ll, bssid) do
-      {:ok, ap} ->
-        access_points = Map.put(state.access_points, ap.bssid, ap)
-        new_state = %{state | access_points: access_points}
-        update_access_points_property(new_state)
-        new_state
-
-      _error ->
-        Logger.warn("AP added and then removed before we could get info on it: #{bssid}")
-        state
-    end
+    BSSIDRequester.get_access_point_info(state.bssid_requester, bssid, &add_access_point/2)
+    state
   end
 
   defp handle_notification({:event, "CTRL-EVENT-BSS-REMOVED", _index, bssid}, state) do
-    access_points = Map.delete(state.access_points, bssid)
-    new_state = %{state | access_points: access_points}
-    update_access_points_property(new_state)
-    new_state
+    # Even though the requester doesn't do anything with this, it needs to be sent
+    # through to avoid the race condition where an BSS is added and then immediately
+    # removed. A message could be in queue that adds a BSS that gets applied out
+    # of order.
+    BSSIDRequester.forget_access_point_info(state.bssid_requester, bssid, &forget_access_point/2)
+    state
   end
 
   # Ignored
@@ -264,10 +261,25 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, "completed", _}, state) do
     Logger.info("Connected to AP: #{bssid}")
 
-    ap = state.access_points[bssid] || VintageNetWiFi.AccessPoint.new(bssid)
-    new_state = %{state | current_ap: ap}
-    update_current_access_point_property(new_state)
-    new_state
+    case state.access_points[bssid] do
+      nil ->
+        # Unknown BSSID. Request info on it and use a placeholder in the meantime
+        BSSIDRequester.get_access_point_info(
+          state.bssid_requester,
+          bssid,
+          &update_current_access_point/2
+        )
+
+        update_current_access_point(state, VintageNetWiFi.AccessPoint.new(bssid))
+
+      ap ->
+        # Known BSSID, so no need to re-query wpa_supplicant
+        # NOTE: This query has been known to timeout in the past. This was almost certainly due to
+        # too many responses being outstanding and a message being dropped on the domain socket.
+        # Since we should almost always know the AP already, not sending the request seems
+        # ultimately safe since it avoids the issue altogether.
+        update_current_access_point(state, ap)
+    end
   end
 
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, status, _}, state) do
@@ -388,30 +400,14 @@ defmodule VintageNetWiFi.WPASupplicant do
     state
   end
 
-  defp handle_notification({:event, "MESH-PEER-CONNECTED", peer}, state) do
-    case get_access_point_info(state.ll, peer) do
-      {:ok, peer} ->
-        peers = [peer | state.peers]
-        new_state = %{state | peers: peers}
-        update_peers_property(new_state)
-        new_state
-
-      {:error, reason} ->
-        _ = Logger.error("Failed to get information about mesh peer: #{peer} #{inspect(reason)}")
-        state
-    end
+  defp handle_notification({:event, "MESH-PEER-CONNECTED", bssid}, state) do
+    BSSIDRequester.get_access_point_info(state.bssid_requester, bssid, &add_mesh_peer/2)
+    state
   end
 
-  defp handle_notification({:event, "MESH-PEER-DISCONNECTED", peer}, state) do
-    peers =
-      Enum.reject(state.peers, fn
-        %{bssid: ^peer} -> true
-        _ -> false
-      end)
-
-    new_state = %{state | peers: peers}
-    update_peers_property(new_state)
-    new_state
+  defp handle_notification({:event, "MESH-PEER-DISCONNECTED", bssid}, state) do
+    BSSIDRequester.forget_access_point_info(state.bssid_requester, bssid, &forget_mesh_peer/2)
+    state
   end
 
   defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
@@ -475,41 +471,52 @@ defmodule VintageNetWiFi.WPASupplicant do
     end
   end
 
-  defp get_access_points(ll) do
-    get_access_points(ll, 0, %{})
+  defp update_all_access_points(state, access_points) when is_map(access_points) do
+    new_state = %{state | access_points: access_points}
+
+    update_access_points_property(new_state)
+    new_state
   end
 
-  defp get_access_points(ll, index, acc) do
-    case get_access_point_info(ll, index) do
-      {:ok, ap} ->
-        get_access_points(ll, index + 1, Map.put(acc, ap.bssid, ap))
+  defp add_access_point(state, %VintageNetWiFi.AccessPoint{} = ap) do
+    new_access_points = Map.put(state.access_points, ap.bssid, ap)
+    new_state = %{state | access_points: new_access_points}
 
-      _error ->
-        acc
-    end
+    update_access_points_property(new_state)
+    new_state
   end
 
-  defp get_access_point_info(ll, index_or_bssid) do
-    with {:ok, raw_response} <- WPASupplicantLL.control_request(ll, "BSS #{index_or_bssid}") do
-      case WPASupplicantDecoder.decode_kv_response(raw_response) do
-        empty when empty == %{} ->
-          {:error, :unknown}
+  defp update_current_access_point(state, %VintageNetWiFi.AccessPoint{} = ap) do
+    new_state = %{state | current_ap: ap}
+    update_current_access_point_property(new_state)
+    new_state
+  end
 
-        %{"mesh_id" => _} = mesh_response ->
-          peer = VintageNetWiFi.MeshPeer.new(mesh_response)
-          {:ok, peer}
+  defp add_mesh_peer(state, %VintageNetWiFi.MeshPeer{} = peer) do
+    new_peers = [peer | state.peers]
+    new_state = %{state | peers: new_peers}
+    update_peers_property(new_state)
+    new_state
+  end
 
-        response ->
-          frequency = String.to_integer(response["freq"])
-          signal_dbm = String.to_integer(response["level"])
-          flags = WPASupplicantDecoder.parse_flags(response["flags"])
-          ssid = response["ssid"]
-          bssid = response["bssid"]
+  defp forget_mesh_peer(state, bssid) do
+    new_peers =
+      Enum.reject(state.peers, fn
+        %{bssid: ^bssid} -> true
+        _ -> false
+      end)
 
-          ap = VintageNetWiFi.AccessPoint.new(bssid, ssid, frequency, signal_dbm, flags)
-          {:ok, ap}
-      end
-    end
+    new_state = %{state | peers: new_peers}
+    update_peers_property(new_state)
+    new_state
+  end
+
+  defp forget_access_point(state, bssid) do
+    new_access_points = Map.delete(state.access_points, bssid)
+
+    new_state = %{state | access_points: new_access_points}
+    update_access_points_property(new_state)
+    new_state
   end
 
   defp update_access_points_property(state) do
