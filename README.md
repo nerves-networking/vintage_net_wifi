@@ -448,3 +448,32 @@ Double check that all of your parameters are set correctly. The `:psk` cannot be
 checked here, so if you suspect that's wrong, double check your `config.exs`.
 The next step is to look at log messages for connection errors. On Nerves
 devices, run `RingLogger.next` at the `IEx` prompt.
+
+## Hardware simulation
+
+It's possible to setup WiFi configurations without any real hardware using the
+Linux kernel's
+[`mac80211_hwsim`](https://wireless.wiki.kernel.org/en/users/Drivers/mac80211_hwsim)
+driver. The `mac80211_hwsim` driver is excellent, but expect some rough edges
+here. Here's how to use it.
+
+1. Install [Vagrant](https://www.vagrantup.com/)
+2. Run `vagrant up` and then `vagrant ssh` into the VM. This takes a while to
+   set up the first time.
+3. `sudo bash` and `cd /vagrant`. Everything useful requires `root` permissions
+   The `/vagrant` folder is this `vintage_net_wifi` source directory in the VM.
+4. Run `modprobe mac80211_hwsim radios=2 channels=1 support_p2p_device=0` to
+   bring up the simulated WiFi adapters. There will be two: `"wlan0"` will be
+   for VintageNetWiFi to use and `"wlan1"` is for setting up access points.
+   The simulator makes it look like they're separate WiFi adapters that are in
+   close proximity.
+5. Run `mix test` just to see that the unit test still work.
+6. Run `vagrant ssh` in other terminals to have multiple connections. VintageNet
+   messes up routing so once you start experimenting for real, you can't log in
+   again or use the internet. Synced folders still work.
+7. In a second window, run `create_ap -n wlan1 MyAccessPoint MyPassphrase` to
+   create a WPA2 PSK access point.
+8. Run `MIX_ENV=hwsim iex -S mix`. Then
+   `VintageNetWiFi.quick_configure("MyAccessPoint", "MyPassphrase")` and watch
+   the logs with `RingLogger.next`.
+

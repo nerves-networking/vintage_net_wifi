@@ -42,14 +42,17 @@ Vagrant.configure("2") do |config|
     apt-get purge -q -y snapd lxcfs lxd ubuntu-core-launcher snap-confine
     apt-get -q -y install build-essential libncurses5-dev \
       git unzip bc autoconf m4 libssh-dev libmnl-dev libnl-genl-3-dev \
-      pkg-config
+      pkg-config wpasupplicant hostapd wireless-tools dnsmasq
 
     apt-get -q -y autoremove
     apt-get -q -y clean
     update-locale LC_ALL=en_US.UTF-8
+    ln -sf /bin/busybox /usr/bin/udhcpc
+    ln -sf /bin/busybox /usr/bin/udhcpd
+    systemctl disable dnsmasq
     SHELL
 
-  config.vm.provision 'shell', privileged: false, inline: <<-SHELL
+  config.vm.provision 'shell', privileged: true, inline: <<-SHELL
     git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.0
     echo ". $HOME/.asdf/asdf.sh" >> ~/.bashrc
     echo ". $HOME/.asdf/completions/asdf.bash" >> ~/.bashrc
@@ -61,8 +64,10 @@ Vagrant.configure("2") do |config|
     asdf install elixir #{ELIXIR_VERSION}
     asdf global elixir #{ELIXIR_VERSION}
     mix local.hex --force
+    git clone https://github.com/oblique/create_ap.git ~/create_ap
+    make -C ~/create_ap install
     SHELL
 
   # Re-enable synced folders
-  config.vm.synced_folder ".", "/vagrant", disabled: false
+  config.vm.synced_folder ".", "/vagrant"
 end
