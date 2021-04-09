@@ -79,9 +79,13 @@ defmodule VintageNetWiFiTest.MockWPASupplicant do
   end
 
   defp lookup(responses, message) do
-    case Map.get(responses, message, "Mock doesn't know about #{message}") do
-      list when is_list(list) -> list
-      other -> [other]
+    case Map.fetch(responses, message) do
+      {:ok, response} ->
+        List.wrap(response)
+
+      :error ->
+        raise RuntimeError,
+              "No canned response for #{message}. If this is to be ignored, set the response to []"
     end
   end
 end
