@@ -23,7 +23,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
   end
 
   test "attaches to wpa_supplicant", context do
-    MockWPASupplicant.set_responses(context.mock, %{"ATTACH" => ["OK\n"]})
+    MockWPASupplicant.set_responses(context.mock, %{"ATTACH" => "OK\n", "BSS 0" => ""})
 
     _ =
       start_supervised!(
@@ -41,7 +41,11 @@ defmodule VintageNetWiFi.WPASupplicantTest do
   end
 
   test "pings wpa_supplicant", context do
-    MockWPASupplicant.set_responses(context.mock, %{"ATTACH" => "OK\n", "PING" => "PONG\n"})
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "BSS 0" => ""
+    })
 
     _ =
       start_supervised!(
@@ -107,12 +111,14 @@ defmodule VintageNetWiFi.WPASupplicantTest do
   test "ap-mode station connect updates property", context do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
-      "PING" => "PONG\n"
+      "PING" => "PONG\n",
+      "BSS 0" => ""
     })
 
     MockWPASupplicant.set_responses(context.p2p_dev_mock, %{
       "ATTACH" => "OK\n",
-      "PING" => "PONG\n"
+      "PING" => "PONG\n",
+      "BSS 0" => ""
     })
 
     clients_property = ["interface", "test_wlan0", "wifi", "clients"]
@@ -149,6 +155,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "SCAN" => ["FAIL-BUSY  \n"]
     })
 
@@ -169,6 +176,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "SCAN" => [
         "OK\n",
         "<2>CTRL-EVENT-SCAN-STARTED ",
@@ -210,6 +218,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "SCAN" => [
         "OK\n",
         "<2>CTRL-EVENT-SCAN-STARTED ",
@@ -259,6 +268,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "BSS 78:8a:20:87:7a:50" =>
         "id=0\nbssid=78:8a:20:87:7a:50\nfreq=2437\nbeacon_int=100\ncapabilities=0x0431\nqual=0\nnoise=-89\nlevel=-71\ntsf=0000333220048880\nage=14\nie=0008426f7062654c414e010882848b968c1298240301062a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\nflags=[WPA-EAP-CCMP+TKIP][ESS]\nssid=TestLAN\nsnr=18\nest_throughput=48000\nupdate_idx=1\nbeacon_ie=0008426f7062654c414e010882848b968c1298240301060504010300002a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\n"
     })
@@ -326,8 +336,10 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "BSS 78:8a:20:87:7a:50" =>
-        "id=0\nbssid=78:8a:20:87:7a:50\nfreq=2437\nbeacon_int=100\ncapabilities=0x0431\nqual=0\nnoise=-89\nlevel=-71\ntsf=0000333220048880\nage=14\nie=0008426f7062654c414e010882848b968c1298240301062a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\nflags=[WPA2-PSK-CCMP][ESS]\nssid=TestLAN\nsnr=18\nest_throughput=48000\nupdate_idx=1\nbeacon_ie=0008426f7062654c414e010882848b968c1298240301060504010300002a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\n"
+        "id=0\nbssid=78:8a:20:87:7a:50\nfreq=2437\nbeacon_int=100\ncapabilities=0x0431\nqual=0\nnoise=-89\nlevel=-71\ntsf=0000333220048880\nage=14\nie=0008426f7062654c414e010882848b968c1298240301062a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\nflags=[WPA2-PSK-CCMP][ESS]\nssid=TestLAN\nsnr=18\nest_throughput=48000\nupdate_idx=1\nbeacon_ie=0008426f7062654c414e010882848b968c1298240301060504010300002a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\n",
+      "BSS 11:22:33:44:55:66" => ""
     })
 
     _supplicant =
@@ -402,6 +414,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "SIGNAL_POLL" =>
         "RSSI=-32\nLINKSPEED=300\nNOISE=9999\nFREQUENCY=2472\nWIDTH=40 MHz\nCENTER_FRQ1=2462\n"
     })
@@ -432,6 +445,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "SIGNAL_POLL" => "FAIL\n"
     })
 
@@ -451,8 +465,10 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
       "PING" => "PONG\n",
+      "BSS 0" => "",
       "BSS f8:a2:d6:b5:d4:07" =>
-        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n"
+        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n",
+      "BSS 00:0f:00:cf:e3:df" => ""
     })
 
     peers_property = ["interface", "test_wlan0", "wifi", "peers"]
