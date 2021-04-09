@@ -89,4 +89,12 @@ defmodule VintageNetWiFi.WPASupplicantLLTest do
       assert_receive ^expected, 5_000
     end
   end
+
+  test "requests timeouts", context do
+    ll = start_supervised!({WPASupplicantLL, path: context.socket_path, notification_pid: self()})
+
+    MockWPASupplicant.set_responses(context.mock, %{"Hello!" => []})
+
+    assert {:error, :timeout} == WPASupplicantLL.control_request(ll, "Hello!")
+  end
 end
