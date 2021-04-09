@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.10.0
+
+This release is backwards compatible with v0.9.2. No changes are needed to
+existing code.
+
+* Bug fixes
+  * OTP 24 is supported now. This release updates to the old crypto API that has
+    been removed in OTP 24.
+  * Fix a GenServer crash when requesting BSSID information. This issue seemed
+    to occur more frequently in high density WiFi environments. OTP supervision
+    recovered it, but it had a side effect of making VintageNet send out
+    notifications that would make it look like the interface bounced.
+  * Fix a crash due to invalid AP flags being reported. Thanks to Rick Carlino
+    for reporting that this happens.
+
 ## v0.9.2
 
 This release introduces helper functions for configuring the most common types
