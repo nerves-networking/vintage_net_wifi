@@ -33,7 +33,8 @@ defmodule VintageNetWiFi.WPASupplicantLL do
               socket: nil,
               request_queue: :queue.new(),
               outstanding: nil,
-              notification_pid: nil
+              notification_pid: nil,
+              request_timer: nil
   end
 
   @doc """
@@ -104,9 +105,21 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   def handle_info({:udp, socket, _, 0, response}, %{socket: socket, outstanding: request} = state)
       when not is_nil(request) do
     {_message, from} = request
+    _ = :timer.cancel(state.request_timer)
+
     GenServer.reply(from, {:ok, response})
 
     new_state = %{state | outstanding: nil} |> maybe_send_request()
+    {:noreply, new_state}
+  end
+
+  def handle_info(:request_timeout, %{outstanding: request} = state)
+      when not is_nil(request) do
+    {_message, from} = request
+
+    GenServer.reply(from, {:error, :timeout})
+    new_state = %{state | outstanding: nil} |> maybe_send_request()
+
     {:noreply, new_state}
   end
 
@@ -137,7 +150,8 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   defp do_send_request(state, {message, from} = request) do
     case :gen_udp.send(state.socket, {:local, state.control_file}, 0, message) do
       :ok ->
-        %{state | outstanding: request}
+        {:ok, timer} = :timer.send_after(1000, :request_timeout)
+        %{state | outstanding: request, request_timer: timer}
 
       error ->
         Logger.error("wpa_supplicant_ll: Error sending #{inspect(message)} (#{inspect(error)})")
