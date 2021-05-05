@@ -32,7 +32,9 @@ defmodule VintageNet.Technology.WiFi do
     |> Map.put(:type, VintageNetWiFi)
   end
 
+  @impl VintageNet.Technology
   defdelegate ioctl(ifname, command, args), to: VintageNetWiFi
 
+  @impl VintageNet.Technology
   defdelegate check_system(opts), to: VintageNetWiFi
 end
