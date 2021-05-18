@@ -8,6 +8,11 @@ end
 
 File.rm_rf!("test/tmp")
 
+# Always warning as errors
+if Version.match?(System.version(), "~> 1.10") do
+  Code.put_compiler_option(:warnings_as_errors, true)
+end
+
 # Networking support has enough pieces that are singleton in nature
 # that parallel running of tests can't be done.
 ExUnit.start(max_cases: 1)
