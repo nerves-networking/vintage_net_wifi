@@ -1,6 +1,8 @@
 defmodule VintageNetWiFi.WPASupplicantDecoder do
   @moduledoc false
 
+  require Logger
+
   @doc """
   Decode notifications from the wpa_supplicant
   """
@@ -257,6 +259,9 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_flag("WPA2-PSK-CCMP"), do: [:wpa2_psk_ccmp]
   defp parse_flag("WPA2-EAP-CCMP"), do: [:wpa2_eap_ccmp]
   defp parse_flag("WPA2-PSK-CCMP+TKIP"), do: [:wpa2_psk_ccmp_tkip]
+  defp parse_flag("WPA2-PSK+SAE-CCMP"), do: [:wpa2_psk_sae_ccmp]
+  defp parse_flag("WPA2-SAE-CCMP"), do: [:wpa2_sae_ccmp]
+  defp parse_flag("WPA2--CCMP"), do: [:wpa2_ccmp]
   defp parse_flag("WPA-PSK-CCMP+TKIP"), do: [:wpa_psk_ccmp_tkip]
   defp parse_flag("WPA-EAP-CCMP+TKIP"), do: [:wpa_eap_ccmp_tkip]
   defp parse_flag("IBSS"), do: [:ibss]
@@ -265,5 +270,9 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_flag("P2P"), do: [:p2p]
   defp parse_flag("WPS"), do: [:wps]
   defp parse_flag("RSN--CCMP"), do: [:rsn_ccmp]
-  defp parse_flag(_other), do: []
+
+  defp parse_flag(other) do
+    Logger.warn("[wpa_supplicant] Unknown flag: #{inspect(other)}")
+    []
+  end
 end
