@@ -30,7 +30,8 @@ defmodule VintageNetWiFi do
     :passive_scan,
     :regulatory_domain,
     :user_mpm,
-    :root_interface
+    :root_interface,
+    :wpa_supplicant_conf_path
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -105,6 +106,10 @@ defmodule VintageNetWiFi do
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
     |> DnsdConfig.normalize()
+  end
+
+  defp normalize_wifi(%{vintage_net_wifi: %{wpa_supplicant_conf: conf}} = config) do
+    %{config | vintage_net_wifi: %{wpa_supplicant_conf: conf}}
   end
 
   defp normalize_wifi(%{vintage_net_wifi: wifi} = config) do
@@ -346,6 +351,15 @@ defmodule VintageNetWiFi do
   def check_system(_opts) do
     # TODO
     :ok
+  end
+
+  defp wifi_to_supplicant_contents(
+         %{wpa_supplicant_conf: conf},
+         control_interface_dir,
+         _regulatory_domain
+       ) do
+    [into_newlines(["ctrl_interface=#{control_interface_dir}"]), conf]
+    |> IO.iodata_to_binary()
   end
 
   defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
