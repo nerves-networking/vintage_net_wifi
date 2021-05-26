@@ -106,8 +106,29 @@ The `:vintage_net_wifi` key has the following common fields:
 See the [official
 docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf) for
 the complete list of options.
+If there is a config from `wpa_supplicant.conf` missing from VintageNet, one may
+supply a `wpa_supplicant_conf` key that will override all other configuration for `vintage_net_wifi`.
+Example:
 
-Here's an example:
+```elixir
+iex> VintageNet.configure("wlan0", %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        wpa_supplicant_conf: """
+        network={
+          ssid="home"
+          key_mgmt=WPA-PSK
+          psk="very secret passphrase"
+        }
+        """
+      },
+      ipv4: %{method: :dhcp}
+    })
+```
+
+Please note that the syntax of the `wpa_supplicant_conf` key is **NOT** validated by VintageNet.
+
+Example of WPA PSK
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
