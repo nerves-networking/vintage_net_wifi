@@ -258,11 +258,13 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   defp parse_flag("WPA2-PSK-CCMP"), do: [:wpa2_psk_ccmp]
   defp parse_flag("WPA2-EAP-CCMP"), do: [:wpa2_eap_ccmp]
+  defp parse_flag("WPA2-EAP-CCMP+TKIP"), do: [:wpa2_eap_ccmp_tkip]
   defp parse_flag("WPA2-PSK-CCMP+TKIP"), do: [:wpa2_psk_ccmp_tkip]
   defp parse_flag("WPA2-PSK+SAE-CCMP"), do: [:wpa2_psk_sae_ccmp]
   defp parse_flag("WPA2-SAE-CCMP"), do: [:wpa2_sae_ccmp]
   defp parse_flag("WPA2--CCMP"), do: [:wpa2_ccmp]
   defp parse_flag("WPA-PSK-CCMP+TKIP"), do: [:wpa_psk_ccmp_tkip]
+  defp parse_flag("WPA-EAP-CCMP"), do: [:wpa_eap_ccmp]
   defp parse_flag("WPA-EAP-CCMP+TKIP"), do: [:wpa_eap_ccmp_tkip]
   defp parse_flag("IBSS"), do: [:ibss]
   defp parse_flag("MESH"), do: [:mesh]
