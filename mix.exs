@@ -1,7 +1,7 @@
 defmodule VintageNetWiFi.MixProject do
   use Mix.Project
 
-  @version "0.10.1"
+  @version "0.10.2"
   @source_url "https://github.com/nerves-networking/vintage_net_wifi"
 
   def project do
@@ -48,15 +48,14 @@ defmodule VintageNetWiFi.MixProject do
   defp package do
     %{
       files: [
+        "CHANGELOG.md",
         "lib",
-        "test",
         "mix.exs",
         "Makefile",
         "README.md",
         "src/*.[ch]",
         "src/test-c99.sh",
-        "LICENSE",
-        "CHANGELOG.md"
+        "LICENSE"
       ],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}

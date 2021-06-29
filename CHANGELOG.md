@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.2
+
+* Bug fixes
+  * Added missing EAP WiFi types. Thanks to Dömötör Gulyás for this fix.
+
 ## v0.10.1
 
 * New features
