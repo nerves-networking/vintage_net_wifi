@@ -19,6 +19,7 @@ defmodule VintageNetWiFi.AccessPoint do
           | :wpa2_psk_sae_ccmp
           | :wpa2_sae_ccmp
           | :wpa2_ccmp
+          | :wpa_psk_ccmp
           | :wpa_psk_ccmp_tkip
           | :wpa_eap_ccmp
           | :wpa_eap_ccmp_tkip
