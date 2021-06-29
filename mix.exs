@@ -48,15 +48,14 @@ defmodule VintageNetWiFi.MixProject do
   defp package do
     %{
       files: [
+        "CHANGELOG.md",
         "lib",
-        "test",
         "mix.exs",
         "Makefile",
         "README.md",
         "src/*.[ch]",
         "src/test-c99.sh",
-        "LICENSE",
-        "CHANGELOG.md"
+        "LICENSE"
       ],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}
