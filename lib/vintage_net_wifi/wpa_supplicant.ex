@@ -188,7 +188,9 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_call(:wps_pbc, _from, state) do
     response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
-    {:reply, response, state}
+    new_state = %{state | wps_credendials: nil}
+    update_wps_credentials(new_state)
+    {:reply, response, new_state}
   end
 
   @impl GenServer
