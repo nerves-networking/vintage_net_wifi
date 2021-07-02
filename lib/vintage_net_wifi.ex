@@ -34,7 +34,8 @@ defmodule VintageNetWiFi do
     :regulatory_domain,
     :user_mpm,
     :root_interface,
-    :wpa_supplicant_conf_path
+    :wpa_supplicant_conf_path,
+    :wps_cred_processing
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -399,7 +400,7 @@ defmodule VintageNetWiFi do
     config = [
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
-      "wps_cred_processing=1",
+      into_config_string(wifi, :wps_cred_processing),
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
       into_config_string(wifi, :user_mpm)
@@ -686,6 +687,10 @@ defmodule VintageNetWiFi do
     "ieee80211w=#{pmk_to_string(value)}"
   end
 
+  defp wifi_opt_to_config_string(_wifi, :wps_cred_processing, value) do
+    "wps_cred_processing=#{value}"
+  end
+
   defp network_config(config) do
     ["network={", "\n", into_newlines(config), "}", "\n"]
   end
@@ -862,6 +867,7 @@ defmodule VintageNetWiFi do
 
   @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
   def quick_wps(timeout) do
+    VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{wps_cred_processing: "1"})
     case WPASupplicant.wps_pbc("wlan0") do
       {:ok, _} -> get_wps_creds(:os.system_time(:millisecond), timeout)
       error -> error
