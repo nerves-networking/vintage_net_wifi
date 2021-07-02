@@ -411,6 +411,128 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
+  test "create a pure WPA3 WiFi configuration" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "testing",
+            sae_password: "hunter2",
+            key_mgmt: :sae,
+            ieee80211w: 2
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    output = %RawConfig{
+      ifname: "wlan0",
+      type: VintageNetWiFi,
+      source_config: VintageNetWiFi.normalize(input),
+      required_ifnames: ["wlan0"],
+      child_specs: [
+        {VintageNetWiFi.WPASupplicant,
+         [
+           wpa_supplicant: "wpa_supplicant",
+           ifname: "wlan0",
+           wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+           control_path: "/tmp/vintage_net/wpa_supplicant",
+           ap_mode: false,
+           verbose: false
+         ]},
+        udhcpc_child_spec("wlan0", "unit_test"),
+        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+      ],
+      restart_strategy: :rest_for_one,
+      files: [
+        {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+         """
+         ctrl_interface=/tmp/vintage_net/wpa_supplicant
+         country=00
+         network={
+         ssid="testing"
+         key_mgmt=SAE
+         mode=0
+         ieee80211w=2
+         sae_password="hunter2"
+         }
+         """}
+      ],
+      up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
+      down_cmds: [
+        {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip", ["link", "set", "wlan0", "down"]}
+      ],
+      cleanup_files: ["/tmp/vintage_net/wpa_supplicant/wlan0"]
+    }
+
+    assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+  end
+
+  test "create a mixed WPA2-PSK/WPA3-SAE WiFi configuration" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "testing",
+            psk: "password",
+            key_mgmt: :wpa_psk_sha256,
+            ieee80211w: 2
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    output = %RawConfig{
+      ifname: "wlan0",
+      type: VintageNetWiFi,
+      source_config: VintageNetWiFi.normalize(input),
+      required_ifnames: ["wlan0"],
+      child_specs: [
+        {VintageNetWiFi.WPASupplicant,
+         [
+           wpa_supplicant: "wpa_supplicant",
+           ifname: "wlan0",
+           wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+           control_path: "/tmp/vintage_net/wpa_supplicant",
+           ap_mode: false,
+           verbose: false
+         ]},
+        udhcpc_child_spec("wlan0", "unit_test"),
+        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+      ],
+      restart_strategy: :rest_for_one,
+      files: [
+        {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+         """
+         ctrl_interface=/tmp/vintage_net/wpa_supplicant
+         country=00
+         network={
+         ssid="testing"
+         key_mgmt=WPA2-PSK-SHA256
+         mode=0
+         ieee80211w=2
+         psk=5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394
+         }
+         """}
+      ],
+      up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
+      down_cmds: [
+        {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip", ["link", "set", "wlan0", "down"]}
+      ],
+      cleanup_files: ["/tmp/vintage_net/wpa_supplicant/wlan0"]
+    }
+
+    assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+  end
+
   test "create an open WiFi configuration" do
     input = %{
       type: VintageNetWiFi,
@@ -2021,6 +2143,74 @@ defmodule VintageNetWiFiTest do
                ]
              },
              VintageNetWiFi.to_raw_config("mesh0", input, default_opts())
+           )
+  end
+
+  test "supplying wpa_supplicant_conf" do
+    input = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :disabled},
+      vintage_net_wifi: %{
+        wpa_supplicant_conf: """
+        network={
+          ssid="home"
+          scan_ssid=1
+          key_mgmt=WPA-PSK
+          psk="very secret passphrase"
+        }
+        """
+      },
+      hostname: "unit_test"
+    }
+
+    assert match?(
+             %RawConfig{
+               child_specs: [
+                 {
+                   VintageNetWiFi.WPASupplicant,
+                   [
+                     wpa_supplicant: "wpa_supplicant",
+                     ifname: "wlan0",
+                     wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+                     control_path: "/tmp/vintage_net/wpa_supplicant",
+                     ap_mode: false,
+                     verbose: false
+                   ]
+                 }
+               ],
+               cleanup_files: ["/tmp/vintage_net/wpa_supplicant/wlan0"],
+               down_cmd_millis: 5000,
+               down_cmds: [
+                 {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
+                 {:run, "ip", ["link", "set", "wlan0", "down"]}
+               ],
+               files: [
+                 {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+                  """
+                  ctrl_interface=/tmp/vintage_net/wpa_supplicant
+                  network={
+                    ssid="home"
+                    scan_ssid=1
+                    key_mgmt=WPA-PSK
+                    psk="very secret passphrase"
+                  }
+                  """}
+               ],
+               ifname: "wlan0",
+               required_ifnames: ["wlan0"],
+               restart_strategy: :rest_for_one,
+               retry_millis: 30000,
+               source_config: %{
+                 hostname: "unit_test",
+                 ipv4: %{method: :disabled},
+                 type: VintageNetWiFi,
+                 vintage_net_wifi: %{}
+               },
+               type: VintageNetWiFi,
+               up_cmd_millis: 5000,
+               up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}]
+             },
+             VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
            )
   end
 end

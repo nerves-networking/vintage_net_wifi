@@ -487,6 +487,10 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
   test "flag parsing" do
     assert [:wpa2_psk_ccmp, :ess] = WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP][ESS]")
     assert [:wpa2_eap_ccmp, :ess] = WPASupplicantDecoder.parse_flags("[WPA2-EAP-CCMP][ESS]")
+    assert [:wpa2_psk_ccmp_tkip] = WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP+TKIP]")
+    assert [:wpa2_psk_sae_ccmp] = WPASupplicantDecoder.parse_flags("[WPA2-PSK+SAE-CCMP]")
+    assert [:wpa2_sae_ccmp] = WPASupplicantDecoder.parse_flags("[WPA2-SAE-CCMP]")
+    assert [:wpa2_ccmp] == WPASupplicantDecoder.parse_flags("[WPA2--CCMP]")
     assert [:rsn_ccmp, :mesh] = WPASupplicantDecoder.parse_flags("[RSN--CCMP][MESH]")
     assert [:ibss] = WPASupplicantDecoder.parse_flags("[IBSS]")
 

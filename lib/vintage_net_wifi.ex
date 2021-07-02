@@ -20,7 +20,10 @@ defmodule VintageNetWiFi do
     :scan_ssid,
     :frequency,
     :mesh_hwmp_rootmode,
-    :mesh_gate_announcements
+    :mesh_gate_announcements,
+    :ieee80211w,
+    :pairwise,
+    :proto
   ]
 
   @root_level_keys [
@@ -30,7 +33,8 @@ defmodule VintageNetWiFi do
     :passive_scan,
     :regulatory_domain,
     :user_mpm,
-    :root_interface
+    :root_interface,
+    :wpa_supplicant_conf_path
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -105,6 +109,10 @@ defmodule VintageNetWiFi do
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
     |> DnsdConfig.normalize()
+  end
+
+  defp normalize_wifi(%{vintage_net_wifi: %{wpa_supplicant_conf: conf}} = config) do
+    %{config | vintage_net_wifi: %{wpa_supplicant_conf: conf}}
   end
 
   defp normalize_wifi(%{vintage_net_wifi: wifi} = config) do
@@ -218,14 +226,40 @@ defmodule VintageNetWiFi do
         |> Map.put(:psk, real_psk)
 
       {:error, reason} ->
-        raise ArgumentError, "Invalid WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
+        raise ArgumentError,
+              "Invalid WPA-PSK WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
+    end
+  end
+
+  # WPA-PSK-SHA256
+  defp normalize_network(%{key_mgmt: :wpa_psk_sha256, ssid: ssid, psk: psk} = network_config)
+       when not is_nil(ssid) and not is_nil(psk) do
+    case WPA2.to_psk(ssid, psk) do
+      {:ok, real_psk} ->
+        network_config
+        |> Map.take([:wpa_ptk_rekey | @common_network_keys])
+        |> Map.put(:psk, real_psk)
+
+      {:error, reason} ->
+        raise ArgumentError,
+              "Invalid WPA-PSK-SHA256 WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
     end
   end
 
   # SAE
-  defp normalize_network(%{key_mgmt: :sae, sae_password: _} = network_config) do
+  defp normalize_network(%{key_mgmt: :sae, ssid: ssid, sae_password: password} = network_config)
+       when not is_nil(ssid) and not is_nil(password) do
     network_config
     |> Map.take([:sae_password | @common_network_keys])
+  end
+
+  defp normalize_network(%{key_mgmt: :sae, ssid: ssid, psk: password} = network_config)
+       when not is_nil(ssid) and not is_nil(password) do
+    # It's easy to specify psk instead of sae_password, so convert.
+    # Note: PSK passwords have more limitations that SAE passwords, so this should be safe.
+    network_config
+    |> Map.put(:sae_password, password)
+    |> normalize_network()
   end
 
   # WPA-EAP or IEEE8021X (TODO)
@@ -352,6 +386,15 @@ defmodule VintageNetWiFi do
     :ok
   end
 
+  defp wifi_to_supplicant_contents(
+         %{wpa_supplicant_conf: conf},
+         control_interface_dir,
+         _regulatory_domain
+       ) do
+    [into_newlines(["ctrl_interface=#{control_interface_dir}"]), conf]
+    |> IO.iodata_to_binary()
+  end
+
   defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
     config = [
       "ctrl_interface=#{control_interface_dir}",
@@ -368,6 +411,7 @@ defmodule VintageNetWiFi do
 
   defp key_mgmt_to_string(:none), do: "NONE"
   defp key_mgmt_to_string(:wpa_psk), do: "WPA-PSK"
+  defp key_mgmt_to_string(:wpa_psk_sha256), do: "WPA2-PSK-SHA256"
   defp key_mgmt_to_string(:wpa_eap), do: "WPA-EAP"
   defp key_mgmt_to_string(:IEEE8021X), do: "IEEE8021X"
   defp key_mgmt_to_string(:sae), do: "SAE"
@@ -383,6 +427,11 @@ defmodule VintageNetWiFi do
   defp bgscan_to_string({:simple, args}), do: "\"simple:#{args}\""
   defp bgscan_to_string(:learn), do: "\"learn\""
   defp bgscan_to_string({:learn, args}), do: "\"learn:#{args}\""
+
+  defp pmk_to_string(n) when n in [0, 1, 2], do: Integer.to_string(n)
+  defp pmk_to_string(:disabled), do: "0"
+  defp pmk_to_string(:optional), do: "1"
+  defp pmk_to_string(:required), do: "2"
 
   defp into_wifi_network_config(%{networks: networks}) do
     Enum.map(networks, &into_wifi_network_config/1)
@@ -401,6 +450,7 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :wps_disabled),
       into_config_string(wifi, :mode),
       into_config_string(wifi, :frequency),
+      into_config_string(wifi, :ieee80211w),
 
       # WPA-PSK settings
       into_config_string(wifi, :psk),
@@ -432,7 +482,7 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :openssl_ciphers),
       into_config_string(wifi, :erp),
 
-      # MESH
+      # SAE settings
       into_config_string(wifi, :sae_password),
 
       # TODO:
@@ -630,6 +680,10 @@ defmodule VintageNetWiFi do
 
   defp wifi_opt_to_config_string(_wifi, :sae_password, value) do
     "sae_password=\"#{value}\""
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :ieee80211w, value) do
+    "ieee80211w=#{pmk_to_string(value)}"
   end
 
   defp network_config(config) do

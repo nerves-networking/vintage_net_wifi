@@ -1,14 +1,14 @@
 defmodule VintageNetWiFi.MixProject do
   use Mix.Project
 
-  @version "0.10.0"
+  @version "0.10.2"
   @source_url "https://github.com/nerves-networking/vintage_net_wifi"
 
   def project do
     [
       app: :vintage_net_wifi,
       version: @version,
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
       start_permanent: Mix.env() == :prod,
@@ -48,15 +48,14 @@ defmodule VintageNetWiFi.MixProject do
   defp package do
     %{
       files: [
+        "CHANGELOG.md",
         "lib",
-        "test",
         "mix.exs",
         "Makefile",
         "README.md",
         "src/*.[ch]",
         "src/test-c99.sh",
-        "LICENSE",
-        "CHANGELOG.md"
+        "LICENSE"
       ],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}

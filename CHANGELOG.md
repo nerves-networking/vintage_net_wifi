@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.10.2
+
+* Bug fixes
+  * Added missing EAP WiFi types. Thanks to Dömötör Gulyás for this fix.
+
+## v0.10.1
+
+* New features
+  * It's now possible to specify arbitrary `wpa_supplicant.conf` text.
+    VintageNetWiFi normally tries to validate everything going into the config
+    file, but this gets in the way of advanced users especially when a feature
+    is not available in VintageNetWiFi yet. This is the escape hatch. Specify
+    the `:wpa_supplicant_conf` key in the config and you have total control.
+  * Initial support for WPA3 has been added. See the `README.md` for
+    configuration details. Note that many WiFi modules and their drivers don't
+    support WPA3 yet, and WPA3 support isn't enabled at the time of this release
+    in all official Nerves systems.
+
 ## v0.10.0
 
 This release is backwards compatible with v0.9.2. No changes are needed to

@@ -92,9 +92,13 @@ The `:vintage_net_wifi` key has the following common fields:
     * `:mesh` - mesh mode
   * `:ssid` - The SSID for the network
   * `:key_mgmt` - WiFi security mode (`:wpa_psk` for WPA2, `:none` for no
-    password or WEP)
+    password or WEP, `:sae` for pure WPA3, or `:wpa_psk_sha256` for transitional
+    WPA2/WPA3)
   * `:psk` - A WPA2 passphrase or the raw PSK. If a passphrase is passed in, it
     will be converted to a PSK and discarded.
+  * `:sae_password` - A password for use with SAE authentication. This is
+    similar to a passphrase that you could supply to `:psk`, but it has less
+    length restrictions.
   * `:priority` - The priority to set for a network if you are using multiple
     network configurations
   * `:scan_ssid` - Scan with SSID-specific Probe Request frames (this can be
@@ -102,12 +106,40 @@ The `:vintage_net_wifi` key has the following common fields:
     this will add latency to scanning, so enable this only when needed)
   * `:frequency` - When in `:ibss` mode, use this channel frequency (in MHz).
     For example, specify 2412 for channel 1.
+  * `:ieee80211w` - Whether management frame protection is enabled. Set to `0`,
+    `1`, `2` or `:disabled`, `:optional`, `:required`.
 
-See the [official
-docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf) for
-the complete list of options.
+These keys fairly directly map to the keys in the [official
+docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf).
+`VintageNetWiFi` performs some checks on the keys to avoid typos and other easy
+mistakes from breaking the `wpa_supplicant.conf` file. To inspect the generated
+configuration, run `File.read("/tmp/vintage_net/wpa_supplicant.conf.wlan0")`.
 
-Here's an example:
+If you do not want VintageNetWiFi to generate a `wpa_supplicant.conf` file for you, you
+can specify the contents for yourself by using the `:wpa_supplicant_conf` key.
+For example,
+
+```elixir
+iex> VintageNet.configure("wlan0", %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        wpa_supplicant_conf: """
+        network={
+          ssid="home"
+          key_mgmt=WPA-PSK
+          psk="very secret passphrase"
+        }
+        """
+      },
+      ipv4: %{method: :dhcp}
+    })
+```
+
+Please note that the syntax of the `:wpa_supplicant_conf` key is **NOT**
+validated by VintageNet and we do not recommend them method unless you are
+troubleshooting the `wpa_supplicant` or are working on a new feature.
+
+Example of WPA PSK
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
@@ -141,6 +173,46 @@ iex> VintageNet.configure("wlan0", %{
         ]
       },
       ipv4: %{method: :dhcp}
+    })
+```
+
+WPA3 support is possible, but you'll find it's limited by commonly used WiFi
+modules and device drivers. If you would like to try, here's a configuration to
+attach to a pure WPA3 network.
+
+```elixir
+iex> VintageNet.configure("wlan0", %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :dhcp},
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            key_mgmt: :sae,
+            ssid: "my_network_ssid",
+            sae_password: "a_password",
+            ieee80211w: 2
+          }
+        ]
+      }
+    })
+```
+
+A transitional WPA2/WPA3 configuration looks like:
+
+```elixir
+iex> VintageNet.configure("wlan0", %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :dhcp},
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            key_mgmt: :wpa_psk_sha256,
+            ssid: "my_network_ssid",
+            psk: "a_password",
+            ieee80211w: 2
+          }
+        ]
+      }
     })
 ```
 
