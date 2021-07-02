@@ -81,7 +81,7 @@ defmodule VintageNetWiFi.WPASupplicant do
       peers: [],
       current_ap: nil,
       eap_status: %EAPStatus{},
-      wps_creds: nil,
+      wps_credentials: nil,
       ll: nil
     }
 
@@ -424,8 +424,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
-    new_state = %{state | wps_creds: msg}
-    update_wps_creds(new_state)
+    new_state = %{state | wps_credentials: msg}
+    update_wps_credentials(new_state)
     new_state
   end
 
@@ -564,11 +564,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     )
   end
 
-  defp update_wps_creds(state) do
+  defp update_wps_credentials(state) do
     VintageNet.PropertyTable.put(
 			VintageNet,
-			["interface", state.ifname, "wifi", "wps_creds"],
-			state.wps_creds
+			["interface", state.ifname, "wifi", "wps_credentials"],
+			state.wps_credentials
     )
   end
 

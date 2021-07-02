@@ -869,7 +869,7 @@ defmodule VintageNetWiFi do
   end
 
   defp get_wps_creds(start_time, timeout) do
-    case VintageNet.get(["interface", "wlan0", "wifi", "wps_creds"]) do
+    case VintageNet.get(["interface", "wlan0", "wifi", "wps_credentials"]) do
       nil -> unless :os.system_time(:millisecond) > (start_time + timeout) do
               Process.sleep(1000)
               get_wps_creds(start_time, timeout)
