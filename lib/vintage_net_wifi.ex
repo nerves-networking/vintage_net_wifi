@@ -400,7 +400,8 @@ defmodule VintageNetWiFi do
     config = [
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
-      into_config_string(wifi, :wps_cred_processing),
+      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves, instead of deferring to wpa_supplicant
+      "wps_cred_processing=1",
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
       into_config_string(wifi, :user_mpm)
@@ -866,7 +867,7 @@ defmodule VintageNetWiFi do
   """
   @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
   def quick_wps(timeout \\ 60_000) do
-    VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{wps_cred_processing: "1"}})
+    VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{networks: []}})
     with {:ok, _ } <- WPASupplicant.wps_pbc("wlan0"),
          {:ok, %{ssid: ssid, psk: psk}} <- get_wps_creds(:os.system_time(:millisecond), timeout) do
     	quick_configure(ssid, psk)

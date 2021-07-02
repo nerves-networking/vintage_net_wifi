@@ -187,7 +187,7 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_call(:wps_pbc, _from, state) do
     response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
-    update_wps_credentials(%{state | wps_credentials: nil})
+    update_wps_credentials(Map.put(state, :wps_credentials, nil))
     {:reply, response, state}
   end
 
@@ -424,7 +424,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
-    update_wps_credentials(%{state | wps_credentials: msg})
+    update_wps_credentials(Map.put(state, :wps_credentials, msg))
     state
   end
 
