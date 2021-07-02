@@ -81,7 +81,6 @@ defmodule VintageNetWiFi.WPASupplicant do
       peers: [],
       current_ap: nil,
       eap_status: %EAPStatus{},
-      wps_credentials: nil,
       ll: nil
     }
 
@@ -188,9 +187,8 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_call(:wps_pbc, _from, state) do
     response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
-    new_state = %{state | wps_credendials: nil}
-    update_wps_credentials(new_state)
-    {:reply, response, new_state}
+    update_wps_credentials(%{state | wps_credentials: nil})
+    {:reply, response, state}
   end
 
   @impl GenServer
@@ -426,9 +424,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
-    new_state = %{state | wps_credentials: msg}
-    update_wps_credentials(new_state)
-    new_state
+    update_wps_credentials(%{state | wps_credentials: msg})
+    state
   end
 
   defp handle_notification({:event, "CTRL-EVENT-TERMINATING"}, _state) do
