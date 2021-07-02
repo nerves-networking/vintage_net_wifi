@@ -864,14 +864,15 @@ defmodule VintageNetWiFi do
   VintageNet.get(["interface", "wlan0", "wifi", "wps_creds"])
   ```
   """
-
   @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
-  def quick_wps(timeout) do
-    VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{wps_cred_processing: "1"})
-    case WPASupplicant.wps_pbc("wlan0") do
-      {:ok, _} -> get_wps_creds(:os.system_time(:millisecond), timeout)
-      error -> error
-    end
+  def quick_wps(timeout \\ 60_000) do
+    VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{wps_cred_processing: "1"}})
+    with {:ok, _ } <- WPASupplicant.wps_pbc("wlan0"),
+         {:ok, %{ssid: ssid, psk: psk}} <- get_wps_creds(:os.system_time(:millisecond), timeout) do
+    	quick_configure(ssid, psk)
+  	else
+    	error -> error
+  	end
   end
 
   defp get_wps_creds(start_time, timeout) do
