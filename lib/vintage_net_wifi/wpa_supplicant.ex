@@ -52,7 +52,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   @doc """
 	Get ready to recieve credentials via WPS
   """
-	@spec wps_pbc(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
+  @spec wps_pbc(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
   def wps_pbc(ifname) do
     GenServer.call(via_name(ifname), :wps_pbc)
   end
@@ -204,6 +204,7 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_info({VintageNetWiFi.WPASupplicantLL, _priority, message}, state) do
     notification = WPASupplicantDecoder.decode_notification(message)
+
     new_state = handle_notification(notification, state)
     {:noreply, new_state, new_state.keep_alive_interval}
   end

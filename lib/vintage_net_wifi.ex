@@ -860,7 +860,7 @@ defmodule VintageNetWiFi do
   ```
   """
 
-	@spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
+  @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
   def quick_wps(timeout) do
     case WPASupplicant.wps_pbc("wlan0") do
       {:ok, _} -> get_wps_creds(:os.system_time(:millisecond), timeout)
