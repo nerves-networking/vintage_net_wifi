@@ -34,7 +34,8 @@ defmodule VintageNetWiFi do
     :regulatory_domain,
     :user_mpm,
     :root_interface,
-    :wpa_supplicant_conf_path
+    :wpa_supplicant_conf_path,
+    :wps_cred_processing
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -372,6 +373,10 @@ defmodule VintageNetWiFi do
     WPASupplicant.signal_poll(ifname)
   end
 
+  def ioctl(ifname, :wps_pbc, _args) do
+    WPASupplicant.wps_pbc(ifname)
+  end
+
   def ioctl(_ifname, _command, _args) do
     {:error, :unsupported}
   end
@@ -395,6 +400,8 @@ defmodule VintageNetWiFi do
     config = [
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
+      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves, instead of deferring to wpa_supplicant
+      "wps_cred_processing=1",
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
       into_config_string(wifi, :user_mpm)
@@ -681,6 +688,10 @@ defmodule VintageNetWiFi do
     "ieee80211w=#{pmk_to_string(value)}"
   end
 
+  defp wifi_opt_to_config_string(_wifi, :wps_cred_processing, value) do
+    "wps_cred_processing=#{value}"
+  end
+
   defp network_config(config) do
     ["network={", "\n", into_newlines(config), "}", "\n"]
   end
@@ -835,5 +846,53 @@ defmodule VintageNetWiFi do
     Process.sleep(wait_time_ms)
 
     VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
+  end
+
+  @doc """
+  Quick way to receive WiFi credentials via WPS PBC
+
+  Call this function with a long enough timeout for you to press the WPS button
+  on your access point.  The WiFi gets configured as soon as the WPS
+  credentials are received.
+
+  ```elixir
+  VintageNetWiFi.quick_wps(60_000)
+  # Press WPS button on AP
+  :ok
+  """
+  @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t()}
+  def quick_wps(timeout \\ 60_000) do
+    with :ok <- VintageNet.configure("wlan0", %{type: VintageNetWiFi}),
+         # Give it some time for the wlan interface to restart
+         Process.sleep(1000),
+         {:ok, _} <- WPASupplicant.wps_pbc("wlan0"),
+         {:ok, credentials} <- get_wps_credentials(now(), timeout) do
+      configure_wps(credentials)
+    end
+  end
+
+  defp get_wps_credentials(start_time, timeout) do
+    case VintageNet.get(["interface", "wlan0", "wifi", "wps_credentials"]) do
+      nil ->
+        unless now() > start_time + timeout do
+          Process.sleep(1000)
+          get_wps_credentials(start_time, timeout)
+        end
+
+      other ->
+        other
+    end
+  end
+
+  defp configure_wps(%{credential: %{ssid: ssid, network_key: psk}}) do
+    quick_configure(ssid, psk)
+  end
+
+  defp configure_wps(other) do
+    {:error, "Don't know how to configure #{inspect(other)}"}
+  end
+
+  defp now() do
+    System.monotonic_time(:millisecond)
   end
 end

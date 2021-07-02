@@ -141,6 +141,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -182,6 +183,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -305,6 +307,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -361,6 +364,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="guest"
          key_mgmt=NONE
@@ -411,6 +415,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=AU
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -458,6 +463,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -509,6 +515,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=NONE
@@ -572,6 +579,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          bssid=00:11:22:33:44:55
@@ -637,6 +645,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -704,6 +713,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-EAP
@@ -774,6 +784,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -844,6 +855,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -916,6 +928,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -986,6 +999,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1058,6 +1072,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1119,6 +1134,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="eap-sim-test"
          key_mgmt=WPA-EAP
@@ -1183,6 +1199,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="eap-psk-test"
          key_mgmt=WPA-EAP
@@ -1251,6 +1268,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="1x-test"
          key_mgmt=IEEE8021X
@@ -1317,6 +1335,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -1379,6 +1398,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -1433,6 +1453,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example ap"
          key_mgmt=WPA-PSK
@@ -1509,6 +1530,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="first_priority"
          key_mgmt=WPA-PSK
@@ -1580,6 +1602,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example ap"
          key_mgmt=WPA-PSK
@@ -1666,6 +1689,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          bgscan="simple"
          ap_scan=1
          network={
@@ -1758,6 +1782,7 @@ defmodule WiFiCompatibilityTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="my_mesh"
          key_mgmt=NONE

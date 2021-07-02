@@ -49,6 +49,14 @@ defmodule VintageNetWiFi.WPASupplicant do
     GenServer.call(via_name(ifname), :signal_poll)
   end
 
+  @doc """
+  Enable reception of WiFi credentials via WPS
+  """
+  @spec wps_pbc(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
+  def wps_pbc(ifname) do
+    GenServer.call(via_name(ifname), :wps_pbc)
+  end
+
   @impl GenServer
   def init(args) do
     wpa_supplicant = Keyword.fetch!(args, :wpa_supplicant)
@@ -174,6 +182,12 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_call(:signal_poll, _from, state) do
     response = get_signal_info(state.ll)
+    {:reply, response, state}
+  end
+
+  def handle_call(:wps_pbc, _from, state) do
+    response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
+    update_wps_credentials(state.ifname, nil)
     {:reply, response, state}
   end
 
@@ -409,6 +423,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
+  defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
+    update_wps_credentials(state.ifname, msg)
+    state
+  end
+
   defp handle_notification({:event, "CTRL-EVENT-TERMINATING"}, _state) do
     # This really shouldn't happen. The only way I know how to cause this
     # is to send a SIGTERM to the wpa_supplicant.
@@ -541,6 +560,14 @@ defmodule VintageNetWiFi.WPASupplicant do
       VintageNet,
       ["interface", state.ifname, "eap_status"],
       state.eap_status
+    )
+  end
+
+  defp update_wps_credentials(ifname, credentials) do
+    VintageNet.PropertyTable.put(
+      VintageNet,
+      ["interface", ifname, "wifi", "wps_credentials"],
+      credentials
     )
   end
 

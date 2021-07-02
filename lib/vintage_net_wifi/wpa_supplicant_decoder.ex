@@ -1,5 +1,6 @@
 defmodule VintageNetWiFi.WPASupplicantDecoder do
   @moduledoc false
+  alias VintageNetWiFi.WPSData
 
   require Logger
 
@@ -95,6 +96,10 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   def decode_notification(<<"CTRL-EVENT-", _type::binary>> = event) do
     {:event, String.trim_trailing(event)}
+  end
+
+  def decode_notification(<<"WPS-CRED-RECEIVED ", rest::binary>>) do
+    {:event, "WPS-CRED-RECEIVED", WPSData.decode(rest)}
   end
 
   def decode_notification(<<"WPS-", _type::binary>> = event) do
