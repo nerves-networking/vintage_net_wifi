@@ -50,7 +50,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   @doc """
-	Get ready to recieve credentials via WPS
+    Enable reception of WiFi credentials via WPS
   """
   @spec wps_pbc(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
   def wps_pbc(ifname) do
