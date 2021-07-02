@@ -338,6 +338,10 @@ defmodule VintageNetWiFi do
     WPASupplicant.signal_poll(ifname)
   end
 
+  def ioctl(ifname, :wps_pbc, _args) do
+    WPASupplicant.wps_pbc(ifname)
+  end
+
   def ioctl(_ifname, _command, _args) do
     {:error, :unsupported}
   end
@@ -352,6 +356,7 @@ defmodule VintageNetWiFi do
     config = [
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
+      "wps_cred_processing=1",
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
       into_config_string(wifi, :user_mpm)
@@ -781,5 +786,41 @@ defmodule VintageNetWiFi do
     Process.sleep(wait_time_ms)
 
     VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
+  end
+
+  @doc """
+  Quick way to receive WiFi credentials via WPS.
+  Call this function with a long enough timeout for you to press the WPS button on your access point. As soon as the credentials are received, the function returns.
+  ```elixir
+  VintageNetWiFi.quick_wps(60_000)
+  # Press WPS button on AP
+  {:ok, %{ssid: "MySSID", psk: "MyWiFiPassword"}}
+  ```
+  If you need more control, you can directly initiate `wps_pbc` by calling:
+  ```elixir
+  VintageNet.ioctl("wlan0", :wps_pbc)
+  ```
+  Once credentials (or an error) are recieved they can be read with:
+  ```elixir
+  VintageNet.get(["interface", "wlan0", "wifi", "wps_creds"])
+  ```
+  """
+
+	@spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
+  def quick_wps(timeout) do
+    case WPASupplicant.wps_pbc("wlan0") do
+      {:ok, _} -> get_wps_creds(:os.system_time(:millisecond), timeout)
+      error -> error
+    end
+  end
+
+  defp get_wps_creds(start_time, timeout) do
+    case VintageNet.get(["interface", "wlan0", "wifi", "wps_creds"]) do
+      nil -> unless :os.system_time(:millisecond) > (start_time + timeout) do
+              Process.sleep(1000)
+              get_wps_creds(start_time, timeout)
+             end
+      other -> other
+    end
   end
 end

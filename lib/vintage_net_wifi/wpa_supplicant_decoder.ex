@@ -95,6 +95,15 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
     {:event, String.trim_trailing(event)}
   end
 
+  def decode_notification(<<"WPS-CRED-RECEIVED ", rest::binary>>) do
+    result =
+      case decode_wps(rest) do
+        [ssid, psk] -> {:ok, %{ssid: ssid, psk: psk}}
+        _ -> {:error, rest}
+      end
+    {:event, "WPS-CRED-RECEIVED", result}
+  end
+
   def decode_notification(<<"WPS-", _type::binary>> = event) do
     {:event, String.trim_trailing(event)}
   end
@@ -139,6 +148,20 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   def decode_notification(string) do
     {:info, String.trim_trailing(string)}
+  end
+
+  defp decode_wps(hex) do
+    hex
+    |> Base.decode16!(case: :lower)
+    |> :binary.bin_to_list
+    |> Enum.chunk_by(&control_char?/1)
+    |> Enum.reject(fn chunk -> Enum.all?(chunk, &control_char?/1) end)
+    |> Enum.filter(fn chunk -> Enum.count(chunk) > 1 end)
+    |> Enum.map(&Kernel.to_string/1)
+  end
+
+  defp control_char?(c) do
+    c < 32 || c > 127
   end
 
   defp eap_peer_cert_decode(

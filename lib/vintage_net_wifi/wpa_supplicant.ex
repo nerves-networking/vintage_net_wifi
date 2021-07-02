@@ -49,6 +49,14 @@ defmodule VintageNetWiFi.WPASupplicant do
     GenServer.call(via_name(ifname), :signal_poll)
   end
 
+  @doc """
+	Get ready to recieve credentials via WPS
+  """
+	@spec wps_pbc(VintageNet.ifname()) :: {:ok, any()} | {:error, any()}
+  def wps_pbc(ifname) do
+    GenServer.call(via_name(ifname), :wps_pbc)
+  end
+
   @impl GenServer
   def init(args) do
     wpa_supplicant = Keyword.fetch!(args, :wpa_supplicant)
@@ -73,6 +81,7 @@ defmodule VintageNetWiFi.WPASupplicant do
       peers: [],
       current_ap: nil,
       eap_status: %EAPStatus{},
+      wps_creds: nil,
       ll: nil
     }
 
@@ -177,6 +186,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:reply, response, state}
   end
 
+  def handle_call(:wps_pbc, _from, state) do
+    response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
+    {:reply, response, state}
+  end
+
   @impl GenServer
   def handle_info(:timeout, state) do
     case WPASupplicantLL.control_request(state.ll, "PING") do
@@ -190,7 +204,6 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   def handle_info({VintageNetWiFi.WPASupplicantLL, _priority, message}, state) do
     notification = WPASupplicantDecoder.decode_notification(message)
-
     new_state = handle_notification(notification, state)
     {:noreply, new_state, new_state.keep_alive_interval}
   end
@@ -409,6 +422,12 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
+  defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
+    new_state = %{state | wps_creds: msg}
+    update_wps_creds(new_state)
+    new_state
+  end
+
   defp handle_notification({:event, "CTRL-EVENT-TERMINATING"}, _state) do
     # This really shouldn't happen. The only way I know how to cause this
     # is to send a SIGTERM to the wpa_supplicant.
@@ -541,6 +560,14 @@ defmodule VintageNetWiFi.WPASupplicant do
       VintageNet,
       ["interface", state.ifname, "eap_status"],
       state.eap_status
+    )
+  end
+
+  defp update_wps_creds(state) do
+    VintageNet.PropertyTable.put(
+			VintageNet,
+			["interface", state.ifname, "wifi", "wps_creds"],
+			state.wps_creds
     )
   end
 
