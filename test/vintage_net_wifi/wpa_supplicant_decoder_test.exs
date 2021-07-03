@@ -543,4 +543,9 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
     assert WPASupplicantDecoder.decode_notification("MESH-PEER-DISCONNECTED 00:00:00:00:00:00") ==
              {:event, "MESH-PEER-DISCONNECTED", "00:00:00:00:00:00"}
   end
+
+  test "decodes wps creds" do
+    assert WPASupplicantDecoder.decode_notification("WPS-CRED-RECEIVED 100e003e10260001011045000b574c414e2d414539343536100300020020100f00020008102700106566673039353639353710200006b827ebc48f5d") ==
+    {:event, "WPS-CRED-RECEIVED", {:ok, %{psk: "efg0956957", ssid: "WLAN-AE9456"}}}
+  end
 end
