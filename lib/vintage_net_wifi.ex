@@ -849,21 +849,14 @@ defmodule VintageNetWiFi do
   end
 
   @doc """
-  Quick way to receive WiFi credentials via WPS.
+  Quick way to receive WiFi credentials via WPS
+  
   Call this function with a long enough timeout for you to press the WPS button on your access point. As soon as the credentials are received, the function returns.
+  
   ```elixir
   VintageNetWiFi.quick_wps(60_000)
   # Press WPS button on AP
   {:ok, %{ssid: "MySSID", psk: "MyWiFiPassword"}}
-  ```
-  If you need more control, you can directly initiate `wps_pbc` by calling:
-  ```elixir
-  VintageNet.ioctl("wlan0", :wps_pbc)
-  ```
-  Once credentials (or an error) are recieved they can be read with:
-  ```elixir
-  VintageNet.get(["interface", "wlan0", "wifi", "wps_creds"])
-  ```
   """
   @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t}
   def quick_wps(timeout \\ 60_000) do
