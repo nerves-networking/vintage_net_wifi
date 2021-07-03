@@ -185,6 +185,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -226,6 +227,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -392,6 +394,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -452,6 +455,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=SAE
@@ -513,6 +517,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA2-PSK-SHA256
@@ -570,6 +575,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="guest"
          key_mgmt=NONE
@@ -620,6 +626,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=AU
+         wps_cred_processing=1
          """}
       ],
       up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
@@ -667,6 +674,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -718,6 +726,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=NONE
@@ -781,6 +790,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          bssid=00:11:22:33:44:55
@@ -846,6 +856,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-PSK
@@ -913,6 +924,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="testing"
          key_mgmt=WPA-EAP
@@ -983,6 +995,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -1053,6 +1066,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1125,6 +1139,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1195,6 +1210,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1267,6 +1283,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-EAP
@@ -1328,6 +1345,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="eap-sim-test"
          key_mgmt=WPA-EAP
@@ -1392,6 +1410,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="eap-psk-test"
          key_mgmt=WPA-EAP
@@ -1460,6 +1479,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="1x-test"
          key_mgmt=IEEE8021X
@@ -1526,6 +1546,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -1588,6 +1609,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example"
          key_mgmt=WPA-PSK
@@ -1642,6 +1664,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example ap"
          key_mgmt=WPA-PSK
@@ -1718,6 +1741,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="first_priority"
          key_mgmt=WPA-PSK
@@ -1789,6 +1813,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="example ap"
          key_mgmt=WPA-PSK
@@ -1875,6 +1900,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          bgscan="simple"
          ap_scan=1
          network={
@@ -1967,6 +1993,7 @@ defmodule VintageNetWiFiTest do
          """
          ctrl_interface=/tmp/vintage_net/wpa_supplicant
          country=00
+         wps_cred_processing=1
          network={
          ssid="my_mesh"
          key_mgmt=NONE
@@ -2040,7 +2067,7 @@ defmodule VintageNetWiFiTest do
                ],
                files: [
                  {"/tmp/vintage_net/wpa_supplicant.conf.mesh0",
-                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nnetwork={\nssid=\"mesh\"\nkey_mgmt=NONE\nmode=5\nfrequency=2412\n}\n"}
+                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nwps_cred_processing=1\nnetwork={\nssid=\"mesh\"\nkey_mgmt=NONE\nmode=5\nfrequency=2412\n}\n"}
                ],
                ifname: "mesh0",
                required_ifnames: ["wlan0"],
@@ -2111,7 +2138,7 @@ defmodule VintageNetWiFiTest do
                ],
                files: [
                  {"/tmp/vintage_net/wpa_supplicant.conf.mesh0",
-                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nnetwork={\nssid=\"mesh\"\nkey_mgmt=SAE\nmode=5\nfrequency=2412\nsae_password=\"password\"\n}\n"}
+                  "ctrl_interface=/tmp/vintage_net/wpa_supplicant\ncountry=00\nwps_cred_processing=1\nnetwork={\nssid=\"mesh\"\nkey_mgmt=SAE\nmode=5\nfrequency=2412\nsae_password=\"password\"\n}\n"}
                ],
                ifname: "mesh0",
                required_ifnames: ["wlan0"],
