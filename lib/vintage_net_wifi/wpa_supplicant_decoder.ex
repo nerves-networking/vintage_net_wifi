@@ -1,5 +1,6 @@
 defmodule VintageNetWiFi.WPASupplicantDecoder do
   @moduledoc false
+  alias VintageNetWiFi.WPSData
 
   require Logger
 
@@ -98,12 +99,7 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   end
 
   def decode_notification(<<"WPS-CRED-RECEIVED ", rest::binary>>) do
-    result =
-      case decode_wps(rest) do
-        [ssid, psk] -> {:ok, %{ssid: ssid, psk: psk}}
-        _ -> {:error, rest}
-      end
-    {:event, "WPS-CRED-RECEIVED", result}
+    {:event, "WPS-CRED-RECEIVED", WPSData.decode(rest)}
   end
 
   def decode_notification(<<"WPS-", _type::binary>> = event) do
@@ -150,16 +146,6 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   def decode_notification(string) do
     {:info, String.trim_trailing(string)}
-  end
-
-  defp decode_wps(hex) do
-    hex
-    |> Base.decode16!(case: :lower)
-    |> :binary.bin_to_list
-    |> Enum.chunk_by(&control_char?/1)
-    |> Enum.reject(fn chunk -> Enum.all?(chunk, &control_char?/1) end)
-    |> Enum.filter(fn chunk -> Enum.count(chunk) > 1 end)
-    |> Enum.map(&Kernel.to_string/1)
   end
 
   defp control_char?(c) do

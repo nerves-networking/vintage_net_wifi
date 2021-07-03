@@ -864,7 +864,7 @@ defmodule VintageNetWiFi do
     VintageNet.configure("wlan0", %{type: VintageNetWiFi, vintage_net_wifi: %{networks: []}})
     Process.sleep(1000) # Give it some time for the wlan interface to restart
     with {:ok, _ } <- WPASupplicant.wps_pbc("wlan0"),
-         {:ok, %{ssid: ssid, psk: psk}} <- get_wps_creds(:os.system_time(:millisecond), timeout) do
+         {:ok, %{credential: %{ssid: ssid, network_key: psk}}} <- get_wps_creds(:os.system_time(:millisecond), timeout) do
     	quick_configure(ssid, psk)
   	else
     	error -> error
