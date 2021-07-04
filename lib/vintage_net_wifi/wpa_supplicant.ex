@@ -563,11 +563,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     )
   end
 
-  defp update_wps_credentials(state) do
+  defp update_wps_credentials(ifname, credentials) do
     VintageNet.PropertyTable.put(
 			VintageNet,
-			["interface", state.ifname, "wifi", "wps_credentials"],
-			state.wps_credentials
+			["interface", ifname, "wifi", "wps_credentials"],
+			credentials
     )
   end
 
