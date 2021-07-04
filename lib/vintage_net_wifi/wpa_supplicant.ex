@@ -424,7 +424,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
-    update_wps_credentials(Map.put(state, :wps_credentials, msg))
+    update_wps_credentials(state.ifname, msg))
     state
   end
 
