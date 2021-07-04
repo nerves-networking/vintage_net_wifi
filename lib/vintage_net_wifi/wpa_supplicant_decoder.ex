@@ -148,10 +148,6 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
     {:info, String.trim_trailing(string)}
   end
 
-  defp control_char?(c) do
-    c < 32 || c > 127
-  end
-
   defp eap_peer_cert_decode(
          binary,
          state \\ %{key?: true, in_quote?: false, key: <<>>, value: <<>>},
