@@ -23,7 +23,7 @@ defmodule VintageNetWiFi.WPSData do
   end
 
   defp decode_all_tlv(_unexpected, _result) do
-     {:error, :unexpected_content}
+     {:error, :malformed_content}
   end
 
   defp decode_tlv(0x100E, value) do
@@ -34,5 +34,14 @@ defmodule VintageNetWiFi.WPSData do
 
   defp decode_tlv(0x1045, value), do: {:ssid, value}
   defp decode_tlv(0x1027, value), do: {:network_key, value}
+  defp decode_tlv(0x1020, <<value::binary-size(6)>>) do
+    mac = value
+        |> Base.encode16
+        |> String.codepoints
+    		|> Enum.chunk_every(2)
+    		|> Enum.join(":")
+   {:mac_address, mac}
+  end
+  defp decode_tlv(0x1026, <<n>>), do: {:network_index, n}
   defp decode_tlv(tag, value), do: {tag, value}
 end
