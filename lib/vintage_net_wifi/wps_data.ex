@@ -22,11 +22,8 @@ defmodule VintageNetWiFi.WPSData do
     end
   end
 
-  defp decode_all_tlv(_unexpected, result) do
-    case result do
-      %{credential: %{ssid: _, network_key: _}} -> {:ok, result}
-      _ -> {:error, :unexpected_content}
-    end
+  defp decode_all_tlv(_unexpected, _result) do
+     {:error, :unexpected_content}
   end
 
   defp decode_tlv(0x100E, value) do
