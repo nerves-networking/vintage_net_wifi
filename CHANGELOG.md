@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.10.3
+
+* New features
+  * Support WPS PBS for connecting to access points. This is the feature where
+    you press a button on the AP and "press a button" on the device to connect.
+    See `VintageNetWiFi.quick_wps/1`. Thanks to @labno for this feature.
+
+* Bug fixes
+  * Added missing PSK WiFi type. Thanks again to Dömötör Gulyás for these fixes.
+  * Improved handling of AP information gathering from the `wpa_supplicant`.
+    This works around a rare issue seen when the `wpa_supplicant` doesn't
+    respond to a BSS information request, by 1. not sending the request when the
+    information is known and 2. moving info requests out of the main process to
+    avoid stalling more important requests when lots of APs are around.
+
 ## v0.10.2
 
 * Bug fixes
