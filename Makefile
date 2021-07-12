@@ -2,7 +2,7 @@
 #
 # Makefile targets:
 #
-# all/install   build and install the NIF
+# all/install   build and install the port binary
 # clean         clean build products and intermediates
 #
 # Variables to override:
@@ -80,15 +80,19 @@ all: install
 install: $(BUILD) $(PREFIX) $(DEFAULT_TARGETS)
 
 $(BUILD)/%.o: src/%.c
+	@echo " CC $(notdir $@)"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PREFIX)/force_ap_scan: $(BUILD)/force_ap_scan.o
+	@echo " LD $(notdir $@)"
 	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
 
 $(PREFIX)/mesh_mode: $(BUILD)/mesh_mode.o
+	@echo " LD $(notdir $@)"
 	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
 
 $(PREFIX)/mesh_param: $(BUILD)/mesh_param.o
+	@echo " LD $(notdir $@)"
 	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
 
 $(PREFIX) $(BUILD):
@@ -115,3 +119,6 @@ format:
 	    src/*.c
 
 .PHONY: all clean calling_from_make install format
+
+# Don't echo commands unless the caller exports "V=1"
+${V}.SILENT:
