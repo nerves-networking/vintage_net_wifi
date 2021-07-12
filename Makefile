@@ -100,8 +100,8 @@ $(PREFIX) $(BUILD):
 
 mix_clean:
 	$(RM) $(PREFIX)/force_ap_scan \
-	$(RM) $(PREFIX)/mesh_mode \
-	$(RM) $(PREFIX)/mesh_param \
+	    $(PREFIX)/mesh_mode \
+	    $(PREFIX)/mesh_param \
 	    $(BUILD)/*.o
 clean:
 	mix clean
