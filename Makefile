@@ -98,11 +98,13 @@ $(PREFIX)/mesh_param: $(BUILD)/mesh_param.o
 $(PREFIX) $(BUILD):
 	mkdir -p $@
 
-clean:
+mix_clean:
 	$(RM) $(PREFIX)/force_ap_scan \
 	$(RM) $(PREFIX)/mesh_mode \
 	$(RM) $(PREFIX)/mesh_param \
 	    $(BUILD)/*.o
+clean:
+	mix clean
 
 format:
 	astyle \
@@ -118,7 +120,7 @@ format:
 	    --pad-oper \
 	    src/*.c
 
-.PHONY: all clean calling_from_make install format
+.PHONY: all clean mix_clean calling_from_make install format
 
 # Don't echo commands unless the caller exports "V=1"
 ${V}.SILENT:
