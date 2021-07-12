@@ -1,7 +1,7 @@
 defmodule VintageNetWiFi.MixProject do
   use Mix.Project
 
-  @version "0.10.3"
+  @version "0.10.4"
   @source_url "https://github.com/nerves-networking/vintage_net_wifi"
 
   def project do

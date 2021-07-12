@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.4
+
+This release only contains a build system update. It doesn't change any code and
+is a safe update.
+
 ## v0.10.3
 
 * New features
