@@ -1616,7 +1616,7 @@ defmodule WiFiCompatibilityTest do
         {:run, "ip", ["addr", "add", "192.168.1.2/16", "dev", "wlan0", "label", "wlan0"]},
         {:run, "ip", ["link", "set", "wlan0", "up"]},
         {:fun, VintageNet.RouteManager, :set_route,
-         ["wlan0", [{{192, 168, 1, 2}, 16}], {192, 168, 1, 1}, :lan]},
+         ["wlan0", [{{192, 168, 1, 2}, 16}], {192, 168, 1, 1}]},
         {:fun, VintageNet.NameResolver, :clear, ["wlan0"]}
       ],
       down_cmds: [
