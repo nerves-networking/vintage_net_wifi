@@ -23,6 +23,7 @@ defmodule VintageNetWiFi.AccessPoint do
           | :wpa_psk_ccmp_tkip
           | :wpa_eap_ccmp
           | :wpa_eap_ccmp_tkip
+          | :wep
           | :ibss
           | :mesh
           | :ess
