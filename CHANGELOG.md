@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.5
+
+* Added
+  * Decode network flags that advertise WEP. Thanks to Ryota Kinukawa for this
+    change.
+
 ## v0.10.4
 
 This release only contains a build system update. It doesn't change any code and
