@@ -100,7 +100,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
                     [
                       %VintageNetWiFi.AccessPoint{
                         bssid: "78:8a:20:82:7a:50",
-                        flags: [:wpa2_psk_ccmp, :ess],
+                        flags: [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess],
                         frequency: 2437,
                         signal_dbm: -71,
                         ssid: "TestLAN"
@@ -205,7 +205,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
                     [
                       %VintageNetWiFi.AccessPoint{
                         bssid: "78:8a:20:82:7a:50",
-                        flags: [:wpa2_psk_ccmp, :ess],
+                        flags: [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess],
                         frequency: 2437,
                         signal_dbm: -71,
                         ssid: "TestLAN"
@@ -250,7 +250,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
         band: :wifi_2_4_ghz,
         bssid: "78:8a:20:87:7a:50",
         channel: 6,
-        flags: [:wpa2_psk_ccmp, :ess],
+        flags: [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess],
         frequency: 2437,
         signal_dbm: -71,
         signal_percent: 48,
@@ -365,7 +365,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       band: :wifi_2_4_ghz,
       bssid: "78:8a:20:87:7a:50",
       channel: 6,
-      flags: [:wpa2_psk_ccmp, :ess],
+      flags: [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess],
       frequency: 2437,
       signal_dbm: -71,
       signal_percent: 48,
@@ -439,7 +439,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       band: :wifi_2_4_ghz,
       bssid: "78:8a:20:87:7a:50",
       channel: 6,
-      flags: [:wpa2_psk_ccmp, :ess],
+      flags: [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess],
       frequency: 2437,
       signal_dbm: -71,
       signal_percent: 48,
