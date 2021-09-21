@@ -5,7 +5,7 @@
 * Bug fixes
   * Fully decode WiFi flags based on inspecting the `wpa_supplicant` source
     code. This should, hopefully, fix the recurring issue with new flags being
-    discovered. The flags are not decomposed into their constituent parts. The
+    discovered. The flags are now decomposed into their constituent parts. The
     original flags are still present, but the new ones should be easier to
     reason about. E.g., `[:wpa2_psk_ccmp]` is now `[:wpa2_psk_ccmp, :wpa2, :psk, :ccmp]`.
 
