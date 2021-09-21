@@ -485,19 +485,52 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
   end
 
   test "flag parsing" do
-    assert [:wpa2_psk_ccmp, :ess] = WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP][ESS]")
-    assert [:wpa2_eap_ccmp, :ess] = WPASupplicantDecoder.parse_flags("[WPA2-EAP-CCMP][ESS]")
-    assert [:wpa2_psk_ccmp_tkip] = WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP+TKIP]")
-    assert [:wpa2_psk_sae_ccmp] = WPASupplicantDecoder.parse_flags("[WPA2-PSK+SAE-CCMP]")
-    assert [:wpa2_sae_ccmp] = WPASupplicantDecoder.parse_flags("[WPA2-SAE-CCMP]")
-    assert [:wpa2_ccmp] == WPASupplicantDecoder.parse_flags("[WPA2--CCMP]")
-    assert [:rsn_ccmp, :mesh] = WPASupplicantDecoder.parse_flags("[RSN--CCMP][MESH]")
-    assert [:ibss] = WPASupplicantDecoder.parse_flags("[IBSS]")
+    # Parse the flags that we return legacy combination atoms for
+    assert [:wpa2_psk_ccmp, :wpa2, :psk, :ccmp, :ess] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP][ESS]")
 
-    assert [:wpa2_psk_ccmp_tkip, :wps] =
+    assert [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess] =
+             WPASupplicantDecoder.parse_flags("[WPA2-EAP-CCMP][ESS]")
+
+    assert [:wpa2_psk_ccmp_tkip, :wpa2, :psk, :ccmp, :tkip] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP+TKIP]")
+
+    assert [:wpa2_psk_sae_ccmp, :wpa2, :psk, :sae, :ccmp] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK+SAE-CCMP]")
+
+    assert [:wpa2_sae_ccmp, :wpa2, :sae, :ccmp] =
+             WPASupplicantDecoder.parse_flags("[WPA2-SAE-CCMP]")
+
+    assert [:wpa2_ccmp, :wpa2, :ccmp] == WPASupplicantDecoder.parse_flags("[WPA2--CCMP]")
+    assert [:rsn_ccmp, :rsn, :ccmp, :mesh] = WPASupplicantDecoder.parse_flags("[RSN--CCMP][MESH]")
+
+    assert [:wpa2_psk_ccmp_tkip, :wpa2, :psk, :ccmp, :tkip, :wps] =
              WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP+TKIP][WPS]")
 
-    assert [:wpa_eap_ccmp_tkip] = WPASupplicantDecoder.parse_flags("[WPA-EAP-CCMP+TKIP]")
+    assert [:wpa_eap_ccmp_tkip, :wpa, :eap, :ccmp, :tkip] =
+             WPASupplicantDecoder.parse_flags("[WPA-EAP-CCMP+TKIP]")
+
+    # Parse strings that don't have legacy atoms
+    assert [:wpa2, :psk, :ft_psk, :ccmp] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK+FT/PSK-CCMP]")
+
+    assert [:wpa2, :psk, :ccmp, :preauth] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP-preauth]")
+
+    # various other flags
+    assert [:owe_trans] = WPASupplicantDecoder.parse_flags("[OWE-TRANS]")
+    assert [:owe_trans_open] = WPASupplicantDecoder.parse_flags("[OWE-TRANS-OPEN]")
+    assert [:wep] = WPASupplicantDecoder.parse_flags("[WEP]")
+    assert [:mesh] = WPASupplicantDecoder.parse_flags("[MESH]")
+    assert [:dmg] = WPASupplicantDecoder.parse_flags("[DMG]")
+    assert [:ibss] = WPASupplicantDecoder.parse_flags("[IBSS]")
+    assert [:ess] = WPASupplicantDecoder.parse_flags("[ESS]")
+    assert [:pbss] = WPASupplicantDecoder.parse_flags("[PBSS]")
+    assert [:p2p] = WPASupplicantDecoder.parse_flags("[P2P]")
+    assert [:hs20] = WPASupplicantDecoder.parse_flags("[HS20]")
+    assert [:fils] = WPASupplicantDecoder.parse_flags("[FILS]")
+    assert [:fst] = WPASupplicantDecoder.parse_flags("[FST]")
+    assert [:utf8] = WPASupplicantDecoder.parse_flags("[UTF-8]")
 
     assert [] = WPASupplicantDecoder.parse_flags("[something random]")
 
