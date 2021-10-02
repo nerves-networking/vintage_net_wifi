@@ -299,7 +299,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -356,7 +356,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -455,7 +455,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -507,7 +507,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -571,7 +571,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -637,7 +637,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -705,7 +705,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -776,7 +776,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -847,7 +847,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -920,7 +920,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -991,7 +991,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1064,7 +1064,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1126,7 +1126,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1191,7 +1191,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1260,7 +1260,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1327,7 +1327,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1390,7 +1390,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1522,7 +1522,7 @@ defmodule WiFiCompatibilityTest do
            verbose: false
          ]},
         udhcpc_child_spec("wlan0", "unit_test"),
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1594,7 +1594,7 @@ defmodule WiFiCompatibilityTest do
            ap_mode: false,
            verbose: false
          ]},
-        {VintageNet.Interface.InternetConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
@@ -1680,7 +1680,7 @@ defmodule WiFiCompatibilityTest do
            ap_mode: true,
            verbose: false
          ]},
-        {VintageNet.Interface.LANConnectivityChecker, "wlan0"},
+        {VintageNet.Connectivity.LANChecker, "wlan0"},
         udhcpd_child_spec("wlan0")
       ],
       restart_strategy: :rest_for_one,
@@ -1774,7 +1774,7 @@ defmodule WiFiCompatibilityTest do
            ap_mode: true,
            verbose: false
          ]},
-        {VintageNet.Interface.LANConnectivityChecker, "wlan0"}
+        {VintageNet.Connectivity.LANChecker, "wlan0"}
       ],
       restart_strategy: :rest_for_one,
       files: [
