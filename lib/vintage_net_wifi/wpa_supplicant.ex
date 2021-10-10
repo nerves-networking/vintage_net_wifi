@@ -308,6 +308,20 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
+  defp handle_notification({:event, event_name = "CTRL-EVENT-ASSOC-REJECT", bssid, event_data}, state = %{ifname: ifname}) do
+    Logger.warn("Association rejected for BSSID: #{bssid}")
+
+    update_wifi_event_property(ifname, {event_name, bssid, event_data})
+    state
+  end
+
+  defp handle_notification({:event, event_name = "CTRL-EVENT-SSID-TEMP-DISABLED", event_data}, state = %{ifname: ifname}) do
+    Logger.warn("Access temporarily disabled to network: #{inspect(event_data)}")
+
+    update_wifi_event_property(ifname, {event_name, event_data})
+    state
+  end
+
   defp handle_notification({:event, "CTRL-EVENT-EAP-STATUS", %{"status" => "started"}}, state) do
     new_state = %{
       state
@@ -581,6 +595,14 @@ defmodule VintageNetWiFi.WPASupplicant do
       VintageNet,
       ["interface", ifname, "wifi", "wps_credentials"],
       credentials
+    )
+  end
+
+  defp update_wifi_event_property(ifname, event) do
+    VintageNet.PropertyTable.put(
+      VintageNet,
+      ["interface", ifname, "wifi", "event"],
+      event
     )
   end
 
