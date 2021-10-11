@@ -1,5 +1,6 @@
 defmodule VintageNetWiFi.WPASupplicantDecoder do
   @moduledoc false
+  alias VintageNetWiFi.WPSData
 
   require Logger
 
@@ -102,6 +103,10 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   def decode_notification(<<"CTRL-EVENT-", _type::binary>> = event) do
     {:event, String.trim_trailing(event)}
+  end
+
+  def decode_notification(<<"WPS-CRED-RECEIVED ", rest::binary>>) do
+    {:event, "WPS-CRED-RECEIVED", WPSData.decode(rest)}
   end
 
   def decode_notification(<<"WPS-", _type::binary>> = event) do
@@ -253,36 +258,136 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
 
   @doc """
   Parse WiFi access point flags
+
+  See `wpa_supplicant/ctl_iface.c` and search for `flags=` for where this gets
+  created.
   """
   @spec parse_flags(String.t() | nil) :: [VintageNetWiFi.AccessPoint.flag()]
-  def parse_flags(flags) when is_binary(flags) do
-    flags
-    |> String.split(["]", "["], trim: true)
-    |> Enum.flat_map(&parse_flag/1)
+  def parse_flags(str) when is_binary(str) do
+    flag_strings = String.split(str, ["]", "["], trim: true)
+
+    # Old code depends on these atoms in the flags
+    legacy_flags = Enum.flat_map(flag_strings, &parse_legacy_flag/1)
+
+    # New code should look at these
+    new_flags = Enum.flat_map(flag_strings, &parse_flag/1)
+
+    legacy_flags ++ new_flags
   end
 
   def parse_flags(nil), do: []
 
-  defp parse_flag("WPA2-PSK-CCMP"), do: [:wpa2_psk_ccmp]
-  defp parse_flag("WPA2-EAP-CCMP"), do: [:wpa2_eap_ccmp]
-  defp parse_flag("WPA2-EAP-CCMP+TKIP"), do: [:wpa2_eap_ccmp_tkip]
-  defp parse_flag("WPA2-PSK-CCMP+TKIP"), do: [:wpa2_psk_ccmp_tkip]
-  defp parse_flag("WPA2-PSK+SAE-CCMP"), do: [:wpa2_psk_sae_ccmp]
-  defp parse_flag("WPA2-SAE-CCMP"), do: [:wpa2_sae_ccmp]
-  defp parse_flag("WPA2--CCMP"), do: [:wpa2_ccmp]
-  defp parse_flag("WPA-PSK-CCMP"), do: [:wpa_psk_ccmp]
-  defp parse_flag("WPA-PSK-CCMP+TKIP"), do: [:wpa_psk_ccmp_tkip]
-  defp parse_flag("WPA-EAP-CCMP"), do: [:wpa_eap_ccmp]
-  defp parse_flag("WPA-EAP-CCMP+TKIP"), do: [:wpa_eap_ccmp_tkip]
-  defp parse_flag("IBSS"), do: [:ibss]
-  defp parse_flag("MESH"), do: [:mesh]
-  defp parse_flag("ESS"), do: [:ess]
-  defp parse_flag("P2P"), do: [:p2p]
-  defp parse_flag("WPS"), do: [:wps]
-  defp parse_flag("RSN--CCMP"), do: [:rsn_ccmp]
+  # Old code depends on these
+  defp parse_legacy_flag("WPA2-PSK-CCMP"), do: [:wpa2_psk_ccmp]
+  defp parse_legacy_flag("WPA2-EAP-CCMP"), do: [:wpa2_eap_ccmp]
+  defp parse_legacy_flag("WPA2-EAP-CCMP+TKIP"), do: [:wpa2_eap_ccmp_tkip]
+  defp parse_legacy_flag("WPA2-PSK-CCMP+TKIP"), do: [:wpa2_psk_ccmp_tkip]
+  defp parse_legacy_flag("WPA2-PSK+SAE-CCMP"), do: [:wpa2_psk_sae_ccmp]
+  defp parse_legacy_flag("WPA2-SAE-CCMP"), do: [:wpa2_sae_ccmp]
+  defp parse_legacy_flag("WPA2--CCMP"), do: [:wpa2_ccmp]
+  defp parse_legacy_flag("WPA-PSK-CCMP"), do: [:wpa_psk_ccmp]
+  defp parse_legacy_flag("WPA-PSK-CCMP+TKIP"), do: [:wpa_psk_ccmp_tkip]
+  defp parse_legacy_flag("WPA-EAP-CCMP"), do: [:wpa_eap_ccmp]
+  defp parse_legacy_flag("WPA-EAP-CCMP+TKIP"), do: [:wpa_eap_ccmp_tkip]
+  defp parse_legacy_flag("RSN--CCMP"), do: [:rsn_ccmp]
+  defp parse_legacy_flag(_), do: []
 
-  defp parse_flag(other) do
-    Logger.warn("[wpa_supplicant] Unknown flag: #{inspect(other)}")
-    []
+  # This is a recursive descent parse for parsing each flag
+  defp parse_flag(str) do
+    str |> parse_flag([]) |> Enum.reverse()
+  end
+
+  # Parse the proto-key_mgmt-cipher style flags
+  defp parse_flag("WPA-" <> rest, flags), do: parse_key_mgmt(rest, [:wpa | flags])
+  defp parse_flag("WPA2-" <> rest, flags), do: parse_key_mgmt(rest, [:wpa2 | flags])
+  defp parse_flag("RSN-" <> rest, flags), do: parse_key_mgmt(rest, [:rsn | flags])
+  defp parse_flag("OSEN-" <> rest, flags), do: parse_key_mgmt(rest, [:osen | flags])
+
+  # Parse standalone flags
+  defp parse_flag("OWE-TRANS", flags), do: [:owe_trans | flags]
+  defp parse_flag("OWE-TRANS-OPEN", flags), do: [:owe_trans_open | flags]
+  defp parse_flag("WEP", flags), do: [:wep | flags]
+  defp parse_flag("MESH", flags), do: [:mesh | flags]
+  defp parse_flag("DMG", flags), do: [:dmg | flags]
+  defp parse_flag("IBSS", flags), do: [:ibss | flags]
+  defp parse_flag("ESS", flags), do: [:ess | flags]
+  defp parse_flag("PBSS", flags), do: [:pbss | flags]
+  defp parse_flag("P2P", flags), do: [:p2p | flags]
+  defp parse_flag("HS20", flags), do: [:hs20 | flags]
+  defp parse_flag("FILS", flags), do: [:fils | flags]
+  defp parse_flag("FST", flags), do: [:fst | flags]
+  defp parse_flag("UTF-8", flags), do: [:utf8 | flags]
+  defp parse_flag("WPS", flags), do: [:wps | flags]
+
+  defp parse_flag(other, flags) do
+    Logger.warn("[wpa_supplicant] Unknown flag: #{other}")
+    flags
+  end
+
+  # key_mgmt=one or more of the following separated by + signs
+  #   EAP,PSK,None,SAE,FT/EAP,FT/PSK,FT/SAE,EAP-SHA256,PSK-SHA256,EAP-SUITE-B,EAP-SUITE-B-192,
+  #   FILS-SHA256,FILS-SHA384,FT-FILS-SHA256,FT-FILS-SHA384,OWE,DPP,OSEN,""
+  defp parse_key_mgmt("EAP" <> rest, flags), do: parse_key_mgmt(rest, [:eap | flags])
+  defp parse_key_mgmt("PSK" <> rest, flags), do: parse_key_mgmt(rest, [:psk | flags])
+  defp parse_key_mgmt("None" <> rest, flags), do: parse_key_mgmt(rest, flags)
+  defp parse_key_mgmt("SAE" <> rest, flags), do: parse_key_mgmt(rest, [:sae | flags])
+  defp parse_key_mgmt("FT/EAP" <> rest, flags), do: parse_key_mgmt(rest, [:ft_eap | flags])
+  defp parse_key_mgmt("FT/PSK" <> rest, flags), do: parse_key_mgmt(rest, [:ft_psk | flags])
+  defp parse_key_mgmt("FT/SAE" <> rest, flags), do: parse_key_mgmt(rest, [:ft_sae | flags])
+
+  defp parse_key_mgmt("EAP-SHA256" <> rest, flags),
+    do: parse_key_mgmt(rest, [:eap_sha256 | flags])
+
+  defp parse_key_mgmt("PSK-SHA256" <> rest, flags),
+    do: parse_key_mgmt(rest, [:psk_sha256 | flags])
+
+  defp parse_key_mgmt("EAP-SUITE-B" <> rest, flags),
+    do: parse_key_mgmt(rest, [:eap_suite_b | flags])
+
+  defp parse_key_mgmt("EAP-SUITE-B-192" <> rest, flags),
+    do: parse_key_mgmt(rest, [:eap_suite_b_192 | flags])
+
+  defp parse_key_mgmt("FILS-SHA256" <> rest, flags),
+    do: parse_key_mgmt(rest, [:fils_sha256 | flags])
+
+  defp parse_key_mgmt("FILS-SHA384" <> rest, flags),
+    do: parse_key_mgmt(rest, [:fils_sha384 | flags])
+
+  defp parse_key_mgmt("FT-FILS-SHA256" <> rest, flags),
+    do: parse_key_mgmt(rest, [:ft_fils_sha256 | flags])
+
+  defp parse_key_mgmt("FT-FILS-SHA384" <> rest, flags),
+    do: parse_key_mgmt(rest, [:ft_fils_sha384 | flags])
+
+  defp parse_key_mgmt("OWE" <> rest, flags), do: parse_key_mgmt(rest, [:owe | flags])
+  defp parse_key_mgmt("DPP" <> rest, flags), do: parse_key_mgmt(rest, [:dpp | flags])
+  defp parse_key_mgmt("OSEN" <> rest, flags), do: parse_key_mgmt(rest, [:osen | flags])
+  defp parse_key_mgmt("-" <> rest, flags), do: parse_cipher(rest, flags)
+  defp parse_key_mgmt("+" <> rest, flags), do: parse_key_mgmt(rest, flags)
+  defp parse_key_mgmt("", flags), do: flags
+
+  defp parse_key_mgmt(other, flags) do
+    Logger.warn("[wpa_supplicant] Ignoring unknown key_mgmt flag: #{other}")
+    flags
+  end
+
+  # See wpa_write_ciphers() for cipher list
+  # ciphers=CCMP-256,GCMP-256,CCMP,GCMP,TKIP,AES-128-CMAC,BIP-GMAC-128,BIP-GMAC-256,BIP-CMAC-256,NONE,""
+  defp parse_cipher("CCMP-256" <> rest, flags), do: parse_cipher(rest, [:ccmp256 | flags])
+  defp parse_cipher("GCMP-256" <> rest, flags), do: parse_cipher(rest, [:gcmp256 | flags])
+  defp parse_cipher("CCMP" <> rest, flags), do: parse_cipher(rest, [:ccmp | flags])
+  defp parse_cipher("GCMP" <> rest, flags), do: parse_cipher(rest, [:gcmp | flags])
+  defp parse_cipher("TKIP" <> rest, flags), do: parse_cipher(rest, [:tkip | flags])
+  defp parse_cipher("AES-128-CMAC" <> rest, flags), do: parse_cipher(rest, [:aes128_cmac | flags])
+  defp parse_cipher("BIP-GMAC-128" <> rest, flags), do: parse_cipher(rest, [:bip_gmac128 | flags])
+  defp parse_cipher("BIP-GMAC-256" <> rest, flags), do: parse_cipher(rest, [:bip_gmac256 | flags])
+  defp parse_cipher("NONE" <> rest, flags), do: parse_cipher(rest, flags)
+  defp parse_cipher("+" <> rest, flags), do: parse_cipher(rest, flags)
+  defp parse_cipher("", flags), do: flags
+  defp parse_cipher("-preauth", flags), do: [:preauth | flags]
+
+  defp parse_cipher(other, flags) do
+    Logger.warn("[wpa_supplicant] Ignoring unknown cipher flag: #{other}")
+    flags
   end
 end
