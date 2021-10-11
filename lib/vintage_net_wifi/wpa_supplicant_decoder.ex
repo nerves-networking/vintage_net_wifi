@@ -100,10 +100,6 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
     decode_kv_notification("CTRL-EVENT-EAP-PROPOSED-METHOD", rest)
   end
 
-  def decode_notification(<<"CTRL-EVENT-SSID-TEMP-DISABLED", rest::binary>>) do
-    decode_kv_notification("CTRL-EVENT-SSID-TEMP-DISABLED", rest)
-  end
-
   def decode_notification(<<"CTRL-EVENT-", _type::binary>> = event) do
     {:event, String.trim_trailing(event)}
   end
