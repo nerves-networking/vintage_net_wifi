@@ -353,6 +353,7 @@ Property        | Values           | Description
 `clients`       | ["11:22:33:44:55:66"] | A list of clients connected to the access point when using `mode: :ap`
 `current_ap`    | %AccessPoint{}   | The currently associated access point
 `peers`         | [%MeshPeer{}]    | a list of mesh peers that the current node knows about when using `mode: :mesh`
+`event`         | [%Event{}]       | WiFi control events not otherwise handled
 
 Access points are identified by their BSSID. Information about an access point
 has the following form:
@@ -413,6 +414,10 @@ it is complete so applications don't need to guess how long to wait.
 If you're using `RingLogger` (which is the default for Nerves) then you probably
 also want to call `RingLogger.attach` to receive any logs in your terminal which
 may include information about the wifi connection.
+
+### Events
+
+Some `wpa_supplicant` events like `CTRL-EVENT-ASSOC-REJECT` are passed on through the "event" property to be handled outside `VintageNetWifi`. These events might be useful, but optional.
 
 ## Signal quality info in STA (client) mode
 
