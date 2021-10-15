@@ -1,11 +1,13 @@
 defmodule VintageNetWiFi.Event do
 
-  @moduledoc """
-  Information about a WiFi events.
+  @moduledoc ~S"""
+  WiFi events.
+
+
 
   Currently supported:
   * `CTRL-EVENT-ASSOC-REJECT` - occurs when authentication fails
-  * `CTRL-EVENT-SSID-TEMP-DISABLED` - association with SSID is temporarily blocked by wpa_supplicant in some cases.
+  * `CTRL-EVENT-SSID-TEMP-DISABLED` - association with SSID is temporarily blocked by `wpa_supplicant` in some cases.
   * `CTRL-EVENT-SSID-REENABLED` - matching event when SSID is re-enabled.
 
   All events have a `:name`, and the other fields are optional.
@@ -21,12 +23,24 @@ defmodule VintageNetWiFi.Event do
   * `CTRL-EVENT-SSID-REENABLED`
     * `:id` - event identifier?
     * `:ssid` - the access point's name
+
+  ## Examples:
+
+      iex> VintageNetWiFi.Event.new("CTRL-EVENT-ASSOC-REJECT", "ab:cd:ef:01:02:03", "1")
+      %VintageNetWiFi.Event{
+        name: "CTRL-EVENT-ASSOC-REJECT", 
+        bssid: "ab:cd:ef:01:02:03", 
+        status_code: 1
+      }
   """
 
   @enforce_keys [:name]
 
   defstruct [:name, :bssid, :status_code, :id, :ssid, :auth_failures, :duration, :reason]
 
+  @typedoc """
+  WiFi event structure.
+  """
   @type t :: %__MODULE__{
           name: String.t(),
           bssid: String.t(),
@@ -41,6 +55,8 @@ defmodule VintageNetWiFi.Event do
   @doc """
   Create an event with the appropriate fields
   """
+  def new(name, arg1, arg2)
+
   @spec new(String.t(), String.t(), non_neg_integer()) :: VintageNetWiFi.Event.t()
   def new(name = "CTRL-EVENT-ASSOC-REJECT", bssid, status_code) 
     when is_integer(status_code) and status_code >= 0 do
@@ -69,6 +85,9 @@ defmodule VintageNetWiFi.Event do
     new(name, String.to_integer(id), ssid)
   end
 
+  @doc """
+  Create an event with the appropriate fields
+  """
   @spec new(String.t(), non_neg_integer(), String.t(), non_neg_integer(), non_neg_integer(), String.t()) :: VintageNetWiFi.Event.t()
   def new(name = "CTRL-EVENT-SSID-TEMP-DISABLED", id, ssid, auth_failures, duration, reason) 
     when is_integer(id) and id >= 0 and is_integer(auth_failures) and auth_failures >= 0 and is_integer(duration) and duration >= 0 do
