@@ -353,6 +353,7 @@ Property        | Values           | Description
 `clients`       | ["11:22:33:44:55:66"] | A list of clients connected to the access point when using `mode: :ap`
 `current_ap`    | %AccessPoint{}   | The currently associated access point
 `peers`         | [%MeshPeer{}]    | a list of mesh peers that the current node knows about when using `mode: :mesh`
+`event`         | [%Event{}]       | WiFi control events not otherwise handled
 
 Access points are identified by their BSSID. Information about an access point
 has the following form:
@@ -409,6 +410,10 @@ scanning networks once or twice. A better way is to subscribe to the
 `"access_points"` property and then call `VintageNet.scan("wlan0")` on a timer.
 The `"access_points"` property updates as soon as the WiFi module notifies that
 it is complete so applications don't need to guess how long to wait.
+
+### Events
+
+Some `wpa_supplicant` events like `CTRL-EVENT-ASSOC-REJECT` are passed on through the "event" property to be handled outside `VintageNetWifi`. These events might be useful, but optional.
 
 ## Signal quality info in STA (client) mode
 
