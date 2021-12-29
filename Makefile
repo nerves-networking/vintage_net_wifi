@@ -48,7 +48,7 @@ else
     else
 
         # Use pkg-config to find libnl
-        PKG_CONFIG = $(shell which pkg-config)
+        PKG_CONFIG = $(PKG_CONFIG_SYSROOT_DIR)/../../bin/pkg-config
         ifeq ($(PKG_CONFIG),)
             $(error pkg-config required to build. Install by running "brew install pkg-config")
         endif
