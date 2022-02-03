@@ -259,7 +259,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:event, "CTRL-EVENT-CONNECTED", bssid, "completed", _}, state) do
-    Logger.info("Connected to AP: #{bssid}")
+    Logger.debug("Connected to AP: #{bssid}")
 
     case state.access_points[bssid] do
       nil ->
@@ -422,12 +422,12 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification({:info, message}, state) do
-    Logger.info("wpa_supplicant(#{state.ifname}): #{message}")
+    Logger.debug("wpa_supplicant(#{state.ifname}): #{message}")
     state
   end
 
   defp handle_notification(unhandled, state) do
-    Logger.info("WPASupplicant ignoring #{inspect(unhandled)}")
+    Logger.warn("WPASupplicant ignoring #{inspect(unhandled)}")
     state
   end
 

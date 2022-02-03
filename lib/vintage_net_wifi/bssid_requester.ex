@@ -82,7 +82,7 @@ defmodule VintageNetWiFi.BSSIDRequester do
         send_result(state, ap_or_peer, cookie)
 
       {:error, reason} ->
-        Logger.info(
+        Logger.warn(
           "Ignoring error getting info on BSSID #{inspect(index_or_bssid)}: #{inspect(reason)}"
         )
     end
