@@ -486,6 +486,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
+  defp add_access_point(state, _non_ap) do
+    # Ignore non-access points like mesh peers
+    state
+  end
+
   defp update_current_access_point(state, %VintageNetWiFi.AccessPoint{} = ap) do
     new_state = %{state | current_ap: ap}
     update_current_access_point_property(new_state)
