@@ -108,6 +108,45 @@ defmodule VintageNetWiFi.WPASupplicantTest do
                     ], _metadata}
   end
 
+  test "scan ignores mesh points", context do
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "SCAN" => [
+        "OK\n",
+        "<2>CTRL-EVENT-SCAN-STARTED ",
+        "<2>CTRL-EVENT-BSS-ADDED 0 f8:a2:d6:b5:d4:07",
+        "<2>CTRL-EVENT-SCAN-RESULTS "
+      ],
+      "BSS 0" => "",
+      "BSS f8:a2:d6:b5:d4:07" =>
+        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n",
+      "BSS 1" => ""
+    })
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path}
+      )
+
+    ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
+    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+
+    VintageNet.subscribe(ap_property)
+
+    :ok = WPASupplicant.scan("test_wlan0")
+
+    # No APs to start
+    assert_receive {VintageNet, ^ap_property, _old, [], _metadata}
+
+    # The mesh peer doesn't get reported
+    refute_receive {VintageNet, ^ap_property, _old, _anything, _metadata}
+  end
+
   test "ap-mode station connect updates property", context do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
