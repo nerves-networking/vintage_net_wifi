@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.7
+
+* Bug fixes
+  * Fix crash when scanning for WiFi networks and near an Eero mesh WiFi system.
+
 ## v0.10.6
 
 * Bug fixes
