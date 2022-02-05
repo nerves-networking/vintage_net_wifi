@@ -36,6 +36,7 @@ jobs:
       - run: mix deps.unlock --check-unused
       - run: mix docs
       - run: mix hex.build
+      - run: mix credo -a
       - run: mix dialyzer
       - run: mix coveralls.circle || true
       - save_cache:

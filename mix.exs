@@ -75,7 +75,8 @@ defmodule VintageNetWiFi.MixProject do
 
   defp dialyzer() do
     [
-      flags: [:race_conditions, :unmatched_returns, :error_handling, :underspecs]
+      flags: [:race_conditions, :unmatched_returns, :error_handling, :underspecs],
+      plt_file: {:no_warn, "_build/plts/dialyzer.plt"}
     ]
   end
 

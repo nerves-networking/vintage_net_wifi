@@ -443,16 +443,11 @@ defmodule VintageNetWiFi.WPASupplicant do
               {:error, :unknown}
 
             response ->
-              center_frequency1 = response["CENTER_FRQ1"] |> String.to_integer(10)
-
-              center_frequency2 =
-                if response["CENTER_FRQ2"] != nil,
-                  do: response["CENTER_FRQ2"] |> String.to_integer(10),
-                  else: 0
-
-              frequency = response["FREQUENCY"] |> String.to_integer(10)
-              linkspeed = response["LINKSPEED"] |> String.to_integer(10)
-              signal_dbm = response["RSSI"] |> String.to_integer(10)
+              center_frequency1 = response["CENTER_FRQ1"] |> string_to_integer()
+              center_frequency2 = response["CENTER_FRQ2"] |> string_to_integer()
+              frequency = response["FREQUENCY"] |> string_to_integer()
+              linkspeed = response["LINKSPEED"] |> string_to_integer()
+              signal_dbm = response["RSSI"] |> string_to_integer()
               width = response["WIDTH"]
 
               signal_info =
@@ -470,6 +465,9 @@ defmodule VintageNetWiFi.WPASupplicant do
       end
     end
   end
+
+  defp string_to_integer(nil), do: 0
+  defp string_to_integer(s), do: String.to_integer(s)
 
   defp update_all_access_points(state, access_points) when is_map(access_points) do
     new_state = %{state | access_points: access_points}
