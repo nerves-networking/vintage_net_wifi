@@ -404,11 +404,15 @@ Mesh peers are identified by their BSSID. Information about a peer has the follo
 
 Applications can scan for access points in a couple ways. The first is to call
 `VintageNet.scan("wlan0")`, wait for a second, and then call
-`VintageNet.get(["interface", "wlan0", "access_points"])`. This works for
-scanning networks once or twice. A better way is to subscribe to the
+`VintageNet.get(["interface", "wlan0", "wifi", "access_points"])`. This works
+for scanning networks once or twice. A better way is to subscribe to the
 `"access_points"` property and then call `VintageNet.scan("wlan0")` on a timer.
 The `"access_points"` property updates as soon as the WiFi module notifies that
 it is complete so applications don't need to guess how long to wait.
+
+If you're using `RingLogger` (which is the default for Nerves) then you probably
+also want to call `RingLogger.attach` to receive any logs in your terminal which
+may include information about the wifi connection.
 
 ## Signal quality info in STA (client) mode
 
