@@ -109,9 +109,21 @@ defmodule VintageNetWiFi.WPASupplicant do
 
         verbose_flag = if state.verbose, do: ["-dd"], else: []
 
+        # -i ifname      // which interface
+        # -Dnl80211,wext // try the nl80211 driver first, then wext
+        # -c config_file // use our config file
+        # -dd            // verbose
+        args = [
+          "-i",
+          state.ifname,
+          "-Dnl80211,wext",
+          "-c",
+          state.wpa_supplicant_conf_path | verbose_flag
+        ]
+
         MuonTrap.Daemon.start_link(
           state.wpa_supplicant,
-          ["-i", state.ifname, "-c", state.wpa_supplicant_conf_path | verbose_flag],
+          args,
           VintageNet.Command.add_muon_options(stderr_to_stdout: true, log_output: :debug)
         )
       else
