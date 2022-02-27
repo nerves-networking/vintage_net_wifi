@@ -859,6 +859,7 @@ defmodule VintageNetWiFi do
   VintageNetWiFi.quick_wps(60_000)
   # Press WPS button on AP
   :ok
+  ```
   """
   @spec quick_wps(non_neg_integer()) :: {:ok, map()} | {:error, String.t()}
   def quick_wps(timeout \\ 60_000) do
