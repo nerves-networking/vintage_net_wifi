@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.8
+
+* Added
+  * Fall back to the wext WiFi driver interface if nl80211 doesn't work. This
+    makes it possible to support the WiFi module on GRiSPv2 boards.
+
 ## v0.10.7
 
 * Bug fixes
