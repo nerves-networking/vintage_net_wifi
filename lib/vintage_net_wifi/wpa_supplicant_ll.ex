@@ -150,7 +150,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   defp do_send_request(state, {message, from} = request) do
     case :gen_udp.send(state.socket, {:local, state.control_file}, 0, message) do
       :ok ->
-        {:ok, timer} = :timer.send_after(1000, :request_timeout)
+        {:ok, timer} = :timer.send_after(4000, :request_timeout)
         %{state | outstanding: request, request_timer: timer}
 
       error ->
