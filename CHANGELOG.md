@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.10.9
+
+* Changed
+  * Increase `wpa_supplicant` timeout from 1 second to 4 seconds. Normally
+    responses come in quickly. On GRiSP 2, initialization takes >1 second.
+    This prevents an unnecessary `wpa_supplicant` restart and improves boot
+    time.
+
 ## v0.10.8
 
 * Added
