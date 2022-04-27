@@ -64,7 +64,7 @@ defmodule VintageNetWiFi.MixProject do
 
   defp deps do
     [
-      {:vintage_net, "~> 0.10.0 or ~> 0.11.0"},
+      {:vintage_net, "~> 0.10.0 or ~> 0.11.0 or ~> 0.12.0"},
       {:credo, "~> 1.2", only: :test, runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:elixir_make, "~> 0.6", runtime: false},
