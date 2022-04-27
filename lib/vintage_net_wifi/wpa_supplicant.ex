@@ -537,7 +537,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp update_access_points_property(state) do
     ap_list = Map.values(state.access_points)
 
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", state.ifname, "wifi", "access_points"],
       ap_list
@@ -545,7 +545,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_clients_property(state) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", state.ifname, "wifi", "clients"],
       state.clients
@@ -553,7 +553,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_peers_property(state) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", state.ifname, "wifi", "peers"],
       state.peers
@@ -561,7 +561,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_current_access_point_property(state) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", state.ifname, "wifi", "current_ap"],
       state.current_ap
@@ -569,7 +569,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_eap_status_property(state) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", state.ifname, "eap_status"],
       state.eap_status
@@ -577,7 +577,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_wps_credentials(ifname, credentials) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", ifname, "wifi", "wps_credentials"],
       credentials

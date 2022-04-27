@@ -90,7 +90,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       )
 
     ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
-    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    PropertyTable.delete(VintageNet, ap_property)
 
     VintageNet.subscribe(ap_property)
 
@@ -134,7 +134,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       )
 
     ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
-    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    PropertyTable.delete(VintageNet, ap_property)
 
     VintageNet.subscribe(ap_property)
 
@@ -161,7 +161,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     })
 
     clients_property = ["interface", "test_wlan0", "wifi", "clients"]
-    VintageNet.PropertyTable.clear(VintageNet, clients_property)
+    PropertyTable.delete(VintageNet, clients_property)
     VintageNet.subscribe(clients_property)
 
     _supplicant =
@@ -235,7 +235,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       )
 
     ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
-    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    PropertyTable.delete(VintageNet, ap_property)
 
     VintageNet.subscribe(ap_property)
     :ok = WPASupplicant.scan("test_wlan0")
@@ -279,7 +279,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       )
 
     ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
-    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    PropertyTable.delete(VintageNet, ap_property)
 
     VintageNet.subscribe(ap_property)
     :ok = WPASupplicant.scan("test_wlan0")
@@ -325,7 +325,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     Process.sleep(100)
 
     eap_status_property = ["interface", "test_wlan0", "eap_status"]
-    VintageNet.PropertyTable.clear(VintageNet, eap_status_property)
+    PropertyTable.delete(VintageNet, eap_status_property)
     VintageNet.subscribe(eap_status_property)
 
     MockWPASupplicant.send_message(
@@ -395,8 +395,8 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
     current_ap_property = ["interface", "test_wlan0", "wifi", "current_ap"]
-    VintageNet.PropertyTable.clear(VintageNet, current_ap_property)
-    VintageNet.PropertyTable.clear(VintageNet, ap_property)
+    PropertyTable.delete(VintageNet, current_ap_property)
+    PropertyTable.delete(VintageNet, ap_property)
     VintageNet.subscribe(ap_property)
     VintageNet.subscribe(current_ap_property)
 
@@ -469,7 +469,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     Process.sleep(100)
 
     current_ap_property = ["interface", "test_wlan0", "wifi", "current_ap"]
-    VintageNet.PropertyTable.clear(VintageNet, current_ap_property)
+    PropertyTable.delete(VintageNet, current_ap_property)
     VintageNet.subscribe(current_ap_property)
 
     unknown_ap = VintageNetWiFi.AccessPoint.new("78:8a:20:87:7a:50")
@@ -559,7 +559,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     })
 
     peers_property = ["interface", "test_wlan0", "wifi", "peers"]
-    VintageNet.PropertyTable.clear(VintageNet, peers_property)
+    PropertyTable.delete(VintageNet, peers_property)
     VintageNet.subscribe(peers_property)
 
     _supplicant =
