@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Overrides for unit tests:
 #
