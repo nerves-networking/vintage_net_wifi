@@ -11,7 +11,36 @@ defmodule VintageNetWiFi.AccessPoint do
   * `:ssid` - the access point's name
   """
 
+  @typedoc """
+  Access point flags
+
+  These flags generally describe the security supported by an access point, but do contain some other details. They're
+  directly passed on from `wpa_supplicant` reports.
+  """
   @type flag ::
+          :ccmp
+          | :eap
+          | :ess
+          | :ibss
+          | :mesh
+          | :p2p
+          | :psk
+          | :rsn_ccmp
+          | :sae
+          | :tkip
+          | :wep
+          | :wpa
+          | :wpa2
+          | :wps
+          | old_flag()
+
+  @typedoc """
+  Old-style access point flags
+
+  Early on with `vintage_net_wifi`, flags were not broken up and returned in a list. The WPA3 support made this approach unmaintainable, but these are
+  kept to avoid breaking code. New code should avoid using these.
+  """
+  @type old_flag ::
           :wpa2_psk_ccmp
           | :wpa2_eap_ccmp
           | :wpa2_eap_ccmp_tkip
@@ -23,13 +52,6 @@ defmodule VintageNetWiFi.AccessPoint do
           | :wpa_psk_ccmp_tkip
           | :wpa_eap_ccmp
           | :wpa_eap_ccmp_tkip
-          | :wep
-          | :ibss
-          | :mesh
-          | :ess
-          | :p2p
-          | :wps
-          | :rsn_ccmp
 
   @type band :: :wifi_2_4_ghz | :wifi_5_ghz | :unknown
 
