@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.11.0 - 2022-04-30
+
+This release requires VintageNet v0.12.0 and Elixir 1.11 or later. No external
+API changes or fixes were made. Other than the new version requirements,
+everything should work the same as v0.10.9.
+
 ## v0.10.9
 
 * Changed
