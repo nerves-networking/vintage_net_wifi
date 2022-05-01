@@ -1,9 +1,4 @@
 defmodule VintageNetWiFi.BSSIDRequester do
-  use GenServer
-
-  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
-  require Logger
-
   @moduledoc """
   Request access point information asynchronously
 
@@ -11,6 +6,10 @@ defmodule VintageNetWiFi.BSSIDRequester do
   behind and start blocking more important requests. This GenServer
   handles this separate from the main WPASupplicant GenServer.
   """
+  use GenServer
+
+  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
+  require Logger
 
   @doc """
   Start a GenServer

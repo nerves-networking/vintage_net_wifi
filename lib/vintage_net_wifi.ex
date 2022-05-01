@@ -1,45 +1,4 @@
 defmodule VintageNetWiFi do
-  @behaviour VintageNet.Technology
-
-  require Logger
-
-  alias VintageNet.Interface.RawConfig
-  alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
-  alias VintageNetWiFi.{Cookbook, WPA2, WPASupplicant}
-
-  # These configuration keys are common to all network specifications
-  # and allowed to pass through network normalization.
-  @common_network_keys [
-    :mode,
-    :key_mgmt,
-    :ssid,
-    :bssid,
-    :bssid_allowlist,
-    :bssid_denylist,
-    :priority,
-    :scan_ssid,
-    :frequency,
-    :mesh_hwmp_rootmode,
-    :mesh_gate_announcements,
-    :ieee80211w,
-    :pairwise,
-    :proto
-  ]
-
-  @root_level_keys [
-    :ap_scan,
-    :networks,
-    :bgscan,
-    :passive_scan,
-    :regulatory_domain,
-    :user_mpm,
-    :root_interface,
-    :wpa_supplicant_conf_path,
-    :wps_cred_processing
-  ]
-
-  @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
-
   @moduledoc """
   WiFi support for VintageNet
 
@@ -102,6 +61,46 @@ defmodule VintageNetWiFi do
   To enable verbose log messages from the `wpa_supplicant`, add `verbose: true` to the
   configuration.
   """
+  @behaviour VintageNet.Technology
+
+  alias VintageNet.Interface.RawConfig
+  alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
+  alias VintageNetWiFi.{Cookbook, WPA2, WPASupplicant}
+
+  require Logger
+
+  # These configuration keys are common to all network specifications
+  # and allowed to pass through network normalization.
+  @common_network_keys [
+    :mode,
+    :key_mgmt,
+    :ssid,
+    :bssid,
+    :bssid_allowlist,
+    :bssid_denylist,
+    :priority,
+    :scan_ssid,
+    :frequency,
+    :mesh_hwmp_rootmode,
+    :mesh_gate_announcements,
+    :ieee80211w,
+    :pairwise,
+    :proto
+  ]
+
+  @root_level_keys [
+    :ap_scan,
+    :networks,
+    :bgscan,
+    :passive_scan,
+    :regulatory_domain,
+    :user_mpm,
+    :root_interface,
+    :wpa_supplicant_conf_path,
+    :wps_cred_processing
+  ]
+
+  @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
 
   @impl VintageNet.Technology
   def normalize(%{type: __MODULE__} = config) do
@@ -400,7 +399,8 @@ defmodule VintageNetWiFi do
     config = [
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
-      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves, instead of deferring to wpa_supplicant
+      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
+      # instead of deferring to wpa_supplicant
       "wps_cred_processing=1",
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),

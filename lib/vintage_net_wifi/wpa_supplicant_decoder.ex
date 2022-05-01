@@ -7,6 +7,13 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   @doc """
   Decode notifications from the wpa_supplicant
   """
+  @spec decode_notification(binary()) ::
+          {:event, String.t()}
+          | {:event, String.t(), any()}
+          | {:event, String.t(), any(), any()}
+          | {:event, String.t(), any(), any(), any()}
+          | {:info, String.t()}
+          | {:interactive, String.t(), any(), any()}
   def decode_notification(<<"CTRL-REQ-", rest::binary>>) do
     [field, net_id, text] = String.split(rest, "-", parts: 3, trim: true)
     {:interactive, "CTRL-REQ-" <> field, String.to_integer(net_id), text}

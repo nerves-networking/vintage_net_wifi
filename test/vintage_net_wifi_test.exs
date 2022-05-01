@@ -1,9 +1,10 @@
 defmodule VintageNetWiFiTest do
   use ExUnit.Case
-  alias VintageNet.Interface.RawConfig
 
   import VintageNetWiFiTest.Utils
   import ExUnit.CaptureLog
+
+  alias VintageNet.Interface.RawConfig
 
   test "old way of specifying ssid works" do
     # No one should be specifying SSIDs at top level with the

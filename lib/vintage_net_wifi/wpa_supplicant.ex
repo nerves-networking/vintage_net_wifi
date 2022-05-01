@@ -1,13 +1,13 @@
 defmodule VintageNetWiFi.WPASupplicant do
+  @moduledoc """
+  Control a wpa_supplicant instance for an interface.
+  """
+
   use GenServer
 
   alias VintageNet.Interface.EAPStatus
   alias VintageNetWiFi.{BSSIDRequester, WPASupplicantDecoder, WPASupplicantLL}
   require Logger
-
-  @moduledoc """
-  Control a wpa_supplicant instance for an interface.
-  """
 
   @doc """
   Start a GenServer to manage communication with a wpa_supplicant
@@ -206,8 +206,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   @impl GenServer
-  def handle_info({:bssid_result, result, cookie}, state) do
-    new_state = apply(cookie, [state, result])
+  def handle_info({:bssid_result, result, function}, state) do
+    new_state = function.(state, result)
     {:noreply, new_state, state.keep_alive_interval}
   end
 

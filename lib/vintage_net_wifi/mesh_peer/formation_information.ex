@@ -2,7 +2,7 @@ defmodule VintageNetWiFi.MeshPeer.FormationInformation do
   @moduledoc """
   * `connected_to_as`:
     true if the Authentication Protocol Identifier is set to 2.
-    (indicating IEEE 802.1X authentication) and the station has an 
+    (indicating IEEE 802.1X authentication) and the station has an
     active connection to an AS
   * `number_of_peerings`:
     indicates the mnumber of mesh peerings currently maintained
@@ -16,10 +16,11 @@ defmodule VintageNetWiFi.MeshPeer.FormationInformation do
 
   @type t() :: %__MODULE__{
           connected_to_as: boolean(),
-          number_of_peerings: non_neg_integer(),
+          number_of_peerings: 0..63,
           connected_to_mesh_gate: boolean()
         }
 
+  @spec decode_formation_information(<<_::8>>) :: t()
   def decode_formation_information(<<
         connected_to_as::1,
         number_of_peerings::unsigned-6,

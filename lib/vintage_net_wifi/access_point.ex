@@ -1,6 +1,4 @@
 defmodule VintageNetWiFi.AccessPoint do
-  alias VintageNetWiFi.Utils
-
   @moduledoc """
   Information about a WiFi access point
 
@@ -10,6 +8,7 @@ defmodule VintageNetWiFi.AccessPoint do
   * `:signal_dbm` - the signal strength in dBm
   * `:ssid` - the access point's name
   """
+  alias VintageNetWiFi.Utils
 
   @typedoc """
   Access point flags

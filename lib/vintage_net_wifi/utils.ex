@@ -4,6 +4,7 @@ defmodule VintageNetWiFi.Utils do
   """
 
   @doc "Converts 1 to true, 0 to false"
+  @spec bit_to_boolean(0 | 1) :: boolean()
   def bit_to_boolean(1), do: true
   def bit_to_boolean(0), do: false
 

@@ -4,16 +4,8 @@ defmodule VintageNetWiFi.MeshPeer do
 
   This is a superset of the fields available on VintageNetWiFi.AccessPoint.
   """
-  alias VintageNetWiFi.{
-    AccessPoint,
-    Utils,
-    WPASupplicantDecoder
-  }
-
-  alias VintageNetWiFi.MeshPeer.{
-    Capabilities,
-    FormationInformation
-  }
+  alias VintageNetWiFi.{AccessPoint, Utils, WPASupplicantDecoder}
+  alias VintageNetWiFi.MeshPeer.{Capabilities, FormationInformation}
 
   defstruct [
     :bssid,
@@ -44,36 +36,37 @@ defmodule VintageNetWiFi.MeshPeer do
   ]
 
   @type t :: %__MODULE__{
-          bssid: String.t(),
-          frequency: non_neg_integer(),
-          band: AccessPoint.band(),
-          channel: non_neg_integer(),
-          signal_dbm: integer(),
-          signal_percent: 0..100,
-          flags: [AccessPoint.flag()],
-          ssid: String.t(),
           active_path_selection_metric_id: non_neg_integer(),
           active_path_selection_protocol_id: non_neg_integer(),
           age: non_neg_integer(),
           authentication_protocol_id: non_neg_integer(),
+          band: AccessPoint.band(),
           beacon_int: non_neg_integer(),
           bss_basic_rate_set: String.t(),
-          capabilities: Capabilities.t(),
+          bssid: String.t(),
+          capabilities: integer(),
+          channel: non_neg_integer(),
           congestion_control_mode_id: non_neg_integer(),
           est_throughput: non_neg_integer(),
+          flags: [AccessPoint.flag()],
+          frequency: non_neg_integer(),
           id: non_neg_integer(),
-          mesh_capability: non_neg_integer(),
-          mesh_formation_info: non_neg_integer(),
+          mesh_capability: Capabilities.t(),
+          mesh_formation_info: FormationInformation.t(),
           mesh_id: String.t(),
           noise_dbm: integer(),
           quality: integer(),
+          signal_dbm: integer(),
+          signal_percent: 0..100,
           snr: non_neg_integer(),
+          ssid: String.t(),
           synchronization_method_id: non_neg_integer()
         }
 
   @doc """
   Create a new MeshPeer struct
   """
+  @spec new(keyword() | map()) :: t()
   def new(peer) do
     frequency = string_to_integer(peer["freq"])
     signal_dbm = string_to_integer(peer["level"])

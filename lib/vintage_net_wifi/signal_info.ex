@@ -1,6 +1,4 @@
 defmodule VintageNetWiFi.SignalInfo do
-  alias VintageNetWiFi.Utils
-
   @moduledoc """
   Information about active connection signal levels
 
@@ -12,6 +10,7 @@ defmodule VintageNetWiFi.SignalInfo do
   * `:signal_percent` - signal quality in percent
   * `:width` - channel width
   """
+  alias VintageNetWiFi.Utils
 
   defstruct [
     :center_frequency1,

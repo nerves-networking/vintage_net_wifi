@@ -2,8 +2,8 @@ defmodule VintageNetWiFi.MeshPeer.Capabilities do
   @moduledoc """
   Capabilities supported by a mesh node
 
-  * `power_slave_level`: 
-    true if at least one of the peer-specific mesh 
+  * `power_slave_level`:
+    true if at least one of the peer-specific mesh
     power management modes is deep sleep mode
   * `tbtt_adjusting`:
     true while the TBBT adjustment procedure is ongoing.
@@ -38,6 +38,7 @@ defmodule VintageNetWiFi.MeshPeer.Capabilities do
     :accepting_peerings
   ]
 
+  @spec decode_capabilities(<<_::8>>) :: t()
   def decode_capabilities(<<
         _reserved::1,
         power_slave_level::1,
