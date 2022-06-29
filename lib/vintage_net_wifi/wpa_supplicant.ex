@@ -308,33 +308,52 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
-  defp handle_notification({:event, event_name = "CTRL-EVENT-ASSOC-REJECT", bssid, _event_data = %{"status_code" => status_code}}, state = %{ifname: ifname}) do
+  defp handle_notification(
+         {:event, event_name = "CTRL-EVENT-ASSOC-REJECT", bssid,
+          event_data = %{"status_code" => status_code}},
+         state = %{ifname: ifname}
+       ) do
     Logger.warn("Association rejected for BSSID: #{bssid}, status code: #{status_code}")
 
-    event = VintageNetWiFi.Event.new(event_name, bssid, status_code)
+    event = VintageNetWiFi.Event.new(event_name, event_data)
 
     update_wifi_event_property(ifname, event)
     state
   end
 
-  defp handle_notification({:event, event_name = "CTRL-EVENT-SSID-TEMP-DISABLED", _event_data = %{"id" => id, "ssid" => ssid, "auth_failures" => auth_failures, "duration" => duration, "reason" => reason}}, state = %{ifname: ifname}) do
+  defp handle_notification(
+         {:event, event_name = "CTRL-EVENT-SSID-TEMP-DISABLED", event_data = %{"ssid" => ssid}},
+         state = %{ifname: ifname}
+       ) do
     Logger.warn("Access temporarily disabled to network: #{inspect(ssid)}")
 
-    event = VintageNetWiFi.Event.new(event_name, id, ssid, auth_failures, duration, reason)
+    event = VintageNetWiFi.Event.new(event_name, event_data)
 
     update_wifi_event_property(ifname, event)
     state
   end
 
-  defp handle_notification({:event, event_name = "CTRL-EVENT-SSID-REENABLED", _event_data = %{"id" => id, "ssid" => ssid}}, state = %{ifname: ifname}) do
+  defp handle_notification(
+         {:event, event_name = "CTRL-EVENT-SSID-REENABLED", event_data = %{"ssid" => ssid}},
+         state = %{ifname: ifname}
+       ) do
     Logger.warn("Access re-enabled to network: #{inspect(ssid)}")
-
-    event = VintageNetWiFi.Event.new(event_name, id, ssid)
-
+    event = VintageNetWiFi.Event.new(event_name, event_data)
     update_wifi_event_property(ifname, event)
     state
   end
 
+  defp handle_notification(
+         {:event, event_name = "CTRL-EVENT-NETWORK-NOT-FOUND"},
+         state = %{ifname: ifname}
+       ) do
+    Logger.warn("network not found")
+
+    event = VintageNetWiFi.Event.new(event_name, %{})
+
+    update_wifi_event_property(ifname, event)
+    state
+  end
 
   defp handle_notification({:event, "CTRL-EVENT-EAP-STATUS", %{"status" => "started"}}, state) do
     new_state = %{

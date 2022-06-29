@@ -1,9 +1,6 @@
 defmodule VintageNetWiFi.Event do
-
   @moduledoc ~S"""
   WiFi events.
-
-
 
   Currently supported:
   * `CTRL-EVENT-ASSOC-REJECT` - occurs when authentication fails
@@ -13,7 +10,7 @@ defmodule VintageNetWiFi.Event do
   All events have a `:name`, and the other fields are optional.
   * `CTRL-EVENT-ASSOC-REJECT`
     * `:bssid` - a unique address for the access point
-    * `:status_code` - status code of the event 
+    * `:status_code` - status code of the event
   * `CTRL-EVENT-SSID-TEMP-DISABLED`
     * `:id` - event identifier?
     * `:ssid` - the access point's name
@@ -26,10 +23,10 @@ defmodule VintageNetWiFi.Event do
 
   ## Examples:
 
-      iex> VintageNetWiFi.Event.new("CTRL-EVENT-ASSOC-REJECT", "ab:cd:ef:01:02:03", "1")
+      iex> VintageNetWiFi.Event.new("CTRL-EVENT-ASSOC-REJECT", %{"bssid" => "ab:cd:ef:01:02:03", "status_code" => "1"})
       %VintageNetWiFi.Event{
-        name: "CTRL-EVENT-ASSOC-REJECT", 
-        bssid: "ab:cd:ef:01:02:03", 
+        name: "CTRL-EVENT-ASSOC-REJECT",
+        bssid: "ab:cd:ef:01:02:03",
         status_code: 1
       }
   """
@@ -38,73 +35,79 @@ defmodule VintageNetWiFi.Event do
 
   defstruct [:name, :bssid, :status_code, :id, :ssid, :auth_failures, :duration, :reason]
 
+  @known_params [
+    "name",
+    "bssid",
+    "status_code",
+    "id",
+    "ssid",
+    "auth_failures",
+    "duration",
+    "reason"
+  ]
+
   @typedoc """
   WiFi event structure.
   """
   @type t :: %__MODULE__{
-          name: String.t(),
-          bssid: String.t(),
-          status_code: non_neg_integer(),
-          id: non_neg_integer(),
+          name: nil | String.t(),
+          bssid: nil | String.t(),
+          status_code: nil | non_neg_integer(),
+          id: nil | non_neg_integer(),
           ssid: String.t(),
-          auth_failures: non_neg_integer(),
-          duration: non_neg_integer(),
-          reason: String.t(),
+          auth_failures: nil | non_neg_integer(),
+          duration: nil | non_neg_integer(),
+          reason: nil | String.t()
         }
 
   @doc """
   Create an event with the appropriate fields
   """
-  def new(name, arg1, arg2)
+  @spec new(String.t(), %{optional(String.t()) => String.t() | non_neg_integer()}) ::
+          VintageNetWiFi.Event.t()
+  def new(name, params)
 
-  @spec new(String.t(), String.t(), non_neg_integer()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-ASSOC-REJECT", bssid, status_code) 
-    when is_integer(status_code) and status_code >= 0 do
-    %__MODULE__{
-      name: name,
-      bssid: bssid,
-      status_code: status_code,
-    }
-  end
-  @spec new(String.t(), String.t(), String.t()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-ASSOC-REJECT", bssid, status_code) do
-    new(name, bssid, String.to_integer(status_code))
+  def new(name = "CTRL-EVENT-ASSOC-REJECT", params) do
+    params = sanitize_params(params)
+    event = struct(__MODULE__, params)
+
+    %__MODULE__{event | name: name}
   end
 
-  @spec new(String.t(), non_neg_integer(), String.t()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-SSID-REENABLED", id, ssid)
-    when is_integer(id) and id >= 0 do
-    %__MODULE__{
-      name: name,
-      id: id,
-      ssid: ssid,
-    }
-  end
-  @spec new(String.t(), String.t(), String.t()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-SSID-REENABLED", id, ssid) do
-    new(name, String.to_integer(id), ssid)
+  def new(name = "CTRL-EVENT-SSID-REENABLED", params) do
+    params = sanitize_params(params)
+    event = struct(__MODULE__, params)
+
+    %__MODULE__{event | name: name}
   end
 
-  @doc """
-  Create an event with the appropriate fields
-  """
-  @spec new(String.t(), non_neg_integer(), String.t(), non_neg_integer(), non_neg_integer(), String.t()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-SSID-TEMP-DISABLED", id, ssid, auth_failures, duration, reason) 
-    when is_integer(id) and id >= 0 and is_integer(auth_failures) and auth_failures >= 0 and is_integer(duration) and duration >= 0 do
-    %__MODULE__{
-      name: name,
-      id: id,
-      ssid: ssid,
-      auth_failures: auth_failures,
-      duration: duration,
-      reason: reason,
-    }
-  end
-  @spec new(String.t(), String.t(), String.t(), String.t(), String.t(), String.t()) :: VintageNetWiFi.Event.t()
-  def new(name = "CTRL-EVENT-SSID-TEMP-DISABLED", id, ssid, auth_failures, duration, reason) do
-    new(name, String.to_integer(id), ssid, String.to_integer(auth_failures), String.to_integer(duration), reason)
+  def new(name = "CTRL-EVENT-SSID-TEMP-DISABLED", params) do
+    params = sanitize_params(params)
+    event = struct(__MODULE__, params)
+
+    %__MODULE__{event | name: name}
   end
 
+  def new(name = "CTRL-EVENT-NETWORK-NOT-FOUND", _params) do
+    %__MODULE__{name: name}
+  end
 
+  @integer_keys [
+    "status_code",
+    "id",
+    "auth_failures",
+    "duration"
+  ]
 
+  defp sanitize_params(params) when is_map(params) do
+    params
+    |> Map.take(@known_params)
+    |> Map.new(fn
+      {key, value} when key in @integer_keys ->
+        {String.to_existing_atom(key), String.to_integer(value)}
+
+      {key, value} ->
+        {String.to_existing_atom(key), value}
+    end)
+  end
 end
