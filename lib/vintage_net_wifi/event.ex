@@ -67,28 +67,28 @@ defmodule VintageNetWiFi.Event do
           VintageNetWiFi.Event.t()
   def new(name, params)
 
-  def new(name = "CTRL-EVENT-ASSOC-REJECT", params) do
+  def new("CTRL-EVENT-ASSOC-REJECT" = name, params) do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
     %__MODULE__{event | name: name}
   end
 
-  def new(name = "CTRL-EVENT-SSID-REENABLED", params) do
+  def new("CTRL-EVENT-SSID-REENABLED" = name, params) do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
     %__MODULE__{event | name: name}
   end
 
-  def new(name = "CTRL-EVENT-SSID-TEMP-DISABLED", params) do
+  def new("CTRL-EVENT-SSID-TEMP-DISABLED" = name, params) do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
     %__MODULE__{event | name: name}
   end
 
-  def new(name = "CTRL-EVENT-NETWORK-NOT-FOUND", _params) do
+  def new("CTRL-EVENT-NETWORK-NOT-FOUND" = name, _params) do
     %__MODULE__{name: name}
   end
 

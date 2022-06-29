@@ -309,9 +309,9 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification(
-         {:event, event_name = "CTRL-EVENT-ASSOC-REJECT", bssid,
-          event_data = %{"status_code" => status_code}},
-         state = %{ifname: ifname}
+         {:event, "CTRL-EVENT-ASSOC-REJECT" = event_name, bssid,
+          %{"status_code" => status_code} = event_data},
+         %{ifname: ifname} = state
        ) do
     Logger.warn("Association rejected for BSSID: #{bssid}, status code: #{status_code}")
 
@@ -322,8 +322,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification(
-         {:event, event_name = "CTRL-EVENT-SSID-TEMP-DISABLED", event_data = %{"ssid" => ssid}},
-         state = %{ifname: ifname}
+         {:event, "CTRL-EVENT-SSID-TEMP-DISABLED" = event_name, %{"ssid" => ssid} = event_data},
+         %{ifname: ifname} = state
        ) do
     Logger.warn("Access temporarily disabled to network: #{inspect(ssid)}")
 
@@ -334,8 +334,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification(
-         {:event, event_name = "CTRL-EVENT-SSID-REENABLED", event_data = %{"ssid" => ssid}},
-         state = %{ifname: ifname}
+         {:event, "CTRL-EVENT-SSID-REENABLED" = event_name, %{"ssid" => ssid} = event_data},
+         %{ifname: ifname} = state
        ) do
     Logger.warn("Access re-enabled to network: #{inspect(ssid)}")
     event = VintageNetWiFi.Event.new(event_name, event_data)
@@ -344,8 +344,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp handle_notification(
-         {:event, event_name = "CTRL-EVENT-NETWORK-NOT-FOUND"},
-         state = %{ifname: ifname}
+         {:event, "CTRL-EVENT-NETWORK-NOT-FOUND" = event_name},
+         %{ifname: ifname} = state
        ) do
     Logger.warn("network not found")
 
