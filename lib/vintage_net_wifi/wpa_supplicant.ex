@@ -621,7 +621,7 @@ defmodule VintageNetWiFi.WPASupplicant do
   end
 
   defp update_wifi_event_property(ifname, event) do
-    VintageNet.PropertyTable.put(
+    PropertyTable.put(
       VintageNet,
       ["interface", ifname, "wifi", "event"],
       event
