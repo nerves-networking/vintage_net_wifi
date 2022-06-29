@@ -353,7 +353,7 @@ Property        | Values           | Description
 `clients`       | ["11:22:33:44:55:66"] | A list of clients connected to the access point when using `mode: :ap`
 `current_ap`    | %AccessPoint{}   | The currently associated access point
 `peers`         | [%MeshPeer{}]    | a list of mesh peers that the current node knows about when using `mode: :mesh`
-`event`         | [%Event{}]       | WiFi control events not otherwise handled
+`event`         | %Event{}         | WiFi control events not otherwise handled
 
 Access points are identified by their BSSID. Information about an access point
 has the following form:
