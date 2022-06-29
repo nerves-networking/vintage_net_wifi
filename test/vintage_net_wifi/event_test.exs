@@ -6,36 +6,43 @@ defmodule VintageNetWiFi.EventTest do
 
   test "create CTRL-EVENT-ASSOC-REJECT" do
     assert Event.new(
-             "CTRL-EVENT-ASSOC-REJECT", "ab:cd:ef:01:02:03", "1"
+             "CTRL-EVENT-ASSOC-REJECT",
+             %{"bssid" => "ab:cd:ef:01:02:03", "status_code" => "1"}
            ) == %Event{
-               name: "CTRL-EVENT-ASSOC-REJECT",
-               bssid: "ab:cd:ef:01:02:03",
-               status_code: 1,
-             }
+             name: "CTRL-EVENT-ASSOC-REJECT",
+             bssid: "ab:cd:ef:01:02:03",
+             status_code: 1
+           }
   end
 
   test "create CTRL-EVENT-SSID-TEMP-DISABLED" do
     assert Event.new(
-             "CTRL-EVENT-SSID-TEMP-DISABLED", "0", "abcdef010203", "1", "10", "CONN_FAILED"
-           ) == %Event{
-               name: "CTRL-EVENT-SSID-TEMP-DISABLED",
-               id: 0,
-               ssid: "abcdef010203",
-               auth_failures: 1,
-               duration: 10,
-               reason: "CONN_FAILED"
+             "CTRL-EVENT-SSID-TEMP-DISABLED",
+             %{
+               "id" => "0",
+               "ssid" => "abcdef010203",
+               "auth_failures" => "1",
+               "duration" => "10",
+               "reason" => "CONN_FAILED"
              }
+           ) == %Event{
+             name: "CTRL-EVENT-SSID-TEMP-DISABLED",
+             id: 0,
+             ssid: "abcdef010203",
+             auth_failures: 1,
+             duration: 10,
+             reason: "CONN_FAILED"
+           }
   end
 
   test "create CTRL-EVENT-SSID-REENABLED" do
     assert Event.new(
-             "CTRL-EVENT-SSID-REENABLED", "0", "abcdef010203"
+             "CTRL-EVENT-SSID-REENABLED",
+             %{"id" => "0", "ssid" => "abcdef010203"}
            ) == %Event{
-               name: "CTRL-EVENT-SSID-REENABLED",
-               id: 0,
-               ssid: "abcdef010203",
-             }
+             name: "CTRL-EVENT-SSID-REENABLED",
+             id: 0,
+             ssid: "abcdef010203"
+           }
   end
-
-
 end
