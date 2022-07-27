@@ -482,10 +482,18 @@ defmodule VintageNetWiFi.WPASupplicant do
   defp string_to_integer(s), do: String.to_integer(s)
 
   defp update_all_access_points(state, access_points) when is_map(access_points) do
+    access_points = filter_access_points(access_points)
     new_state = %{state | access_points: access_points}
 
     update_access_points_property(new_state)
     new_state
+  end
+
+  defp filter_access_points(access_points_map) do
+    Enum.reduce(access_points_map, %{}, fn
+      {bssid, %VintageNetWiFi.AccessPoint{} = ap}, acc -> Map.put(acc, bssid, ap)
+      {_bssid, _non_ap}, acc -> acc
+    end)
   end
 
   defp add_access_point(state, %VintageNetWiFi.AccessPoint{} = ap) do
