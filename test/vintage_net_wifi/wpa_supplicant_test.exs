@@ -63,7 +63,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     assert "PING" in requests
   end
 
-  test "scan updates properties", context do
+  test "scan updates properties - filters mesh peers", context do
     # TODO: Double check that this is what the real wpa_supplicant does
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
@@ -71,13 +71,14 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       "SCAN" => [
         "OK\n",
         "<2>CTRL-EVENT-SCAN-STARTED ",
-        "<2>CTRL-EVENT-BSS-ADDED 0 78:8a:20:87:7a:50",
         "<2>CTRL-EVENT-SCAN-RESULTS ",
         "<2>CTRL-EVENT-NETWORK-NOT-FOUND "
       ],
       "BSS 0" =>
         "id=0\nbssid=78:8a:20:82:7a:50\nfreq=2437\nbeacon_int=100\ncapabilities=0x0431\nqual=0\nnoise=-89\nlevel=-71\ntsf=0000333220048880\nage=14\nie=0008426f7062654c414e010882848b968c1298240301062a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\nflags=[WPA2-PSK-CCMP][ESS]\nssid=TestLAN\nsnr=18\nest_throughput=48000\nupdate_idx=1\nbeacon_ie=0008426f7062654c414e010882848b968c1298240301060504010300002a01003204b048606c0b0504000a00002d1aac011bffffff00000000000000000001000000000000000000003d1606080c000000000000000000000000000000000000007f080000000000000040dd180050f2020101000003a4000027a4000042435e0062322f00dd0900037f01010000ff7fdd1300156d00010100010237e58106788a20867a5030140100000fac040100000fac040100000fac020000\n",
-      "BSS 1" => ""
+      "BSS 1" =>
+        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n",
+      "BSS 2" => ""
     })
 
     _supplicant =
@@ -120,8 +121,7 @@ defmodule VintageNetWiFi.WPASupplicantTest do
       ],
       "BSS 0" => "",
       "BSS f8:a2:d6:b5:d4:07" =>
-        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n",
-      "BSS 1" => ""
+        "id=7\nbssid=f8:a2:d6:b5:d4:07\nfreq=2432\nbeacon_int=1000\ncapabilities=0x0000\nqual=0\nnoise=-89\nlevel=-27\ntsf=0000005463796281\nage=2339\nie=0000010882848b968c1298240301053204b048606c2d1a7e0112ff000000010000000000000001000000000000000000003d16050000000000ff00000001000000000000000000000072076d792d6d657368710701010001000209\nflags=[MESH]\nssid=my-mesh\nmesh_id=my-mesh\nactive_path_selection_protocol_id=0x01\nactive_path_selection_metric_id=0x01\ncongestion_control_mode_id=0x00\nsynchronization_method_id=0x01\nauthentication_protocol_id=0x00\nmesh_formation_info=0x02\nmesh_capability=0x09\nbss_basic_rate_set=10 20 55 110 60 120 240\nsnr=62\nest_throughput=65000\nupdate_idx=2\n"
     })
 
     _supplicant =
