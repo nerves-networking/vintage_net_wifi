@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.11.1 - 2022-07-27
+
+* Changed
+  * Added support for handling WiFi events. Currently events associated with
+    WiFi AP associations are reported since they can be helpful when creating
+    WiFi configuration user interfaces. More could be supported in the future.
+    Thanks to @dognotdog, @THE9rtyt, and @ConnorRigby for this feature.
+
+* Fixed
+  * Remove mesh peers from reported access point lists. Mesh peers are reported
+    separately and mixing them with access points was unexpected. Thanks to
+    @mattludwigs for identifying and fixing the issue.
+
 ## v0.11.0 - 2022-04-30
 
 This release requires VintageNet v0.12.0 and Elixir 1.11 or later. No external
