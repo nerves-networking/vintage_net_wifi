@@ -392,7 +392,7 @@ defmodule VintageNetWiFi do
          _regulatory_domain
        ) do
     [into_newlines(["ctrl_interface=#{control_interface_dir}"]), conf]
-    |> IO.iodata_to_binary()
+    |> IO.chardata_to_string()
   end
 
   defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
@@ -408,7 +408,7 @@ defmodule VintageNetWiFi do
     ]
 
     iodata = [into_newlines(config), into_wifi_network_config(wifi)]
-    IO.iodata_to_binary(iodata)
+    IO.chardata_to_string(iodata)
   end
 
   defp key_mgmt_to_string(:none), do: "NONE"
