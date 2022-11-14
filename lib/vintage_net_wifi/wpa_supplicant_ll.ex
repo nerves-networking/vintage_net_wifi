@@ -93,7 +93,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
 
   @impl GenServer
   def handle_info(
-        {:udp, socket, _, 0, <<?<, priority, ?>, notification::binary()>>},
+        {:udp, socket, _, 0, <<?<, priority, ?>, notification::binary>>},
         %{socket: socket, notification_pid: pid} = state
       ) do
     send(pid, {__MODULE__, priority - ?0, notification})
