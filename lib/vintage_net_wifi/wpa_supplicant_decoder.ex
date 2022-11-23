@@ -327,25 +327,20 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   # key_mgmt=one or more of the following separated by + signs
   #   EAP,PSK,None,SAE,FT/EAP,FT/PSK,FT/SAE,EAP-SHA256,PSK-SHA256,EAP-SUITE-B,EAP-SUITE-B-192,
   #   FILS-SHA256,FILS-SHA384,FT-FILS-SHA256,FT-FILS-SHA384,OWE,DPP,OSEN,""
-  defp parse_key_mgmt("EAP" <> rest, flags), do: parse_key_mgmt(rest, [:eap | flags])
-  defp parse_key_mgmt("PSK" <> rest, flags), do: parse_key_mgmt(rest, [:psk | flags])
-  defp parse_key_mgmt("None" <> rest, flags), do: parse_key_mgmt(rest, flags)
-  defp parse_key_mgmt("SAE" <> rest, flags), do: parse_key_mgmt(rest, [:sae | flags])
-  defp parse_key_mgmt("FT/EAP" <> rest, flags), do: parse_key_mgmt(rest, [:ft_eap | flags])
-  defp parse_key_mgmt("FT/PSK" <> rest, flags), do: parse_key_mgmt(rest, [:ft_psk | flags])
-  defp parse_key_mgmt("FT/SAE" <> rest, flags), do: parse_key_mgmt(rest, [:ft_sae | flags])
-
+  #
+  # IMPORTANT: These are tested in order, so it's critical that longer strings
+  #            are placed before any prefixes they contain!!!
   defp parse_key_mgmt("EAP-SHA256" <> rest, flags),
     do: parse_key_mgmt(rest, [:eap_sha256 | flags])
 
-  defp parse_key_mgmt("PSK-SHA256" <> rest, flags),
-    do: parse_key_mgmt(rest, [:psk_sha256 | flags])
+  defp parse_key_mgmt("EAP-SUITE-B-192" <> rest, flags),
+    do: parse_key_mgmt(rest, [:eap_suite_b_192 | flags])
 
   defp parse_key_mgmt("EAP-SUITE-B" <> rest, flags),
     do: parse_key_mgmt(rest, [:eap_suite_b | flags])
 
-  defp parse_key_mgmt("EAP-SUITE-B-192" <> rest, flags),
-    do: parse_key_mgmt(rest, [:eap_suite_b_192 | flags])
+  defp parse_key_mgmt("PSK-SHA256" <> rest, flags),
+    do: parse_key_mgmt(rest, [:psk_sha256 | flags])
 
   defp parse_key_mgmt("FILS-SHA256" <> rest, flags),
     do: parse_key_mgmt(rest, [:fils_sha256 | flags])
@@ -359,6 +354,13 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_key_mgmt("FT-FILS-SHA384" <> rest, flags),
     do: parse_key_mgmt(rest, [:ft_fils_sha384 | flags])
 
+  defp parse_key_mgmt("None" <> rest, flags), do: parse_key_mgmt(rest, flags)
+  defp parse_key_mgmt("EAP" <> rest, flags), do: parse_key_mgmt(rest, [:eap | flags])
+  defp parse_key_mgmt("PSK" <> rest, flags), do: parse_key_mgmt(rest, [:psk | flags])
+  defp parse_key_mgmt("SAE" <> rest, flags), do: parse_key_mgmt(rest, [:sae | flags])
+  defp parse_key_mgmt("FT/EAP" <> rest, flags), do: parse_key_mgmt(rest, [:ft_eap | flags])
+  defp parse_key_mgmt("FT/PSK" <> rest, flags), do: parse_key_mgmt(rest, [:ft_psk | flags])
+  defp parse_key_mgmt("FT/SAE" <> rest, flags), do: parse_key_mgmt(rest, [:ft_sae | flags])
   defp parse_key_mgmt("OWE" <> rest, flags), do: parse_key_mgmt(rest, [:owe | flags])
   defp parse_key_mgmt("DPP" <> rest, flags), do: parse_key_mgmt(rest, [:dpp | flags])
   defp parse_key_mgmt("OSEN" <> rest, flags), do: parse_key_mgmt(rest, [:osen | flags])
@@ -374,8 +376,8 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   # See wpa_write_ciphers() for cipher list
   # ciphers=CCMP-256,GCMP-256,CCMP,GCMP,TKIP,AES-128-CMAC,BIP-GMAC-128,BIP-GMAC-256,BIP-CMAC-256,NONE,""
   defp parse_cipher("CCMP-256" <> rest, flags), do: parse_cipher(rest, [:ccmp256 | flags])
-  defp parse_cipher("GCMP-256" <> rest, flags), do: parse_cipher(rest, [:gcmp256 | flags])
   defp parse_cipher("CCMP" <> rest, flags), do: parse_cipher(rest, [:ccmp | flags])
+  defp parse_cipher("GCMP-256" <> rest, flags), do: parse_cipher(rest, [:gcmp256 | flags])
   defp parse_cipher("GCMP" <> rest, flags), do: parse_cipher(rest, [:gcmp | flags])
   defp parse_cipher("TKIP" <> rest, flags), do: parse_cipher(rest, [:tkip | flags])
   defp parse_cipher("AES-128-CMAC" <> rest, flags), do: parse_cipher(rest, [:aes128_cmac | flags])

@@ -517,6 +517,14 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
     assert [:wpa2, :psk, :ccmp, :preauth] =
              WPASupplicantDecoder.parse_flags("[WPA2-PSK-CCMP-preauth]")
 
+    assert [:wpa2, :eap_suite_b_192] = WPASupplicantDecoder.parse_flags("[WPA2-EAP-SUITE-B-192]")
+
+    assert [:wpa2, :psk_sha256, :ccmp, :wps] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK-SHA256-CCMP][WPS]")
+
+    assert [:wpa2, :psk, :psk_sha256, :ccmp, :ess] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK+PSK-SHA256-CCMP][ESS]")
+
     # various other flags
     assert [:owe_trans] = WPASupplicantDecoder.parse_flags("[OWE-TRANS]")
     assert [:owe_trans_open] = WPASupplicantDecoder.parse_flags("[OWE-TRANS-OPEN]")
