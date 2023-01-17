@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.11.2 - 2023-01-16
+
+* Fixed
+  * Fix cipher flag parsing from some access points. For example, if an access
+    point advertised `[WPA2-PSK+PSK-SHA256-CCMP][ESS]`, it would fail to parse
+    due to "PSK" being greedily selected as the cipher instead of "PSDK-SHA256".
+
 ## v0.11.1 - 2022-07-27
 
 * Changed
