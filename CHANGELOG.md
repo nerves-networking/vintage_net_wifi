@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.11.3 - 2023-01-23
+
+* Changed
+  * Allow VintageNet v0.13.0 to be used
+
 ## v0.11.2 - 2023-01-16
 
 * Fixed
