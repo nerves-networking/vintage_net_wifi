@@ -134,7 +134,7 @@ defmodule VintageNetWiFi do
     # If user specified a standalone ssid, move it to the first spot
     # in the networks list so that networks are only stored in one place.
 
-    Logger.warn(
+    Logger.warning(
       "Passing Wi-Fi network parameters outside of `:networks` for ssid '#{ssid}' is deprecated. See `VintageNet.info` for the fixed configuration."
     )
 
@@ -305,7 +305,7 @@ defmodule VintageNetWiFi do
     # than crash this configuration, the expected thing seems to be to
     # drop this network so that scan-only WiFi mode is available.
 
-    Logger.warn("Dropping network with `nil` SSID: #{inspect(network)}")
+    Logger.warning("Dropping network with `nil` SSID: #{inspect(network)}")
     %{}
   end
 

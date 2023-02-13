@@ -320,7 +320,7 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_flag("WPS", flags), do: [:wps | flags]
 
   defp parse_flag(other, flags) do
-    Logger.warn("[wpa_supplicant] Unknown flag: #{other}")
+    Logger.warning("[wpa_supplicant] Unknown flag: #{other}")
     flags
   end
 
@@ -369,7 +369,7 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_key_mgmt("", flags), do: flags
 
   defp parse_key_mgmt(other, flags) do
-    Logger.warn("[wpa_supplicant] Ignoring unknown key_mgmt flag: #{other}")
+    Logger.warning("[wpa_supplicant] Ignoring unknown key_mgmt flag: #{other}")
     flags
   end
 
@@ -389,7 +389,7 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_cipher("-preauth", flags), do: [:preauth | flags]
 
   defp parse_cipher(other, flags) do
-    Logger.warn("[wpa_supplicant] Ignoring unknown cipher flag: #{other}")
+    Logger.warning("[wpa_supplicant] Ignoring unknown cipher flag: #{other}")
     flags
   end
 end
