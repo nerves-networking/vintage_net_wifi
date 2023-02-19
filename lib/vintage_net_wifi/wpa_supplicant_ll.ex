@@ -25,15 +25,12 @@ defmodule VintageNetWiFi.WPASupplicantLL do
   use GenServer
   require Logger
 
-  defmodule State do
-    @moduledoc false
-    defstruct control_file: nil,
-              socket: nil,
-              request_queue: :queue.new(),
-              outstanding: nil,
-              notification_pid: nil,
-              request_timer: nil
-  end
+  defstruct control_file: nil,
+            socket: nil,
+            request_queue: :queue.new(),
+            outstanding: nil,
+            notification_pid: nil,
+            request_timer: nil
 
   @doc """
   Start the WPASupplicant low-level interface
@@ -72,7 +69,7 @@ defmodule VintageNetWiFi.WPASupplicantLL do
     {:ok, socket} =
       :gen_udp.open(0, [:local, :binary, {:active, true}, {:ip, {:local, our_path}}])
 
-    state = %State{
+    state = %__MODULE__{
       control_file: path,
       socket: socket,
       notification_pid: pid
