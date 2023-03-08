@@ -510,6 +510,12 @@ defmodule VintageNetWiFi.WPASupplicantDecoderTest do
     assert [:wpa_eap_ccmp_tkip, :wpa, :eap, :ccmp, :tkip] =
              WPASupplicantDecoder.parse_flags("[WPA-EAP-CCMP+TKIP]")
 
+    assert [:wpa2_psk_sae_ccmp, :wpa2, :psk, :sae, :ccmp, :sae_h2e, :ess] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK+SAE-CCMP][SAE-H2E][ESS]")
+
+    assert [:wpa2_psk_sae_ccmp, :wpa2, :psk, :sae, :ccmp, :sae_pk, :ess] =
+             WPASupplicantDecoder.parse_flags("[WPA2-PSK+SAE-CCMP][SAE-PK][ESS]")
+
     # Parse strings that don't have legacy atoms
     assert [:wpa2, :psk, :ft_psk, :ccmp] =
              WPASupplicantDecoder.parse_flags("[WPA2-PSK+FT/PSK-CCMP]")

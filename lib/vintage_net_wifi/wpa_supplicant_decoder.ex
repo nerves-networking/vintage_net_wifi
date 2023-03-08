@@ -318,6 +318,8 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
   defp parse_flag("FST", flags), do: [:fst | flags]
   defp parse_flag("UTF-8", flags), do: [:utf8 | flags]
   defp parse_flag("WPS", flags), do: [:wps | flags]
+  defp parse_flag("SAE-H2E", flags), do: [:sae_h2e | flags]
+  defp parse_flag("SAE-PK", flags), do: [:sae_pk | flags]
 
   defp parse_flag(other, flags) do
     Logger.warning("[wpa_supplicant] Unknown flag: #{other}")
