@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.11.5 - 2023-03-08
+
+* Fixed
+  * Support SAE H2E and PK flags in AP advertisements
+
 ## v0.11.4 - 2023-02-12
 
 * Fixed
