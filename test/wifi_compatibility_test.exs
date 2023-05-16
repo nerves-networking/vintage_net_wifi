@@ -1615,7 +1615,18 @@ defmodule WiFiCompatibilityTest do
       ],
       up_cmds: [
         {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
-        {:run, "ip", ["addr", "add", "192.168.1.2/16", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip",
+         [
+           "addr",
+           "add",
+           "192.168.1.2/16",
+           "dev",
+           "wlan0",
+           "broadcast",
+           "192.168.255.255",
+           "label",
+           "wlan0"
+         ]},
         {:run, "ip", ["link", "set", "wlan0", "up"]},
         {:fun, VintageNet.RouteManager, :set_route,
          ["wlan0", [{{192, 168, 1, 2}, 16}], {192, 168, 1, 1}]},
@@ -1726,7 +1737,18 @@ defmodule WiFiCompatibilityTest do
       ],
       up_cmds: [
         {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
-        {:run, "ip", ["addr", "add", "192.168.24.1/24", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip",
+         [
+           "addr",
+           "add",
+           "192.168.24.1/24",
+           "dev",
+           "wlan0",
+           "broadcast",
+           "192.168.24.255",
+           "label",
+           "wlan0"
+         ]},
         {:run, "ip", ["link", "set", "wlan0", "up"]},
         {:fun, VintageNet.RouteManager, :clear_route, ["wlan0"]},
         {:fun, VintageNet.NameResolver, :clear, ["wlan0"]}
@@ -1801,7 +1823,18 @@ defmodule WiFiCompatibilityTest do
       ],
       up_cmds: [
         {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
-        {:run, "ip", ["addr", "add", "192.168.24.1/24", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip",
+         [
+           "addr",
+           "add",
+           "192.168.24.1/24",
+           "dev",
+           "wlan0",
+           "broadcast",
+           "192.168.24.255",
+           "label",
+           "wlan0"
+         ]},
         {:run, "ip", ["link", "set", "wlan0", "up"]},
         {:fun, VintageNet.RouteManager, :clear_route, ["wlan0"]},
         {:fun, VintageNet.NameResolver, :clear, ["wlan0"]}
