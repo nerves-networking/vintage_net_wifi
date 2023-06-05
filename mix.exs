@@ -10,7 +10,6 @@ defmodule VintageNetWiFi.MixProject do
       version: @version,
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
-      test_coverage: [tool: ExCoveralls],
       start_permanent: Mix.env() == :prod,
       compilers: [:elixir_make | Mix.compilers()],
       make_targets: ["all"],
@@ -25,8 +24,7 @@ defmodule VintageNetWiFi.MixProject do
         docs: :docs,
         "hex.publish": :docs,
         "hex.build": :docs,
-        credo: :test,
-        "coveralls.circle": :test
+        credo: :test
       }
     ]
   end
@@ -67,8 +65,7 @@ defmodule VintageNetWiFi.MixProject do
       {:credo, "~> 1.2", only: :test, runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:elixir_make, "~> 0.6", runtime: false},
-      {:ex_doc, "~> 0.22", only: :docs, runtime: false},
-      {:excoveralls, "~> 0.13", only: :test, runtime: false}
+      {:ex_doc, "~> 0.22", only: :docs, runtime: false}
     ]
   end
 
