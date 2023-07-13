@@ -259,13 +259,16 @@ iex> VintageNet.configure("wlan0", %{
       ipv4: %{
         method: :static,
         address: "192.168.24.1",
-        gateway: "192.168.24.255",
-        netmask: "255.255.255.0",
-        name_servers: ["1.1.1.1"]
+        netmask: "255.255.255.0"
       },
       dhcpd: %{
         start: "192.168.24.2",
-        end: "192.168.24.10"
+        end: "192.168.24.10",
+        options: %{
+          dns: ["1.1.1.1", "1.0.0.1"],
+          subnet: "255.255.255.0",
+          router: ["192.168.24.1"]
+        }
       }
 })
 ```
