@@ -91,7 +91,7 @@ defmodule VintageNetWiFi.WPA2 do
     <<:erlang.bxor(a, b)::160>>
   end
 
-  if :erlang.system_info(:otp_release) == '21' do
+  if :erlang.system_info(:otp_release) == ~c"21" do
     # TODO: Remove when OTP 21 is no longer supported.
     defp sha1_hmac(digest, password) do
       :crypto.hmac(:sha, password, digest)
