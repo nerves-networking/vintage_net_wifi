@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.11.6 - 2023-03-08
+
+* Fixed
+  * Support passing SSIDs with all NULL characters to `wpa_supplicant`. This
+    also fixes other SSIDs with nonprintable characters.
+
 ## v0.11.5 - 2023-03-08
 
 * Fixed
