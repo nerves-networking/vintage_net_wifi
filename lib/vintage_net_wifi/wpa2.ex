@@ -25,14 +25,14 @@ defmodule VintageNetWiFi.WPA2 do
   @spec to_psk(String.t(), psk() | String.t()) ::
           {:ok, psk()}
           | {:error, invalid_ssid_error() | invalid_passphrase_error()}
-  def to_psk(ssid, psk) when byte_size(psk) == 64 do
+  def to_psk(ssid, psk) when is_binary(ssid) and byte_size(psk) == 64 do
     with :ok <- validate_psk(psk),
          :ok <- validate_ssid(ssid) do
       {:ok, psk}
     end
   end
 
-  def to_psk(ssid, passphrase) when is_binary(passphrase) do
+  def to_psk(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
     with :ok <- validate_passphrase(passphrase),
          :ok <- validate_ssid(ssid) do
       {:ok, compute_psk(ssid, passphrase)}

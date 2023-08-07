@@ -201,7 +201,8 @@ defmodule VintageNetWiFi do
            ssid: ssid,
            wep_tx_keyidx: _wep_tx_keyidx
          } = network_config
-       ) do
+       )
+       when is_binary(ssid) do
     assert_ssid(ssid)
 
     Map.take(
@@ -211,14 +212,14 @@ defmodule VintageNetWiFi do
   end
 
   # No Security
-  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) when not is_nil(ssid) do
+  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) when is_binary(ssid) do
     assert_ssid(ssid)
     Map.take(network_config, @common_network_keys)
   end
 
   # WPA-PSK
   defp normalize_network(%{key_mgmt: :wpa_psk, ssid: ssid, psk: psk} = network_config)
-       when not is_nil(ssid) and not is_nil(psk) do
+       when is_binary(ssid) and is_binary(psk) do
     case WPA2.to_psk(ssid, psk) do
       {:ok, real_psk} ->
         network_config
@@ -227,13 +228,13 @@ defmodule VintageNetWiFi do
 
       {:error, reason} ->
         raise ArgumentError,
-              "Invalid WPA-PSK WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
+              "Invalid WPA-PSK WiFi network for #{escape_string(ssid)}: #{inspect(reason)}"
     end
   end
 
   # WPA-PSK-SHA256
   defp normalize_network(%{key_mgmt: :wpa_psk_sha256, ssid: ssid, psk: psk} = network_config)
-       when not is_nil(ssid) and not is_nil(psk) do
+       when is_binary(ssid) and is_binary(psk) do
     case WPA2.to_psk(ssid, psk) do
       {:ok, real_psk} ->
         network_config
@@ -242,19 +243,19 @@ defmodule VintageNetWiFi do
 
       {:error, reason} ->
         raise ArgumentError,
-              "Invalid WPA-PSK-SHA256 WiFi network for #{inspect(ssid)}: #{inspect(reason)}"
+              "Invalid WPA-PSK-SHA256 WiFi network for #{escape_string(ssid)}: #{inspect(reason)}"
     end
   end
 
   # SAE
   defp normalize_network(%{key_mgmt: :sae, ssid: ssid, sae_password: password} = network_config)
-       when not is_nil(ssid) and not is_nil(password) do
+       when is_binary(ssid) and is_binary(password) do
     network_config
     |> Map.take([:sae_password | @common_network_keys])
   end
 
   defp normalize_network(%{key_mgmt: :sae, ssid: ssid, psk: password} = network_config)
-       when not is_nil(ssid) and not is_nil(password) do
+       when is_binary(ssid) and is_binary(password) do
     # It's easy to specify psk instead of sae_password, so convert.
     # Note: PSK passwords have more limitations that SAE passwords, so this should be safe.
     network_config
@@ -264,7 +265,7 @@ defmodule VintageNetWiFi do
 
   # WPA-EAP or IEEE8021X (TODO)
   defp normalize_network(%{key_mgmt: key_mgmt, ssid: ssid} = network_config)
-       when key_mgmt in [:wpa_eap, :IEEE8021X] and not is_nil(ssid) do
+       when key_mgmt in [:wpa_eap, :IEEE8021X] and is_binary(ssid) do
     assert_ssid(ssid)
 
     Map.take(network_config, [
@@ -292,7 +293,7 @@ defmodule VintageNetWiFi do
     ])
   end
 
-  defp normalize_network(%{ssid: ssid} = network) when not is_nil(ssid) do
+  defp normalize_network(%{ssid: ssid} = network) when is_binary(ssid) do
     # Default to no security and try again.
     network
     |> Map.put(:key_mgmt, :none)
@@ -525,7 +526,7 @@ defmodule VintageNetWiFi do
   end
 
   defp wifi_opt_to_config_string(_wifi, :ssid, ssid) do
-    "ssid=#{inspect(ssid)}"
+    "ssid=#{escape_string(ssid)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :bssid, bssid) do
@@ -565,23 +566,23 @@ defmodule VintageNetWiFi do
   end
 
   defp wifi_opt_to_config_string(_wifi, :identity, value) do
-    "identity=#{inspect(value)}"
+    "identity=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :anonymous_identity, value) do
-    "anonymous_identity=#{inspect(value)}"
+    "anonymous_identity=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :password, value) do
-    "password=#{inspect(value)}"
+    "password=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :phase1, value) do
-    "phase1=#{inspect(value)}"
+    "phase1=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :phase2, value) do
-    "phase2=#{inspect(value)}"
+    "phase2=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :pairwise, value) do
@@ -601,35 +602,35 @@ defmodule VintageNetWiFi do
   end
 
   defp wifi_opt_to_config_string(_wifi, :ca_cert, value) do
-    "ca_cert=#{inspect(value)}"
+    "ca_cert=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :ca_cert2, value) do
-    "ca_cert2=#{inspect(value)}"
+    "ca_cert2=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :client_cert, value) do
-    "client_cert=#{inspect(value)}"
+    "client_cert=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :client_cert2, value) do
-    "client_cert2=#{inspect(value)}"
+    "client_cert2=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :private_key, value) do
-    "private_key=#{inspect(value)}"
+    "private_key=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :private_key2, value) do
-    "private_key2=#{inspect(value)}"
+    "private_key2=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :private_key_passwd, value) do
-    "private_key_passwd=#{inspect(value)}"
+    "private_key_passwd=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :private_key2_passwd, value) do
-    "private_key2_passwd=#{inspect(value)}"
+    "private_key2_passwd=#{escape_string(value)}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :pin, value) do
@@ -895,5 +896,11 @@ defmodule VintageNetWiFi do
 
   defp now() do
     System.monotonic_time(:millisecond)
+  end
+
+  defp escape_string(value) when is_binary(value) do
+    # Use inspect since the Elixir API that escapes non-printable characters is
+    # currently private.
+    inspect(value, binaries: :as_strings)
   end
 end

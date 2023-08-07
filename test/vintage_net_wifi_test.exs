@@ -273,16 +273,6 @@ defmodule VintageNetWiFiTest do
         }
       })
     end
-
-    # Non-strings
-    assert_raise FunctionClauseError, fn ->
-      VintageNetWiFi.normalize(%{
-        type: VintageNetWiFi,
-        vintage_net_wifi: %{
-          networks: [%{ssid: 123, key_mgmt: :none}]
-        }
-      })
-    end
   end
 
   test "normalization converts passphrases to PSKs" do
@@ -2273,5 +2263,65 @@ defmodule VintageNetWiFiTest do
              },
              VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
            )
+  end
+
+  test "create a WiFi configuration with SSID that has nulls" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>,
+            psk: "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+            key_mgmt: :wpa_psk
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    output = %RawConfig{
+      ifname: "wlan0",
+      type: VintageNetWiFi,
+      source_config: VintageNetWiFi.normalize(input),
+      required_ifnames: ["wlan0"],
+      child_specs: [
+        {VintageNetWiFi.WPASupplicant,
+         [
+           wpa_supplicant: "wpa_supplicant",
+           ifname: "wlan0",
+           wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+           control_path: "/tmp/vintage_net/wpa_supplicant",
+           ap_mode: false,
+           verbose: false
+         ]},
+        udhcpc_child_spec("wlan0", "unit_test"),
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
+      ],
+      restart_strategy: :rest_for_one,
+      files: [
+        {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+         """
+         ctrl_interface=/tmp/vintage_net/wpa_supplicant
+         country=00
+         wps_cred_processing=1
+         network={
+         ssid="\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0"
+         key_mgmt=WPA-PSK
+         mode=0
+         psk=0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
+         }
+         """}
+      ],
+      down_cmds: [
+        {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip", ["link", "set", "wlan0", "down"]}
+      ],
+      up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
+      cleanup_files: ["/tmp/vintage_net/wpa_supplicant/wlan0"]
+    }
+
+    assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 end
