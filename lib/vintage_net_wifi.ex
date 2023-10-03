@@ -526,7 +526,8 @@ defmodule VintageNetWiFi do
   end
 
   defp wifi_opt_to_config_string(_wifi, :ssid, ssid) do
-    "ssid=#{escape_string(ssid)}"
+    process_ssid = ssid |> escape_string |> do_wpa_supplicant_ssid_hack()
+    "ssid=#{process_ssid}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :bssid, bssid) do
@@ -903,4 +904,19 @@ defmodule VintageNetWiFi do
     # currently private.
     inspect(value, binaries: :as_strings)
   end
+
+  defp do_wpa_supplicant_ssid_hack("\"" <> str) when byte_size(str) > 33 do
+    # Work around wpa_supplicant complaining about SSIDs that are too
+    # long when their unescaped length is greater than 32 characters
+    trimmed = binary_part(str, 0, 32) |> trim_orphan_backslash()
+    "\"" <> trimmed <> "\""
+  end
+
+  defp do_wpa_supplicant_ssid_hack(str), do: str
+
+  defp trim_orphan_backslash(<<s::30-bytes, second_last, ?\\>>) when second_last != ?\\ do
+    <<s::binary, second_last>>
+  end
+
+  defp trim_orphan_backslash(s), do: s
 end
