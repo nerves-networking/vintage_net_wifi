@@ -908,7 +908,7 @@ defmodule VintageNetWiFi do
   defp do_wpa_supplicant_ssid_hack("\"" <> str) when byte_size(str) > 33 do
     # Work around wpa_supplicant complaining about SSIDs that are too
     # long when their unescaped length is greater than 32 characters
-    Logger.warn("Trimming unusual SSID to avoid wpa_supplicant issue. Check config.")
+    Logger.warning("Trimming unusual SSID to avoid wpa_supplicant issue. Check config.")
     trimmed = binary_part(str, 0, 32) |> trim_orphan_backslash()
     "\"" <> trimmed <> "\""
   end
