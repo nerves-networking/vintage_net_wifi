@@ -23,7 +23,7 @@ defmodule VintageNetWiFi.MeshPeer.FormationInformation do
   @spec decode_formation_information(<<_::8>>) :: t()
   def decode_formation_information(<<
         connected_to_as::1,
-        number_of_peerings::unsigned-6,
+        number_of_peerings::6,
         connected_to_mesh_gate::1
       >>) do
     %__MODULE__{

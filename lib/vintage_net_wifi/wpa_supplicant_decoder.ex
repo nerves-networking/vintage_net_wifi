@@ -181,11 +181,11 @@ defmodule VintageNetWiFi.WPASupplicantDecoder do
     )
   end
 
-  defp eap_peer_cert_decode(<<char::size(1)-binary, rest::binary>>, %{key?: true} = state, acc) do
+  defp eap_peer_cert_decode(<<char::1-bytes, rest::binary>>, %{key?: true} = state, acc) do
     eap_peer_cert_decode(rest, %{state | key: state.key <> char}, acc)
   end
 
-  defp eap_peer_cert_decode(<<char::size(1)-binary, rest::binary>>, %{key?: false} = state, acc) do
+  defp eap_peer_cert_decode(<<char::1-bytes, rest::binary>>, %{key?: false} = state, acc) do
     eap_peer_cert_decode(rest, %{state | value: state.value <> char}, acc)
   end
 
