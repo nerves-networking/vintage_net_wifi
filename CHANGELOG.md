@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.11.7 - 2023-10-04
+
+* Fixed
+  * Workaround issue passing SSIDs that contain a lot of escaped characters.
+    These were probably invalid anyway, but this prevents needless retries.
+
+* Changes
+  * Lowered log priority (warning -> debug) of several messages that occur a lot
+    and aren't really problems.
+
 ## v0.11.6 - 2023-03-08
 
 * Fixed
