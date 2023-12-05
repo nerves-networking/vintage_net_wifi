@@ -840,7 +840,7 @@ defmodule VintageNetWiFi do
   call `VintageNet.scan/1` every 30 seconds or so to repeat the scan across all
   WiFi channels.
   """
-  @spec quick_scan(non_neg_integer()) :: [VintageNetWiFi.AccessPoint.t()]
+  @spec quick_scan(non_neg_integer()) :: [map()]
   def quick_scan(wait_time_ms \\ 2_000) do
     :ok = ioctl("wlan0", :scan, [])
 
@@ -848,6 +848,30 @@ defmodule VintageNetWiFi do
     Process.sleep(wait_time_ms)
 
     VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
+    |> summarize_access_points()
+  end
+
+  @spec summarize_access_points([VintageNetWiFi.AccessPoint.t()]) :: [map()]
+  def summarize_access_points(access_points) do
+    extracted_access_points_info =
+      Enum.flat_map(access_points, fn %{
+                                        ssid: my_ssid,
+                                        signal_percent: signal_percent,
+                                        flags: security
+                                      } ->
+        cond do
+          String.contains?(my_ssid, "\0") -> []
+          String.trim(my_ssid) == "" -> []
+          true -> [%{ssid: my_ssid, signal_strength: signal_percent, security_flags: security}]
+        end
+      end)
+
+    Enum.sort_by(
+      extracted_access_points_info,
+      fn %{signal_strength: percent} -> percent end,
+      :desc
+    )
+    |> Enum.uniq_by(fn %{ssid: s} -> s end)
   end
 
   @doc """

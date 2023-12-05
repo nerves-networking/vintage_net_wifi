@@ -2450,4 +2450,99 @@ defmodule VintageNetWiFiTest do
 
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
+
+  test "Summarize access_point list: When duplicate access points exist, keep the one with a stronger signal percent" do
+    input = [
+      %VintageNetWiFi.AccessPoint{
+        bssid: "02:cb:7a:04:e9:52",
+        frequency: 5220,
+        band: :wifi_5_ghz,
+        channel: 44,
+        signal_dbm: -57,
+        signal_percent: 90,
+        flags: [:ess],
+        ssid: "xfinitywifi"
+      },
+      %VintageNetWiFi.AccessPoint{
+        bssid: "02:cb:7a:04:e9:54",
+        frequency: 5220,
+        band: :wifi_5_ghz,
+        channel: 44,
+        signal_dbm: -57,
+        signal_percent: 81,
+        flags: [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess, :hs20],
+        ssid: "anotherWifi"
+      },
+      %VintageNetWiFi.AccessPoint{
+        bssid: "0e:51:a4:b2:e2:a1",
+        frequency: 5180,
+        band: :wifi_5_ghz,
+        channel: 36,
+        signal_dbm: -60,
+        signal_percent: 86,
+        flags: [:ess],
+        ssid: "xfinitywifi"
+      }
+    ]
+
+    expected_output = [
+      %{
+        ssid: "xfinitywifi",
+        signal_strength: 90,
+        security_flags: [:ess]
+      },
+      %{
+        ssid: "anotherWifi",
+        signal_strength: 81,
+        security_flags: [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess, :hs20]
+      }
+    ]
+
+    assert expected_output == VintageNetWiFi.summarize_access_points(input)
+  end
+
+  test "Summarize access_point list: SSIDs that contain null characters are removed" do
+    input = [
+      %VintageNetWiFi.AccessPoint{
+        bssid: "02:cb:7a:04:e9:52",
+        frequency: 5220,
+        band: :wifi_5_ghz,
+        channel: 44,
+        signal_dbm: -57,
+        signal_percent: 90,
+        flags: [:ess],
+        ssid: "hidden\0"
+      },
+      %VintageNetWiFi.AccessPoint{
+        bssid: "02:cb:7a:04:e9:54",
+        frequency: 5220,
+        band: :wifi_5_ghz,
+        channel: 44,
+        signal_dbm: -57,
+        signal_percent: 81,
+        flags: [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess, :hs20],
+        ssid: "\0\0\0"
+      },
+      %VintageNetWiFi.AccessPoint{
+        bssid: "0e:51:a4:b2:e2:a1",
+        frequency: 5180,
+        band: :wifi_5_ghz,
+        channel: 36,
+        signal_dbm: -60,
+        signal_percent: 86,
+        flags: [:ess],
+        ssid: "onlyRemainingWiFi"
+      }
+    ]
+
+    expected_output = [
+      %{
+        ssid: "onlyRemainingWiFi",
+        signal_strength: 86,
+        security_flags: [:ess]
+      }
+    ]
+
+    assert expected_output == VintageNetWiFi.summarize_access_points(input)
+  end
 end
