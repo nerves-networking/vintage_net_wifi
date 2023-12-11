@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.12.0 - 2023-12-11
+
+* Changes
+  * Added `VintageNetWiFi.summarize_access_points/1` to centralize filtering and
+    sorting access point lists for presentation to users. (Thanks
+    @grace-in-wonderland)
+  * Change `VintageNetWiFi.quick_scan/1` to call `summarize_access_points/1`.
+    This should make it much easier to find SSIDs at the IEx prompt. It's
+    technically an API change. See the function's hexdocs for details.
+
 ## v0.11.7 - 2023-10-04
 
 * Fixed
