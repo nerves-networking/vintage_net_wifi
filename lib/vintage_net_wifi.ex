@@ -64,8 +64,13 @@ defmodule VintageNetWiFi do
   @behaviour VintageNet.Technology
 
   alias VintageNet.Interface.RawConfig
-  alias VintageNet.IP.{DhcpdConfig, DnsdConfig, IPv4Config}
-  alias VintageNetWiFi.{Cookbook, WPA2, WPASupplicant}
+  alias VintageNet.IP.DhcpdConfig
+  alias VintageNet.IP.DnsdConfig
+  alias VintageNet.IP.IPv4Config
+  alias VintageNetWiFi.AccessPoint
+  alias VintageNetWiFi.Cookbook
+  alias VintageNetWiFi.WPA2
+  alias VintageNetWiFi.WPASupplicant
 
   require Logger
 
@@ -838,9 +843,10 @@ defmodule VintageNetWiFi do
 
   Both `old_value` and `new_value` will be lists of access points. You'll need
   call `VintageNet.scan/1` every 30 seconds or so to repeat the scan across all
-  WiFi channels.
+  WiFi channels. See also `VintageNetWiFi.summarize_access_points/1` to get an
+  easier to manage list of access points for presentation to users.
   """
-  @spec quick_scan(non_neg_integer()) :: [map()]
+  @spec quick_scan(non_neg_integer()) :: [AccessPoint.t()]
   def quick_scan(wait_time_ms \\ 2_000) do
     :ok = ioctl("wlan0", :scan, [])
 
@@ -851,27 +857,33 @@ defmodule VintageNetWiFi do
     |> summarize_access_points()
   end
 
-  @spec summarize_access_points([VintageNetWiFi.AccessPoint.t()]) :: [map()]
-  def summarize_access_points(access_points) do
-    extracted_access_points_info =
-      Enum.flat_map(access_points, fn %{
-                                        ssid: my_ssid,
-                                        signal_percent: signal_percent,
-                                        flags: security
-                                      } ->
-        cond do
-          String.contains?(my_ssid, "\0") -> []
-          String.trim(my_ssid) == "" -> []
-          true -> [%{ssid: my_ssid, signal_strength: signal_percent, security_flags: security}]
-        end
-      end)
+  @doc """
+  Summarize access point lists
 
-    Enum.sort_by(
-      extracted_access_points_info,
-      fn %{signal_strength: percent} -> percent end,
-      :desc
-    )
+  This function summarizes a list of access points, such as those returned from
+  `quick_scan/1` or via calls to `VintageNet.scan/1` checking the
+  `["interface", "wlan0", "wifi", "access_points"]` property.  The summary
+  provides a list that most people are used to seeing when looking for access
+  points. It does the following:
+
+  * When the same SSID is found on multiple channels, it picks the one with the
+    best signal and removes the others.
+  * Filter out SSIDs used by mesh routers and other devices that wouldn't work
+  * Sort SSIDs by signal strength
+  """
+  @spec summarize_access_points([AccessPoint.t()]) :: [AccessPoint.t()]
+  def summarize_access_points(access_points) do
+    access_points
+    |> Enum.filter(&usable_ssid?/1)
+    |> Enum.sort_by(fn %{signal_percent: p} -> p end, :desc)
     |> Enum.uniq_by(fn %{ssid: s} -> s end)
+  end
+
+  defp usable_ssid?(access_point) do
+    ssid = access_point.ssid
+
+    not String.contains?(ssid, "\0") and
+      String.trim(ssid) != ""
   end
 
   @doc """

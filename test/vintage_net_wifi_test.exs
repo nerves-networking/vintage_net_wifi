@@ -2486,15 +2486,25 @@ defmodule VintageNetWiFiTest do
     ]
 
     expected_output = [
-      %{
+      %VintageNetWiFi.AccessPoint{
         ssid: "xfinitywifi",
-        signal_strength: 90,
-        security_flags: [:ess]
+        band: :wifi_5_ghz,
+        bssid: "02:cb:7a:04:e9:52",
+        channel: 44,
+        flags: [:ess],
+        frequency: 5220,
+        signal_dbm: -57,
+        signal_percent: 90
       },
-      %{
+      %VintageNetWiFi.AccessPoint{
         ssid: "anotherWifi",
-        signal_strength: 81,
-        security_flags: [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess, :hs20]
+        band: :wifi_5_ghz,
+        bssid: "02:cb:7a:04:e9:54",
+        channel: 44,
+        flags: [:wpa2_eap_ccmp, :wpa2, :eap, :ccmp, :ess, :hs20],
+        frequency: 5220,
+        signal_dbm: -57,
+        signal_percent: 81
       }
     ]
 
@@ -2536,10 +2546,15 @@ defmodule VintageNetWiFiTest do
     ]
 
     expected_output = [
-      %{
-        ssid: "onlyRemainingWiFi",
-        signal_strength: 86,
-        security_flags: [:ess]
+      %VintageNetWiFi.AccessPoint{
+        bssid: "0e:51:a4:b2:e2:a1",
+        frequency: 5180,
+        band: :wifi_5_ghz,
+        channel: 36,
+        signal_dbm: -60,
+        signal_percent: 86,
+        flags: [:ess],
+        ssid: "onlyRemainingWiFi"
       }
     ]
 
