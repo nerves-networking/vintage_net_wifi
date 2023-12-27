@@ -2693,4 +2693,20 @@ defmodule VintageNetWiFiTest do
     refute VintageNetWiFi.network_configured?(empty2)
     refute VintageNetWiFi.network_configured?(%{})
   end
+
+  test "generating QR strings" do
+    assert VintageNetWiFi.qr_string("Nerves", "IsCool") ==
+             "WIFI:S:Nerves;T:WPA;P:IsCool;H:false;;"
+
+    assert VintageNetWiFi.qr_string("Nerves", "") == "WIFI:S:Nerves;T:WPA;P:;H:false;;"
+
+    assert VintageNetWiFi.qr_string("Nerves", "IsCool", hidden: true) ==
+             "WIFI:S:Nerves;T:WPA;P:IsCool;H:true;;"
+
+    assert VintageNetWiFi.qr_string("Nerves", "IsCool", type: :WEP) ==
+             "WIFI:S:Nerves;T:WEP;P:IsCool;H:false;;"
+
+    assert VintageNetWiFi.qr_string("Nerves", "IsCool", type: :nopass) ==
+             "WIFI:S:Nerves;T:nopass;P:IsCool;H:false;;"
+  end
 end

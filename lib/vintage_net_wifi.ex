@@ -861,6 +861,24 @@ defmodule VintageNetWiFi do
   end
 
   @doc """
+  Generate string for WiFi credentials to be used in a QR code
+
+  This makes a formatted string specific to WiFi credentials. When
+  scaned from a mobile device, it will prompt the user to join the
+  WiFi network without having to enter any details manually.
+
+  See https://en.wikipedia.org/wiki/QR_code#Joining_a_Wi%E2%80%91Fi_network
+  for more format details
+  """
+  @type qr_opt :: {:hidden, boolean()} | {:type, :WPA | :WEP | :nopass}
+  @spec qr_string(String.t(), String.t(), [qr_opt()]) :: String.t()
+  def qr_string(ssid, psk, opts \\ []) do
+    type = opts[:type] || "WPA"
+    hidden = opts[:hidden] || false
+    "WIFI:S:#{ssid};T:#{type};P:#{psk};H:#{hidden};;"
+  end
+
+  @doc """
   Convenience function to scan for access points
 
   This function initiates a scan, waits, and then returns all of the discovered
