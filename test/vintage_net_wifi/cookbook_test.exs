@@ -25,6 +25,19 @@ defmodule VintageNetWiFi.CookbookTest do
             }} == Cookbook.wpa_psk("my_ssid", "my_passphrase")
   end
 
+  test "wpa3_sae/2" do
+    assert {:ok,
+            %{
+              type: VintageNetWiFi,
+              ipv4: %{method: :dhcp},
+              vintage_net_wifi: %{
+                networks: [
+                  %{key_mgmt: :sae, ieee80211w: 2, sae_password: "my_passphrase", ssid: "my_ssid"}
+                ]
+              }
+            }} == Cookbook.wpa3_sae("my_ssid", "my_passphrase")
+  end
+
   test "wpa_eap_peap/2" do
     assert {:ok,
             %{
