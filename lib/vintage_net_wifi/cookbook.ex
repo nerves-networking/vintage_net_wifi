@@ -64,6 +64,36 @@ defmodule VintageNetWiFi.Cookbook do
   end
 
   @doc """
+  Return a configuration for connecting to a WPA3 network
+
+  Pass an SSID and passphrase. If the SSID and passphrase are ok, you'll get an
+  `:ok` tuple with the configuration. If there's a problem, you'll get an error
+  tuple with a reason.
+  """
+  @spec wpa3_sae(String.t(), String.t()) ::
+          {:ok, map()} | {:error, WPA2.invalid_ssid_error() | WPA2.invalid_passphrase_error()}
+  def wpa3_sae(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
+    with :ok <- WPA2.validate_ssid(ssid),
+         :ok <- WPA2.validate_passphrase(passphrase) do
+      {:ok,
+       %{
+         type: VintageNetWiFi,
+         vintage_net_wifi: %{
+           networks: [
+             %{
+               key_mgmt: :sae,
+               ieee80211w: 2,
+               sae_password: passphrase,
+               ssid: ssid
+             }
+           ]
+         },
+         ipv4: %{method: :dhcp}
+       }}
+    end
+  end
+
+  @doc """
   Return a configuration for connecting to a WPA-EAP PEAP network
 
   Pass an SSID and login credentials. If valid, you'll get an
