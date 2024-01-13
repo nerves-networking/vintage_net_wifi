@@ -529,6 +529,70 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
+  test "create a WPA2, WPA2 SHA256, WPA3 WiFi configuration" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "testing",
+            psk: "password",
+            sae_password: "password",
+            key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+            ieee80211w: 2
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    output = %RawConfig{
+      ifname: "wlan0",
+      type: VintageNetWiFi,
+      source_config: VintageNetWiFi.normalize(input),
+      required_ifnames: ["wlan0"],
+      child_specs: [
+        {VintageNetWiFi.WPASupplicant,
+         [
+           wpa_supplicant: "wpa_supplicant",
+           ifname: "wlan0",
+           wpa_supplicant_conf_path: "/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+           control_path: "/tmp/vintage_net/wpa_supplicant",
+           ap_mode: false,
+           verbose: false
+         ]},
+        udhcpc_child_spec("wlan0", "unit_test"),
+        {VintageNet.Connectivity.InternetChecker, "wlan0"}
+      ],
+      restart_strategy: :rest_for_one,
+      files: [
+        {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+         """
+         ctrl_interface=/tmp/vintage_net/wpa_supplicant
+         country=00
+         wps_cred_processing=1
+         network={
+         ssid="testing"
+         key_mgmt=SAE WPA-PSK-SHA256 WPA-PSK
+         mode=0
+         ieee80211w=2
+         psk=5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394
+         sae_password="password"
+         }
+         """}
+      ],
+      up_cmds: [{:run, "ip", ["link", "set", "wlan0", "up"]}],
+      down_cmds: [
+        {:run_ignore_errors, "ip", ["addr", "flush", "dev", "wlan0", "label", "wlan0"]},
+        {:run, "ip", ["link", "set", "wlan0", "down"]}
+      ],
+      cleanup_files: ["/tmp/vintage_net/wpa_supplicant/wlan0"]
+    }
+
+    assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+  end
+
   test "create an open WiFi configuration" do
     input = %{
       type: VintageNetWiFi,

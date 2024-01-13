@@ -199,10 +199,23 @@ defmodule VintageNetWiFi do
     end
   end
 
+  defp normalize_network(%{key_mgmt: keys} = network_config) do
+    List.wrap(keys)
+    |> Enum.map(&extract_network_options(&1, network_config))
+    |> Enum.reduce(%{}, &Map.merge/2)
+  end
+
+  defp normalize_network(network_config) do
+    # Default to no security and try again.
+    network_config
+    |> Map.put(:key_mgmt, :none)
+    |> normalize_network()
+  end
+
   # WEP
-  defp normalize_network(
+  defp extract_network_options(
+         :none,
          %{
-           key_mgmt: :none,
            ssid: ssid,
            wep_tx_keyidx: _wep_tx_keyidx
          } = network_config
@@ -217,13 +230,13 @@ defmodule VintageNetWiFi do
   end
 
   # No Security
-  defp normalize_network(%{key_mgmt: :none, ssid: ssid} = network_config) when is_binary(ssid) do
+  defp extract_network_options(:none, %{ssid: ssid} = network_config) when is_binary(ssid) do
     assert_ssid(ssid)
     Map.take(network_config, @common_network_keys)
   end
 
   # WPA-PSK
-  defp normalize_network(%{key_mgmt: :wpa_psk, ssid: ssid, psk: psk} = network_config)
+  defp extract_network_options(:wpa_psk, %{ssid: ssid, psk: psk} = network_config)
        when is_binary(ssid) and is_binary(psk) do
     case WPA2.to_psk(ssid, psk) do
       {:ok, real_psk} ->
@@ -238,7 +251,7 @@ defmodule VintageNetWiFi do
   end
 
   # WPA-PSK-SHA256
-  defp normalize_network(%{key_mgmt: :wpa_psk_sha256, ssid: ssid, psk: psk} = network_config)
+  defp extract_network_options(:wpa_psk_sha256, %{ssid: ssid, psk: psk} = network_config)
        when is_binary(ssid) and is_binary(psk) do
     case WPA2.to_psk(ssid, psk) do
       {:ok, real_psk} ->
@@ -253,23 +266,21 @@ defmodule VintageNetWiFi do
   end
 
   # SAE
-  defp normalize_network(%{key_mgmt: :sae, ssid: ssid, sae_password: password} = network_config)
+  defp extract_network_options(:sae, %{ssid: ssid, sae_password: password} = network_config)
        when is_binary(ssid) and is_binary(password) do
     network_config
     |> Map.take([:sae_password | @common_network_keys])
   end
 
-  defp normalize_network(%{key_mgmt: :sae, ssid: ssid, psk: password} = network_config)
+  defp extract_network_options(:sae, %{ssid: ssid, psk: password} = network_config)
        when is_binary(ssid) and is_binary(password) do
     # It's easy to specify psk instead of sae_password, so convert.
     # Note: PSK passwords have more limitations that SAE passwords, so this should be safe.
-    network_config
-    |> Map.put(:sae_password, password)
-    |> normalize_network()
+    extract_network_options(:sae, Map.put(network_config, :sae_password, password))
   end
 
   # WPA-EAP or IEEE8021X (TODO)
-  defp normalize_network(%{key_mgmt: key_mgmt, ssid: ssid} = network_config)
+  defp extract_network_options(key_mgmt, %{ssid: ssid} = network_config)
        when key_mgmt in [:wpa_eap, :IEEE8021X] and is_binary(ssid) do
     assert_ssid(ssid)
 
@@ -298,14 +309,7 @@ defmodule VintageNetWiFi do
     ])
   end
 
-  defp normalize_network(%{ssid: ssid} = network) when is_binary(ssid) do
-    # Default to no security and try again.
-    network
-    |> Map.put(:key_mgmt, :none)
-    |> normalize_network()
-  end
-
-  defp normalize_network(%{ssid: nil} = network) do
+  defp extract_network_options(_, %{ssid: nil} = network) do
     # This case happens when the user gets the ssid from the application
     # environment or somewhere else and that place returns `nil`. Rather
     # than crash this configuration, the expected thing seems to be to
@@ -315,7 +319,7 @@ defmodule VintageNetWiFi do
     %{}
   end
 
-  defp normalize_network(network) do
+  defp extract_network_options(_, network) do
     raise ArgumentError, "don't know how to process #{inspect(network)}"
   end
 
@@ -417,12 +421,16 @@ defmodule VintageNetWiFi do
     IO.chardata_to_string(iodata)
   end
 
-  defp key_mgmt_to_string(:none), do: "NONE"
-  defp key_mgmt_to_string(:wpa_psk), do: "WPA-PSK"
-  defp key_mgmt_to_string(:wpa_psk_sha256), do: "WPA-PSK-SHA256"
-  defp key_mgmt_to_string(:wpa_eap), do: "WPA-EAP"
-  defp key_mgmt_to_string(:IEEE8021X), do: "IEEE8021X"
-  defp key_mgmt_to_string(:sae), do: "SAE"
+  defp key_mgmt_to_string(key_mgmt) do
+    key_mgmt |> List.wrap() |> Enum.map_join(" ", &key_mgmt_item_to_string/1)
+  end
+
+  defp key_mgmt_item_to_string(:none), do: "NONE"
+  defp key_mgmt_item_to_string(:wpa_psk), do: "WPA-PSK"
+  defp key_mgmt_item_to_string(:wpa_psk_sha256), do: "WPA-PSK-SHA256"
+  defp key_mgmt_item_to_string(:wpa_eap), do: "WPA-EAP"
+  defp key_mgmt_item_to_string(:IEEE8021X), do: "IEEE8021X"
+  defp key_mgmt_item_to_string(:sae), do: "SAE"
 
   defp mode_to_string(:infrastructure), do: "0"
   defp mode_to_string(:ibss), do: "1"
