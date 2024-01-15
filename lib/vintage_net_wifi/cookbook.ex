@@ -33,7 +33,7 @@ defmodule VintageNetWiFi.Cookbook do
                ssid: ssid,
                psk: passphrase,
                sae_password: passphrase,
-               key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+               key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
                ieee80211w: 2
              }
            ]

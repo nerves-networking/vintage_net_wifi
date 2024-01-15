@@ -529,6 +529,43 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
+  test "normalize creates backwards compatible key_mgmt" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "testing",
+            psk: "password",
+            sae_password: "password",
+            key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
+            ieee80211w: 2
+          }
+        ]
+      }
+    }
+
+    normalized_input = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :dhcp},
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "testing",
+            psk: "5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394",
+            sae_password: "password",
+            ieee80211w: 2,
+            allowed_key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
+            key_mgmt: :wpa_psk,
+            mode: :infrastructure
+          }
+        ]
+      }
+    }
+
+    assert normalized_input == VintageNetWiFi.normalize(input)
+  end
+
   test "create a WPA2, WPA2 SHA256, WPA3 WiFi configuration" do
     input = %{
       type: VintageNetWiFi,
@@ -538,7 +575,7 @@ defmodule VintageNetWiFiTest do
             ssid: "testing",
             psk: "password",
             sae_password: "password",
-            key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+            key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
             ieee80211w: 2
           }
         ]
@@ -574,7 +611,7 @@ defmodule VintageNetWiFiTest do
          wps_cred_processing=1
          network={
          ssid="testing"
-         key_mgmt=SAE WPA-PSK-SHA256 WPA-PSK
+         key_mgmt=WPA-PSK WPA-PSK-SHA256 SAE
          mode=0
          ieee80211w=2
          psk=5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394

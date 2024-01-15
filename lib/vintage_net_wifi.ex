@@ -79,6 +79,7 @@ defmodule VintageNetWiFi do
   @common_network_keys [
     :mode,
     :key_mgmt,
+    :allowed_key_mgmt,
     :ssid,
     :bssid,
     :bssid_allowlist,
@@ -199,10 +200,37 @@ defmodule VintageNetWiFi do
     end
   end
 
-  defp normalize_network(%{key_mgmt: keys} = network_config) do
-    List.wrap(keys)
+  # v0.12.1 note:
+  # :key_mgmt was originally restricted to be an atom, but in v0.12.1, it could be
+  # a list. Since lists aren't supported in v0.12.0 and earlier, this could result
+  # in a broken WiFi configuration if you revert to a firmware using the earlier
+  # version.
+  #
+  # To fix this:
+  #
+  # 1. Support lists in `:key_mgmt` for the future, but normalize configs to store
+  #    the list in `:allowed_key_mgmt` and have `:key_mgmt` hold the first item.
+  # 2. Use `:allowed_key_mgmt` in preference to `:key_mgmt`
+  # 3. Some time in the future when v0.12.0 is unlikely to be used, normalize configs
+  #    to use lists for `:key_mgmt` instead of using `:allowed_key_mgmt`.
+  # 4. Even farther in the future, phase out support for `:allowed_key_mgmt`.
+  defp normalize_network(%{allowed_key_mgmt: keys} = network_config) when is_list(keys) do
+    keys
     |> Enum.map(&extract_network_options(&1, network_config))
     |> Enum.reduce(%{}, &Map.merge/2)
+    |> Map.put_new(:key_mgmt, hd(keys))
+  end
+
+  defp normalize_network(%{key_mgmt: key} = network_config) when is_atom(key) do
+    extract_network_options(key, network_config)
+  end
+
+  defp normalize_network(%{key_mgmt: keys} = network_config) when is_list(keys) do
+    keys
+    |> Enum.map(&extract_network_options(&1, network_config))
+    |> Enum.reduce(%{}, &Map.merge/2)
+    |> Map.put(:allowed_key_mgmt, keys)
+    |> Map.put(:key_mgmt, hd(keys))
   end
 
   defp normalize_network(network_config) do
@@ -449,16 +477,18 @@ defmodule VintageNetWiFi do
   defp pmk_to_string(:optional), do: "1"
   defp pmk_to_string(:required), do: "2"
 
-  defp into_wifi_network_config(%{networks: networks}) do
+  defp into_wifi_network_config(%{networks: networks}) when is_list(networks) do
     Enum.map(networks, &into_wifi_network_config/1)
   end
 
   defp into_wifi_network_config(wifi) do
+    key_mgmt = if Map.has_key?(wifi, :allowed_key_mgmt), do: :allowed_key_mgmt, else: :key_mgmt
+
     network_config([
       # Common settings
       into_config_string(wifi, :ssid),
       into_config_string(wifi, :bssid),
-      into_config_string(wifi, :key_mgmt),
+      into_config_string(wifi, key_mgmt),
       into_config_string(wifi, :scan_ssid),
       into_config_string(wifi, :priority),
       into_config_string(wifi, :bssid_allowlist),
@@ -555,7 +585,8 @@ defmodule VintageNetWiFi do
     "wpa_ptk_rekey=#{wpa_ptk_rekey}"
   end
 
-  defp wifi_opt_to_config_string(_wifi, :key_mgmt, key_mgmt) do
+  defp wifi_opt_to_config_string(_wifi, key_mgmt_key, key_mgmt)
+       when key_mgmt_key in [:key_mgmt, :allowed_key_mgmt] do
     "key_mgmt=#{key_mgmt_to_string(key_mgmt)}"
   end
 

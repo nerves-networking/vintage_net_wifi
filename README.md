@@ -115,7 +115,11 @@ The `:vintage_net_wifi` key has the following common fields:
   * `:ssid` - The SSID for the network
   * `:key_mgmt` - WiFi security mode (`:wpa_psk` for WPA2, `:none` for no
     password or WEP, `:sae` for pure WPA3, or `:wpa_psk_sha256` for WPA2 with
-    SHA256)
+    SHA256). Not used if `:allowed_key_mgmt` is set.
+  * `:allowed_key_mgmt` - A list of allowed WiFi security modes. See `:key_mgmt`
+    for options. Supported in v0.12.1+. VintageNetWiFi's configuration
+    normalizer automatically sets `:key_mgmt` to the first option in the list
+    for backwards compatibility with v0.12.0 and earlier.
   * `:psk` - A WPA2 passphrase or the raw PSK. If a passphrase is passed in, it
     will be converted to a PSK and discarded.
   * `:sae_password` - A password for use with SAE authentication. This is

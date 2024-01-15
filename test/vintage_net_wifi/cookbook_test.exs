@@ -11,7 +11,7 @@ defmodule VintageNetWiFi.CookbookTest do
               vintage_net_wifi: %{
                 networks: [
                   %{
-                    key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+                    key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
                     psk: "my_passphrase",
                     ssid: "my_ssid",
                     ieee80211w: 2,
