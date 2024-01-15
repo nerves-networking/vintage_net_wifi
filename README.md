@@ -92,8 +92,8 @@ The `:vintage_net_wifi` key has the following common fields:
     * `:mesh` - mesh mode
   * `:ssid` - The SSID for the network
   * `:key_mgmt` - WiFi security mode (`:wpa_psk` for WPA2, `:none` for no
-    password or WEP, `:sae` for pure WPA3, or `:wpa_psk_sha256` for transitional
-    WPA2/WPA3)
+    password or WEP, `:sae` for pure WPA3, or `:wpa_psk_sha256` for WPA2 with
+    SHA256)
   * `:psk` - A WPA2 passphrase or the raw PSK. If a passphrase is passed in, it
     will be converted to a PSK and discarded.
   * `:sae_password` - A password for use with SAE authentication. This is
@@ -197,7 +197,7 @@ iex> VintageNet.configure("wlan0", %{
     })
 ```
 
-A transitional WPA2/WPA3 configuration looks like:
+WPA2 w/ SHA256 configuration looks like:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
