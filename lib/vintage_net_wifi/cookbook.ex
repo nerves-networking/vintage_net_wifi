@@ -9,6 +9,41 @@ defmodule VintageNetWiFi.Cookbook do
   alias VintageNetWiFi.WPA2
 
   @doc """
+  Return a generic configuration for connecting to preshared-key networks
+
+  The returned configuration should be able to connect to an access point
+  configured to use WPA3-only, WPA2/3 transitional or WPA2. The WiFi module
+  must also support WPA3 for this to work.
+
+  Pass an SSID and passphrase. If the SSID and passphrase are ok, you'll get an
+  `:ok` tuple with the configuration. If there's a problem, you'll get an error
+  tuple with a reason.
+  """
+  @spec generic(String.t(), String.t()) ::
+          {:ok, map()} | {:error, WPA2.invalid_ssid_error() | WPA2.invalid_passphrase_error()}
+  def generic(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
+    with :ok <- WPA2.validate_ssid(ssid),
+         :ok <- WPA2.validate_passphrase(passphrase) do
+      {:ok,
+       %{
+         type: VintageNetWiFi,
+         vintage_net_wifi: %{
+           networks: [
+             %{
+               ssid: ssid,
+               psk: passphrase,
+               sae_password: passphrase,
+               key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+               ieee80211w: 2
+             }
+           ]
+         },
+         ipv4: %{method: :dhcp}
+       }}
+    end
+  end
+
+  @doc """
   Return a configuration for connecting to open WiFi network
 
   Pass an SSID and passphrase. If the SSID and passphrase are ok, you'll get an

@@ -3,6 +3,25 @@ defmodule VintageNetWiFi.CookbookTest do
 
   alias VintageNetWiFi.Cookbook
 
+  test "generic/2" do
+    assert {:ok,
+            %{
+              type: VintageNetWiFi,
+              ipv4: %{method: :dhcp},
+              vintage_net_wifi: %{
+                networks: [
+                  %{
+                    key_mgmt: [:sae, :wpa_psk_sha256, :wpa_psk],
+                    psk: "my_passphrase",
+                    ssid: "my_ssid",
+                    ieee80211w: 2,
+                    sae_password: "my_passphrase"
+                  }
+                ]
+              }
+            }} == Cookbook.generic("my_ssid", "my_passphrase")
+  end
+
   test "open_wifi/2" do
     assert {:ok,
             %{

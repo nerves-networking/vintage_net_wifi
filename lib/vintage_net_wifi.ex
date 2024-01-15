@@ -787,7 +787,7 @@ defmodule VintageNetWiFi do
   @doc """
   Configure WiFi using the most common settings
 
-  If your network requires a password (WPA PSK networks):
+  If your network requires a password (WPA2 PSK and WPA3 SAE networks):
 
   ```
   iex> VintageNetWiFi.quick_configure("ssid", "password")
@@ -824,7 +824,7 @@ defmodule VintageNetWiFi do
   end
 
   def quick_configure(ssid, passphrase) do
-    with {:ok, config} <- Cookbook.wpa_psk(ssid, passphrase) do
+    with {:ok, config} <- Cookbook.generic(ssid, passphrase) do
       VintageNet.configure("wlan0", config)
     end
   end
