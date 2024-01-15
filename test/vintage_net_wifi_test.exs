@@ -511,7 +511,7 @@ defmodule VintageNetWiFiTest do
          wps_cred_processing=1
          network={
          ssid="testing"
-         key_mgmt=WPA2-PSK-SHA256
+         key_mgmt=WPA-PSK-SHA256
          mode=0
          ieee80211w=2
          psk=5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394

@@ -419,7 +419,7 @@ defmodule VintageNetWiFi do
 
   defp key_mgmt_to_string(:none), do: "NONE"
   defp key_mgmt_to_string(:wpa_psk), do: "WPA-PSK"
-  defp key_mgmt_to_string(:wpa_psk_sha256), do: "WPA2-PSK-SHA256"
+  defp key_mgmt_to_string(:wpa_psk_sha256), do: "WPA-PSK-SHA256"
   defp key_mgmt_to_string(:wpa_eap), do: "WPA-EAP"
   defp key_mgmt_to_string(:IEEE8021X), do: "IEEE8021X"
   defp key_mgmt_to_string(:sae), do: "SAE"
