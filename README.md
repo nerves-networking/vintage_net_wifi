@@ -20,7 +20,7 @@ Once that's done, all that you need to do is add `:vintage_net_wifi` to your
 ```elixir
 def deps do
   [
-    {:vintage_net_wifi, "~> 0.9.0", targets: @all_targets}
+    {:vintage_net_wifi, "~> 0.12.0", targets: @all_targets}
   ]
 end
 ```
@@ -33,6 +33,28 @@ end
 >
 > If you are using access point mode, check that `CONFIG_UDHCPD` is enabled
 > in Busybox and `BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT` is enabled in Buildroot.
+
+## Usage
+
+The easiest way to configure WiFi is to using
+`VintageNetWiFi.quick_configure/2`. For example:
+
+```
+iex> VintageNetWiFi.quick_configure("my_access_point", "secret_passphrase")
+:ok
+```
+
+Using `VintageNet.info` to check whether you're connected. If there's no
+connection and you think there should be one, try watching the logs. On Nerves,
+the normal ways are to run `RingLogger.next`, `RingLogger.viewer` or
+`log_attach`/`log_detach` from an IEx prompt. (Hopefully the console or a wired
+network interface works)
+
+The second easiest way to create WiFi configurations is to use the helper
+functions in `VintageNetWiFi.Cookbook`. Check out the module documentation for
+the various configurations.
+
+## Advanced usage
 
 WiFi network interfaces typically have names like `"wlan0"` or `"wlan1"` when
 using Nerves. Most of the time, there's only one WiFi interface and its
@@ -115,9 +137,9 @@ docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf).
 mistakes from breaking the `wpa_supplicant.conf` file. To inspect the generated
 configuration, run `File.read("/tmp/vintage_net/wpa_supplicant.conf.wlan0")`.
 
-If you do not want VintageNetWiFi to generate a `wpa_supplicant.conf` file for you, you
-can specify the contents for yourself by using the `:wpa_supplicant_conf` key.
-For example,
+If you do not want VintageNetWiFi to generate a `wpa_supplicant.conf` file for
+you, you can specify the contents for yourself by using the
+`:wpa_supplicant_conf` key. For example,
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
