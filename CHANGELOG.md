@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.12.1 - 2024-01-16
+
+This release adds support for creating generic WiFi configurations that work
+with both WPA2 and WPA3 access points. It's implemented to be backwards
+compatible if you role out firmware with this version and revert to a firmware
+with the previous version.
+
+* Changes
+  * Added `VintageNetWiFi.Cookbook.generic/2` for easily creating WiFi
+    configurations that will connect to WPA2-only, WPA2/WPA3-transitional, and
+    WPA3-only access points. This works with WPA2-only WiFi modules like what's
+    currently on Raspberry Pis and modules that support WPA3 like on the
+    BeagleBone Green WiFi and custom hardware.
+  * Updated `VintageNetWiFi.quick_connect/2` to create generic WiFi
+    configurations. It previously generated WPA2-only ones.
+  * Updated `:key_mgmt` to support lists so that multiple key management types
+    could be allowed. To make configs work with earlier versions of
+    VintageNetWiFi, these are normalized to store the list in the
+    `:allowed_key_mgmt` field with the first option in `:key_mgmt`. This means
+    that if you revert firmware to an earlier VintageNetWiFi version, you'll get
+    a WPA2-only config if you're using the new `generic/2` helper.
+
+* Fixed
+  * Fixed specification of WPA2-PSK configurations that use SHA256 hashing. This
+    not a common configuration to my knowledge and it would have failed due to a
+    typo previously.
+
 ## v0.12.0 - 2023-12-11
 
 * Changes
