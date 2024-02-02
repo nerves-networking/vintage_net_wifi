@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.12.2 - 2024-02-02
+
+* Changes
+  * Handle `update_current_access_point` crashes to handle attempts to associate
+    with mesh endpoints.
+
 ## v0.12.1 - 2024-01-16
 
 This release adds support for creating generic WiFi configurations that work
