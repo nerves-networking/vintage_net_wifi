@@ -562,6 +562,13 @@ defmodule VintageNetWiFi.WPASupplicant do
     new_state
   end
 
+  defp update_current_access_point(state, _other) do
+    # For some reason this has returned a non-access point in the field. Just
+    # keep whatever is there since someone's doing something weird with trying
+    # to join a mesh.
+    state
+  end
+
   defp add_mesh_peer(state, %VintageNetWiFi.MeshPeer{} = peer) do
     new_peers = [peer | state.peers]
     new_state = %{state | peers: new_peers}
