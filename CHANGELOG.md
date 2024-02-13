@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.12.3 - 2024-02-13
+
+* Fixed
+  * Relaxed frame protection requirement in generic WiFi configuration to work
+    with more access points. This fixes an issue with connecting to hotspot mode
+    a Samsung phone and probably other devices. The generic configuration works
+    all WPA2 PSK and WPA3 SAE access points tested so far.
+
 ## v0.12.2 - 2024-02-02
 
 * Changes
