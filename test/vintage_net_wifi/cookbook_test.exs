@@ -14,7 +14,7 @@ defmodule VintageNetWiFi.CookbookTest do
                     key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
                     psk: "my_passphrase",
                     ssid: "my_ssid",
-                    ieee80211w: 2,
+                    ieee80211w: 1,
                     sae_password: "my_passphrase"
                   }
                 ]

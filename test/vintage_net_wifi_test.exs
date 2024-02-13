@@ -576,7 +576,7 @@ defmodule VintageNetWiFiTest do
             psk: "password",
             sae_password: "password",
             key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
-            ieee80211w: 2
+            ieee80211w: 1
           }
         ]
       },
@@ -613,7 +613,7 @@ defmodule VintageNetWiFiTest do
          ssid="testing"
          key_mgmt=WPA-PSK WPA-PSK-SHA256 SAE
          mode=0
-         ieee80211w=2
+         ieee80211w=1
          psk=5747B578C5FAF01543C4CEC284A772E1037C7C84C03C9A2404DAB5CBF9C74394
          sae_password="password"
          }
