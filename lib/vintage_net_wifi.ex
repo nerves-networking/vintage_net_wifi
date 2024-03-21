@@ -997,15 +997,24 @@ defmodule VintageNetWiFi do
   defp trim_orphan_backslash(s), do: s
 
   @doc """
-  Check if a wlan network interface is configured.
-  """
-  @spec configured?(map | binary) :: boolean
-  def configured?(wlan_ifname) when is_binary(wlan_ifname) do
-    wlan_ifname |> VintageNet.get_configuration() |> configured?()
-  end
+  Helper for checking whether a WiFi configuration has a network configured
 
-  def configured?(wlan_config) when wlan_config == %{type: VintageNetWiFi}, do: false
-  def configured?(%{vintage_net_wifi: %{networks: []}}), do: false
-  def configured?(%{vintage_net_wifi: %{networks: [_ | _]}}), do: true
-  def configured?(_), do: false
+  This is useful for checking whether a WiFi configuration is just good for
+  scanning for WiFi networks or whether it actually could connect to another
+  computer.
+
+  Returns `false` if the configuration isn't a VintageNetWiFi one or if no
+  networks were specified.
+
+  To test an `ifname` has a network configured, run:
+
+  ```
+  VintageNet.get_configuration() |> network_configured?()
+  ```
+  """
+  @spec network_configured?(map()) :: boolean()
+  def network_configured?(wlan_config) when wlan_config == %{type: VintageNetWiFi}, do: false
+  def network_configured?(%{vintage_net_wifi: %{networks: []}}), do: false
+  def network_configured?(%{vintage_net_wifi: %{networks: [_ | _]}}), do: true
+  def network_configured?(_), do: false
 end

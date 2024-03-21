@@ -2688,9 +2688,9 @@ defmodule VintageNetWiFiTest do
       ipv4: %{method: :disabled}
     }
 
-    assert VintageNetWiFi.configured?(configured)
-    refute VintageNetWiFi.configured?(empty1)
-    refute VintageNetWiFi.configured?(empty2)
-    refute VintageNetWiFi.configured?(%{})
+    assert VintageNetWiFi.network_configured?(configured)
+    refute VintageNetWiFi.network_configured?(empty1)
+    refute VintageNetWiFi.network_configured?(empty2)
+    refute VintageNetWiFi.network_configured?(%{})
   end
 end
