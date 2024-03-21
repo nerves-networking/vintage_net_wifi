@@ -2661,4 +2661,36 @@ defmodule VintageNetWiFiTest do
 
     assert expected_output == VintageNetWiFi.summarize_access_points(input)
   end
+
+  test "Check if wlan is already configured" do
+    configured = %{
+      type: VintageNetWiFi,
+      ipv4: %{method: :dhcp},
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            key_mgmt: :wpa_psk,
+            ssid: "IEEE",
+            psk: "F42C6FC52DF0EBEF9EBB4B90B38A5F902E83FE1B135A70E23AED762E9710A12E",
+            mode: :infrastructure
+          }
+        ]
+      }
+    }
+
+    empty1 = %{
+      type: VintageNetWiFi
+    }
+
+    empty2 = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{networks: []},
+      ipv4: %{method: :disabled}
+    }
+
+    assert VintageNetWiFi.configured?(configured)
+    refute VintageNetWiFi.configured?(empty1)
+    refute VintageNetWiFi.configured?(empty2)
+    refute VintageNetWiFi.configured?(%{})
+  end
 end
