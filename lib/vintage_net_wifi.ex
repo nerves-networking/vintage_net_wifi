@@ -995,4 +995,17 @@ defmodule VintageNetWiFi do
   end
 
   defp trim_orphan_backslash(s), do: s
+
+  @doc """
+  Check if a wlan network interface is configured.
+  """
+  @spec configured?(map | binary) :: boolean
+  def configured?(wlan_ifname) when is_binary(wlan_ifname) do
+    wlan_ifname |> VintageNet.get_configuration() |> configured?()
+  end
+
+  def configured?(wlan_config) when wlan_config == %{type: VintageNetWiFi}, do: false
+  def configured?(%{vintage_net_wifi: %{networks: []}}), do: false
+  def configured?(%{vintage_net_wifi: %{networks: [_ | _]}}), do: true
+  def configured?(_), do: false
 end
