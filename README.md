@@ -29,7 +29,9 @@ end
 > WiFi kernel modules are included in the system. All officially supported
 > Nerves systems that run on hardware with WiFI should work.
 >
-> In Buildroot, check that `BR2_PACKAGE_WPA_SUPPLICANT` is enabled.
+> In Buildroot, check that `BR2_PACKAGE_WPA_SUPPLICANT` is enabled. Even if you
+> don't plan to use WPA3, enable `BR2_PACKAGE_WPA_SUPPLICANT_WPA3` as well so
+> that the generic WiFi configurations don't fail due to parse errors.
 >
 > If you are using access point mode, check that `CONFIG_UDHCPD` is enabled
 > in Busybox and `BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT` is enabled in Buildroot.
@@ -165,7 +167,7 @@ Please note that the syntax of the `:wpa_supplicant_conf` key is **NOT**
 validated by VintageNet and we do not recommend them method unless you are
 troubleshooting the `wpa_supplicant` or are working on a new feature.
 
-Example of WPA PSK
+WPA PSK example:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
@@ -183,7 +185,7 @@ iex> VintageNet.configure("wlan0", %{
     })
 ```
 
-Example of WEP:
+WEP example:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
@@ -202,9 +204,7 @@ iex> VintageNet.configure("wlan0", %{
     })
 ```
 
-WPA3 support is possible, but you'll find it's limited by commonly used WiFi
-modules and device drivers. If you would like to try, here's a configuration to
-attach to a pure WPA3 network.
+WPA3-only example:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
@@ -223,7 +223,7 @@ iex> VintageNet.configure("wlan0", %{
     })
 ```
 
-WPA2 w/ SHA256 configuration looks like:
+WPA2 w/ SHA256 example:
 
 ```elixir
 iex> VintageNet.configure("wlan0", %{
