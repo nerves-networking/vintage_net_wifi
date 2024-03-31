@@ -57,6 +57,21 @@ defmodule VintageNetWiFi.WPASupplicant do
     GenServer.call(via_name(ifname), :wps_pbc)
   end
 
+  @doc """
+  Send a raw command to the `wpa_supplicant`
+
+  This doesn't do any kind of processing on the results and just returns whatever
+  `wpa_supplicant` says. See [ctrl_iface](https://w1.fi/wpa_supplicant/devel/ctrl_iface_page.html)
+  and `ctrl_iface.c` for options.
+
+      iex> VintageNetWiFi.WPASupplicant.raw_command("wlan0", "GET_CAPABILITY modes")
+      {:ok, "AP MESH"}
+  """
+  @spec raw_command(VintageNet.ifname(), String.t()) :: {:ok, String.t()} | {:error, any()}
+  def raw_command(ifname, command) do
+    GenServer.call(via_name(ifname), {:raw_command, command})
+  end
+
   @impl GenServer
   def init(args) do
     wpa_supplicant = Keyword.fetch!(args, :wpa_supplicant)
@@ -202,6 +217,11 @@ defmodule VintageNetWiFi.WPASupplicant do
   def handle_call(:wps_pbc, _from, state) do
     response = WPASupplicantLL.control_request(state.ll, "WPS_PBC")
     update_wps_credentials(state.ifname, nil)
+    {:reply, response, state}
+  end
+
+  def handle_call({:raw_command, command}, _from, state) do
+    response = WPASupplicantLL.control_request(state.ll, command)
     {:reply, response, state}
   end
 

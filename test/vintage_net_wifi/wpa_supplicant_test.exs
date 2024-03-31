@@ -633,4 +633,25 @@ defmodule VintageNetWiFi.WPASupplicantTest do
              Process.sleep(100)
            end) =~ "Ignoring error getting info on BSSID \"00:0f:00:cf:e3:df\""
   end
+
+  test "can send arbitrary commands", context do
+    # TODO: Double check that this is what the real wpa_supplicant does
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "BSS 0" => "",
+      "TEST_COMMAND" => "TEST_RESPONSE\n"
+    })
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path}
+      )
+
+    assert {:ok, "TEST_RESPONSE\n"} = WPASupplicant.raw_command("test_wlan0", "TEST_COMMAND")
+  end
 end
