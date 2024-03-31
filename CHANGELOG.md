@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.12.4 - 2024-03-31
+
+* Changes
+  * Added `VintageNetWiFi.network_configured?/1` helper function for checking
+    whether a WiFi connection to another computer is possible or just scanning
+    for access points.
+  * Added `VintageNetWiFi.qr_string/3` to create QR Code-encodable strings for
+    easily sharing network credentials.
+  * Added experimental `VintageNetWiFi.capabilities/1` to query WiFi driver and
+    `wpa_supplicant` capabilities. This can be used to check WPA3 compatibility,
+    support for 5 GHz channels and more. It's experimental since the information
+    is currently very raw.
+
 ## v0.12.3 - 2024-02-13
 
 * Fixed
