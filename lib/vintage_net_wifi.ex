@@ -861,21 +861,49 @@ defmodule VintageNetWiFi do
   end
 
   @doc """
-  Generate string for WiFi credentials to be used in a QR code
+  Create a WiFi network config string for use in a QR Code
 
-  This makes a formatted string specific to WiFi credentials. When
-  scaned from a mobile device, it will prompt the user to join the
-  WiFi network without having to enter any details manually.
+  A QR Code created from the string returned by this function is scannable by
+  almost any smartphone to allow easy access to a Wi-Fi network. The user only
+  needs to agree to a prompt rather than enter credentials manually.
 
-  See https://en.wikipedia.org/wiki/QR_code#Joining_a_Wi%E2%80%91Fi_network
-  for more format details
+  See https://github.com/zxing/zxing/wiki/Barcode-Contents#wi-fi-network-config-android-ios-11
+  for more format details.
   """
-  @type qr_opt :: {:hidden, boolean()} | {:type, :WPA | :WEP | :nopass}
-  @spec qr_string(String.t(), String.t(), [qr_opt()]) :: String.t()
-  def qr_string(ssid, psk, opts \\ []) do
-    type = opts[:type] || "WPA"
+  @type qr_options() :: [hidden: boolean(), type: :WPA | :WEP | :nopass]
+  @spec qr_string(String.t(), String.t(), qr_options()) :: String.t()
+  def qr_string(ssid, password, opts \\ []) do
+    default_type = if password != "", do: :WPA, else: :nopass
+    type = opts[:type] || default_type
     hidden = opts[:hidden] || false
-    "WIFI:S:#{ssid};T:#{type};P:#{psk};H:#{hidden};;"
+
+    [
+      "WIFI:",
+      mecard_param(?S, ssid),
+      if(type != :nopass, do: [mecard_param(?T, type), mecard_param(?P, password)], else: []),
+      if(hidden, do: mecard_param(?H, hidden), else: []),
+      ";"
+    ]
+    |> IO.chardata_to_string()
+  end
+
+  defp mecard_param(param, value), do: [param, ?:, mecard_escape(value), ?;]
+
+  defp mecard_escape(input) when is_atom(input), do: to_string(input)
+
+  defp mecard_escape(input) when is_binary(input) do
+    case Base.decode16(input, case: :mixed) do
+      {:ok, _} -> [?", input, ?"]
+      :error -> mecard_escape_generic(input)
+    end
+  end
+
+  defp mecard_escape_generic(input) do
+    escape_chars = [?#, ?\\, ?;, ?,, ?", ?:]
+
+    for <<c <- input>>, into: "" do
+      if c in escape_chars, do: <<"\\", c>>, else: <<c>>
+    end
   end
 
   @doc """

@@ -2696,17 +2696,24 @@ defmodule VintageNetWiFiTest do
 
   test "generating QR strings" do
     assert VintageNetWiFi.qr_string("Nerves", "IsCool") ==
-             "WIFI:S:Nerves;T:WPA;P:IsCool;H:false;;"
+             "WIFI:S:Nerves;T:WPA;P:IsCool;;"
 
-    assert VintageNetWiFi.qr_string("Nerves", "") == "WIFI:S:Nerves;T:WPA;P:;H:false;;"
+    assert VintageNetWiFi.qr_string("Nerves", "") == "WIFI:S:Nerves;;"
 
     assert VintageNetWiFi.qr_string("Nerves", "IsCool", hidden: true) ==
              "WIFI:S:Nerves;T:WPA;P:IsCool;H:true;;"
 
     assert VintageNetWiFi.qr_string("Nerves", "IsCool", type: :WEP) ==
-             "WIFI:S:Nerves;T:WEP;P:IsCool;H:false;;"
+             "WIFI:S:Nerves;T:WEP;P:IsCool;;"
 
     assert VintageNetWiFi.qr_string("Nerves", "IsCool", type: :nopass) ==
-             "WIFI:S:Nerves;T:nopass;P:IsCool;H:false;;"
+             "WIFI:S:Nerves;;"
+
+    # Obnoxious escaping example from docs
+    assert VintageNetWiFi.qr_string("\"foo;bar\\baz\"", "") ==
+             "WIFI:S:\\\"foo\\;bar\\\\baz\\\";;"
+
+    # Ambiguous hex string example from docs
+    assert VintageNetWiFi.qr_string("abcd", "abcd") == "WIFI:S:\"abcd\";T:WPA;P:\"abcd\";;"
   end
 end
