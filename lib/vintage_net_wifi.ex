@@ -1017,4 +1017,47 @@ defmodule VintageNetWiFi do
   def network_configured?(%{vintage_net_wifi: %{networks: []}}), do: false
   def network_configured?(%{vintage_net_wifi: %{networks: [_ | _]}}), do: true
   def network_configured?(_), do: false
+
+  @doc """
+  Experimental API for getting WiFi driver capabilities
+
+  This queries the `wpa_supplicant` and driver to see what it supports. It's
+  useful for seeing whether WPA3, 5 GHz, and other things are supported. The
+  results aren't currently processed.
+  """
+  @spec capabilities(VintageNet.ifname()) :: map()
+  def capabilities(ifname) do
+    keys = [
+      :key_mgmt,
+      :modes,
+      :channels,
+      :pairwise,
+      :group,
+      :group_mgmt,
+      :proto,
+      :freq,
+      :sae,
+      :beacon_prot,
+      :eap,
+      :auth_alg,
+      :tdls,
+      :erp,
+      :fips,
+      :acs,
+      :fils,
+      :multibss,
+      :dpp,
+      :ocv
+    ]
+
+    keys |> Enum.map(&get_capability(ifname, &1)) |> Map.new()
+  end
+
+  defp get_capability(ifname, key) do
+    case WPASupplicant.raw_command(ifname, "GET_CAPABILITY #{key}") do
+      {:ok, "FAIL\n"} -> {key, :unknown}
+      {:ok, result} -> {key, result}
+      _ -> {key, :error}
+    end
+  end
 end
