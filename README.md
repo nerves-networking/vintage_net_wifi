@@ -41,7 +41,7 @@ end
 The easiest way to configure WiFi is to using
 `VintageNetWiFi.quick_configure/2`. For example:
 
-```
+```elixir
 iex> VintageNetWiFi.quick_configure("my_access_point", "secret_passphrase")
 :ok
 ```
@@ -55,6 +55,9 @@ network interface works)
 The second easiest way to create WiFi configurations is to use the helper
 functions in `VintageNetWiFi.Cookbook`. Check out the module documentation for
 the various configurations.
+
+See the `VintageNetWiFi.quick_configure/2` documentation for details on WPA3
+support.
 
 ## Advanced usage
 

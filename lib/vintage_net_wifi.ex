@@ -843,6 +843,18 @@ defmodule VintageNetWiFi do
   other special configuration handling, you'll need to call
   `VintageNet.configure/3` instead. See `VintageNetWiFi.Cookbook` for help with
   creating configurations or manually construct the configuration map.
+
+  > #### WiFi Authentication {: .info}
+  >
+  > VintageNetWiFi doesn't know whether the WiFi hardware you're using fully
+  > supports WPA3 authentication. To avoid hard to understand errors,
+  > `quick_configure/2` defaults to WPA2. If you have hardware that supports
+  > WPA3 and would like to use WPA2/WPA3 generic configurations, update your
+  > `config.exs` to:
+  >
+  > ```
+  > config :vintage_net_wifi, :quick_configure, &VintageNetWiFi.Cookbook.generic/2
+  > ```
   """
   @spec quick_configure(String.t(), String.t() | nil) :: :ok | {:error, term()}
   def quick_configure(ssid, passphrase \\ nil)
@@ -855,7 +867,10 @@ defmodule VintageNetWiFi do
   end
 
   def quick_configure(ssid, passphrase) do
-    with {:ok, config} <- Cookbook.generic(ssid, passphrase) do
+    cookbook_strategy =
+      Application.get_env(:vintage_net_wifi, :quick_configure, &Cookbook.wpa_psk/2)
+
+    with {:ok, config} <- cookbook_strategy.(ssid, passphrase) do
       VintageNet.configure("wlan0", config)
     end
   end
