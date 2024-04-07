@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.12.5 - 2024-04-07
+
+* Changes
+  * Revert support for WPA3 with `VintageNetWiFi.quick_configure/2`. It caused
+    way to many issues on some Nerves devices. The default is WPA2 like old
+    times. Raspberry Pis, BBBs, and GRiSP2 don't support WPA3 with their
+    built-in WiFi modules so this may not impact you.
+  * Support use of WPA3 via an application environment option. See
+    `VintageNetWiFi.quick_configure/2` for details.
+
 ## v0.12.4 - 2024-03-31
 
 * Changes
