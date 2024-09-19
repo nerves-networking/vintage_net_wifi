@@ -135,8 +135,8 @@ The `:vintage_net_wifi` key has the following common fields:
   * `:scan_ssid` - Scan with SSID-specific Probe Request frames (this can be
     used to find APs that do not accept broadcast SSID or use multiple SSIDs;
     this will add latency to scanning, so enable this only when needed)
-  * `:frequency` - When in `:ibss` mode, use this channel frequency (in MHz).
-    For example, specify 2412 for channel 1.
+  * `:frequency` - When in `:ibss` or `:ap` mode, use this channel frequency
+    (in MHz). For example, specify 2412 for channel 1.
   * `:ieee80211w` - Whether management frame protection is enabled. Set to `0`,
     `1`, `2` or `:disabled`, `:optional`, `:required`.
 
@@ -281,6 +281,40 @@ iex> VintageNet.configure("wlan0", %{
           %{
             mode: :ap,
             ssid: "test ssid",
+            key_mgmt: :none
+          }
+        ]
+      },
+      ipv4: %{
+        method: :static,
+        address: "192.168.24.1",
+        netmask: "255.255.255.0"
+      },
+      dhcpd: %{
+        start: "192.168.24.2",
+        end: "192.168.24.10",
+        options: %{
+          dns: ["1.1.1.1", "1.0.0.1"],
+          subnet: "255.255.255.0",
+          router: ["192.168.24.1"]
+        }
+      }
+})
+```
+
+An example of configuring the Access Point's frequency is as follows. Consult 
+[WLAN Channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels) for the 
+appropriate channels for your device.
+
+```elixir
+iex> VintageNet.configure("wlan0", %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            mode: :ap,
+            ssid: "test ssid",
+            frequency: 5180, # Creates a 5 GHz wifi network if supported by device
             key_mgmt: :none
           }
         ]
