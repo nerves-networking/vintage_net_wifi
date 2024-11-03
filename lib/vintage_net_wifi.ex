@@ -1067,10 +1067,10 @@ defmodule VintageNetWiFi do
   Returns `false` if the configuration isn't a VintageNetWiFi one or if no
   networks were specified.
 
-  To test an `ifname` has a network configured, run:
+  To test if an `ifname` has a network configured, run:
 
   ```
-  VintageNet.get_configuration() |> network_configured?()
+  VintageNet.get_configuration(ifname) |> network_configured?()
   ```
   """
   @spec network_configured?(map()) :: boolean()
