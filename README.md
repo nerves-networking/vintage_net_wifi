@@ -484,7 +484,7 @@ may include information about the wifi connection.
 ### Events
 
 Some `wpa_supplicant` events like `CTRL-EVENT-ASSOC-REJECT` are passed on
-through the "event" property to be handled outside `VintageNetWifi`. These
+through the "event" property to be handled outside `VintageNetWiFi`. These
 events might be useful, but optional.
 
 ## Signal quality info in STA (client) mode
