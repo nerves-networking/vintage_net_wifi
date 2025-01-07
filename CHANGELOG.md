@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.12.6 - 2025-01-06
+
+* Changes
+  * Remove support for upgrading 5+ year old configurations. These probably
+    weren't used much at all given how early in VintageNetWiFi's history they
+    were around. If you're upgrading a device that has not been updated in 5
+    years, please review differences or you may lose an existing WiFi config.
+  * Add docs on forcing the WiFi frequency used when configuring AP mode. Thanks
+    to Ray Chang for this update.
+
 ## v0.12.5 - 2024-04-07
 
 * Changes
