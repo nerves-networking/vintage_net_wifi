@@ -302,8 +302,8 @@ iex> VintageNet.configure("wlan0", %{
 })
 ```
 
-An example of configuring the Access Point's frequency is as follows. Consult 
-[WLAN Channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels) for the 
+An example of configuring the Access Point's frequency is as follows. Consult
+[WLAN Channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels) for the
 appropriate channels for your device.
 
 ```elixir
