@@ -69,7 +69,7 @@ DEFAULT_TARGETS ?= $(PREFIX) \
 # but it fails to build on many setups.
 # NOTE: Need to call sh here since file permissions are not preserved
 #       in hex packages.
-ifeq ($(shell CC=$(CC) sh src/test-c99.sh),yes)
+ifeq ($(shell CC=$(CC) sh c_src/test-c99.sh),yes)
 CFLAGS += -std=c99 -D_XOPEN_SOURCE=600
 else
 CFLAGS += -std=gnu99
@@ -79,7 +79,7 @@ all: install
 
 install: $(BUILD) $(PREFIX) $(DEFAULT_TARGETS)
 
-$(BUILD)/%.o: src/%.c
+$(BUILD)/%.o: c_src/%.c
 	@echo " CC $(notdir $@)"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
