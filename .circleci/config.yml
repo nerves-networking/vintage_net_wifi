@@ -5,7 +5,7 @@ latest: &latest
 
 tags: &tags
   [
-    1.18.1-erlang-27.2-alpine-3.20.3,
+    1.18.3-erlang-27.3-alpine-3.21.3,
     1.17.0-erlang-27.0-alpine-3.20.0,
     1.16.2-erlang-26.2.3-alpine-3.19.1,
     1.15.7-erlang-26.1.2-alpine-3.18.4,
@@ -57,7 +57,7 @@ jobs:
 
   automerge:
     docker:
-      - image: alpine:3.21.0
+      - image: alpine:3.21.3
     steps:
       - run:
           name: Install GitHub CLI
@@ -66,7 +66,6 @@ jobs:
           name: Attempt PR automerge
           command: |
             author=$(gh pr view "${CIRCLE_PULL_REQUEST}" --json author --jq '.author.login' || true)
-
             if [ "$author" = "app/dependabot" ]; then
               gh pr merge "${CIRCLE_PULL_REQUEST}" --auto --rebase || echo "Failed trying to set automerge"
             else
