@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2021 WN
+# SPDX-FileCopyrightText: 2023 Ace Yanagida
+# SPDX-FileCopyrightText: 2023 Jon Carstens
+# SPDX-FileCopyrightText: 2024 Masatoshi Nishiguchi
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFiTest do
   use ExUnit.Case
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.WPASupplicantLL do
   @moduledoc """
   This modules provides a low-level interface for interacting with the `wpa_supplicant`

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.WPA2Test do
   use ExUnit.Case
   alias VintageNetWiFi.WPA2

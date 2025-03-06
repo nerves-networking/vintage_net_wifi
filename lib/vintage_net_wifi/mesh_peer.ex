@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2022 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.MeshPeer do
   @moduledoc """
   Information about a WiFi mesh peer

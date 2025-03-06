@@ -1,4 +1,8 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 
 if [ -z $CC ]; then
   CC=cc

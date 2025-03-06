@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2022 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.MeshPeer.FormationInformation do
   @moduledoc """
   * `connected_to_as`:

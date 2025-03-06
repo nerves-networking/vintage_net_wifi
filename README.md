@@ -2,8 +2,9 @@
 
 [![Hex version](https://img.shields.io/hexpm/v/vintage_net_wifi.svg "Hex version")](https://hex.pm/packages/vintage_net_wifi)
 [![API docs](https://img.shields.io/hexpm/v/vintage_net_wifi.svg?label=hexdocs "API docs")](https://hexdocs.pm/vintage_net_wifi/VintageNetWiFi.html)
-[![CircleCI](https://circleci.com/gh/nerves-networking/vintage_net_wifi.svg?style=svg)](https://circleci.com/gh/nerves-networking/vintage_net_wifi)
-[![Coverage Status](https://coveralls.io/repos/github/nerves-networking/vintage_net_wifi/badge.svg?branch=main)](https://coveralls.io/github/nerves-networking/vintage_net_wifi?branch=main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nerves-networking/vintage_net_wifi/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nerves-networking/vintage_net_wifi/tree/main)
+[![Coverage Status](https://coveralls.io/repos/github/nerves-networking/vintage_net_wifi/badge.svg)](https://coveralls.io/github/nerves-networking/vintage_net_wifi)
+[![REUSE status](https://api.reuse.software/badge/github.com/nerves-networking/vintage_net_wifi)](https://api.reuse.software/info/github.com/nerves-networking/vintage_net_wifi)
 
 `VintageNetWiFi` makes it easy to add WiFi support for your device. This can be
 as simple as connecting to a WiFi access point or starting a WiFi access point

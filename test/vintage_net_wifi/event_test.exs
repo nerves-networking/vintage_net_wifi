@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2021 Dömötör Gulyás
+# SPDX-FileCopyrightText: 2022 Connor Rigby
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.EventTest do
   use ExUnit.Case
   alias VintageNetWiFi.Event

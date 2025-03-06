@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 WN
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.WPSDataTest do
   use ExUnit.Case
   alias VintageNetWiFi.WPSData

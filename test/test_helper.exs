@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule Utils do
   @spec default_opts() :: keyword()
   def default_opts() do

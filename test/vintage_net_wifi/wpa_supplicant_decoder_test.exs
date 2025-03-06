@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2020 Pavel Sorejs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.WPASupplicantDecoderTest do
   use ExUnit.Case
 

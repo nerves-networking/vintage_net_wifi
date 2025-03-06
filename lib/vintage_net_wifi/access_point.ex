@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2021 Connor Rigby
+# SPDX-FileCopyrightText: 2021 Dömötör Gulyás
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.AccessPoint do
   @moduledoc """
   Information about a WiFi access point

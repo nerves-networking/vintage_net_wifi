@@ -48,16 +48,22 @@ defmodule VintageNetWiFi.MixProject do
     %{
       files: [
         "CHANGELOG.md",
-        "lib",
-        "mix.exs",
-        "Makefile",
-        "README.md",
         "c_src/*.[ch]",
         "c_src/test-c99.sh",
-        "LICENSE"
+        "lib",
+        "LICENSES/*",
+        "mix.exs",
+        "Makefile",
+        "NOTICE",
+        "README.md",
+        "REUSE.toml"
       ],
       licenses: ["Apache-2.0"],
-      links: %{"GitHub" => @source_url}
+      links: %{
+        "GitHub" => @source_url,
+        "REUSE Compliance" =>
+          "https://api.reuse.software/info/github.com/nerves-networking/vintage_net_wifi"
+      }
     }
   end
 

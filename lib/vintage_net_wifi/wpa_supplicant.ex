@@ -1,3 +1,13 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2020 Pavel Sorejs
+# SPDX-FileCopyrightText: 2021 Dömötör Gulyás
+# SPDX-FileCopyrightText: 2021 WN
+# SPDX-FileCopyrightText: 2022 Jon Carstens
+# SPDX-FileCopyrightText: 2022 Matt Ludwigs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.WPASupplicant do
   @moduledoc """
   Control a wpa_supplicant instance for an interface.

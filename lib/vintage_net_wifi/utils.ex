@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi.Utils do
   @moduledoc """
   Various utility functions for handling WiFi information

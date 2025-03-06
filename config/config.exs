@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Matt Ludwigs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 import Config
 
 # Overrides for unit tests:

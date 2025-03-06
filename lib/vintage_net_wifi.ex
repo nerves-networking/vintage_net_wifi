@@ -1,3 +1,15 @@
+# SPDX-FileCopyrightText: 2019 Frank Hunleth
+# SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2020 Matt Ludwigs
+# SPDX-FileCopyrightText: 2020 Pavel Sorejs
+# SPDX-FileCopyrightText: 2021 WN
+# SPDX-FileCopyrightText: 2022 Masatoshi Nishiguchi
+# SPDX-FileCopyrightText: 2023 Ace Yanagida
+# SPDX-FileCopyrightText: 2023 Jon Carstens
+# SPDX-FileCopyrightText: 2024 Thomas Jack
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule VintageNetWiFi do
   @moduledoc """
   WiFi support for VintageNet
