@@ -52,8 +52,8 @@ defmodule VintageNetWiFi.MixProject do
         "mix.exs",
         "Makefile",
         "README.md",
-        "src/*.[ch]",
-        "src/test-c99.sh",
+        "c_src/*.[ch]",
+        "c_src/test-c99.sh",
         "LICENSE"
       ],
       licenses: ["Apache-2.0"],
