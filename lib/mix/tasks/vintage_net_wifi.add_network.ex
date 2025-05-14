@@ -123,6 +123,9 @@ if Code.ensure_loaded?(Igniter) do
             Mix.raise("Invalid key_mgmt: #{key_mgmt}, only 'wpa_psk' and 'none' are supported.")
         end)
         |> Enum.sort()
+        |> Enum.map(fn {key, value} ->
+          {{:__block__, [format: :keyword], [key]}, {:__block__, [], [value]}}
+        end)
         |> then(&{:%{}, [], &1})
 
       Config.configure(
@@ -131,35 +134,29 @@ if Code.ensure_loaded?(Igniter) do
         :vintage_net,
         [:config],
         :unused_is_aways_an_update,
-        updater: fn config_zipper ->
-          interface_config =
-            Sourceror.Zipper.find(
-              config_zipper,
-              &match?(
-                {{:__block__, _, [^interface]}, _},
-                &1
-              )
-            )
+        updater: fn zipper ->
+          {:ok, zipper} =
+            Igniter.Code.List.move_to_list_item(zipper, fn zipper ->
+              with true <- Igniter.Code.Tuple.tuple?(zipper),
+                   {:ok, first} <- Igniter.Code.Tuple.tuple_elem(zipper, 0) do
+                Igniter.Code.Common.nodes_equal?(first, interface)
+              else
+                _ ->
+                  false
+              end
+            end)
 
-          {:ok, zip} =
-            interface_config
-            |> Sourceror.Zipper.down()
-            |> Sourceror.Zipper.right()
-            |> Igniter.Code.Map.set_map_key(
-              :networks,
-              fix_ast([options]),
-              &{:ok, Sourceror.Zipper.append_child(&1, fix_ast(options))}
-            )
+          {:ok, zipper} = Igniter.Code.Tuple.tuple_elem(zipper, 1)
 
-          zip = Sourceror.Zipper.replace(zip, fix_ast(zip.node))
-
-          {:ok, zip}
+          Igniter.Code.Map.set_map_key(
+            zipper,
+            :networks,
+            [options],
+            &{:ok, Igniter.Code.List.append_to_list(&1, options)}
+          )
         end
       )
     end
-
-    @spec fix_ast(ast :: Macro.t()) :: Macro.t()
-    defp fix_ast(ast), do: ast |> Sourceror.to_string() |> Sourceror.parse_string!()
   end
 else
   defmodule Mix.Tasks.VintageNetWifi.AddNetwork do

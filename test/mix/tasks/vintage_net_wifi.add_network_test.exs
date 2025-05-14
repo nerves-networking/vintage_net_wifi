@@ -101,7 +101,6 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
         "--regulatory-domain",
         "00"
       ])
-      # TODO: Fix Map Keys (atom: instead of :atom =>)
       |> assert_creates("config/target.exs", """
       import Config
 
@@ -110,8 +109,8 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
         config: [
           {"wlan0",
            %{
-             :type => VintageNetWiFi,
-             :networks => [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
+             type: VintageNetWiFi,
+             networks: [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
            }}
         ]
       """)
@@ -139,8 +138,8 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
         config: [
           {"wlanname",
            %{
-             :type => VintageNetWiFi,
-             :networks => [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
+             type: VintageNetWiFi,
+             networks: [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
            }}
         ]
       """)
