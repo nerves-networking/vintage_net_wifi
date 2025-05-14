@@ -149,7 +149,7 @@ if Code.ensure_loaded?(Igniter) do
                 config_zipper,
                 fix_ast(
                   quote do
-                    {"wlan0", %{type: VintageNetWiFi}}
+                    {unquote(interface), %{type: VintageNetWiFi}}
                   end
                 )
               )
