@@ -33,7 +33,6 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
         "--psk",
         "MySecretPassword"
       ])
-      # TODO: Fix Map Keys (atom: instead of :atom =>)
       |> assert_has_patch("config/target.exs", """
           ...|
       3  3   |config :vintage_net,
@@ -129,7 +128,6 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
         "--regulatory-domain",
         "00"
       ])
-      # TODO: Fix Map Keys (atom: instead of :atom =>)
       |> assert_creates("config/target.exs", """
       import Config
 
