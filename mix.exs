@@ -70,7 +70,8 @@ defmodule VintageNetWiFi.MixProject do
   defp deps do
     [
       # TODO: runtime: false (Dialyzer...)
-      {:igniter, "~> 0.5", optional: true, runtime: true},
+      # TODO: Use released igniter version
+      {:igniter, "~> 0.5", optional: true, runtime: true, github: "ash-project/igniter"},
       {:vintage_net, "~> 0.12.0 or ~> 0.13.0"},
       {:credo, "~> 1.2", only: :test, runtime: false},
       {:credo_binary_patterns, "~> 0.2.2", only: :test, runtime: false},

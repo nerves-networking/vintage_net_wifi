@@ -24,12 +24,18 @@ defmodule Mix.Tasks.VintageNetWifi.InstallTest do
 
   describe inspect(&Install.run/1) do
     test "sets up regulatory domain when provided as an argument" do
-      test_project()
+      assert {:ok, igniter, _} =
+               test_project()
+               |> Igniter.compose_task("vintage_net_wifi.install", ["--regulatory-domain", "US"])
+               |> assert_creates("config/target.exs", """
+               import Config
+               config :vintage_net, regulatory_domain: "US", config: [{"wlan0", %{type: VintageNetWiFi}}]
+               """)
+               |> apply_igniter()
+
+      igniter
       |> Igniter.compose_task("vintage_net_wifi.install", ["--regulatory-domain", "US"])
-      |> assert_creates("config/target.exs", """
-      import Config
-      config :vintage_net, regulatory_domain: "US", config: [{"wlan0", %{type: VintageNetWiFi}}]
-      """)
+      |> assert_unchanged("config/target.exs")
     end
 
     test "prompts for regulatory domain" do

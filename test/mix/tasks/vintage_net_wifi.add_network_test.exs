@@ -41,11 +41,12 @@ defmodule Mix.Tasks.VintageNetWifi.AddNetworktest do
          5 + |  config: [
          6 + |    {"wlan0",
          7 + |     %{
-         8 + |       :type => VintageNetWiFi,
-         9 + |       :networks => [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
+         8 + |       type: VintageNetWiFi,
+         9 + |       networks: [%{key_mgmt: :wpa_psk, psk: "MySecretPassword", ssid: "MySSID"}]
         10 + |     }}
         11 + |  ]
       """)
+      |> apply_igniter()
     end
 
     test "adds network to existing interface with other networks" do

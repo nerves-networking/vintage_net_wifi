@@ -145,15 +145,14 @@ if Code.ensure_loaded?(Igniter) do
 
           case type_config do
             nil ->
-              {:ok,
-               Sourceror.Zipper.append_child(
-                 config_zipper,
-                 fix_ast(
-                   quote do
-                     {"wlan0", %{type: VintageNetWiFi}}
-                   end
-                 )
-               )}
+              Igniter.Code.List.append_to_list(
+                config_zipper,
+                fix_ast(
+                  quote do
+                    {"wlan0", %{type: VintageNetWiFi}}
+                  end
+                )
+              )
 
             _ ->
               {:ok, config_zipper}

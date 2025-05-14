@@ -50,6 +50,7 @@ if Code.ensure_loaded?(Igniter) do
 
     use Igniter.Mix.Task
 
+    alias Igniter.Code.Common
     alias Igniter.Project.Config
 
     @impl Igniter.Mix.Task
@@ -109,24 +110,7 @@ if Code.ensure_loaded?(Igniter) do
     @spec add_interface(igniter :: Igniter.t(), interface :: String.t(), options :: Keyword.t()) ::
             Igniter.t()
     defp add_interface(igniter, interface, options) do
-      options =
-        options
-        |> Keyword.take(~w(ssid key_mgmt psk)a)
-        |> Keyword.update!(:key_mgmt, fn
-          "wpa_psk" ->
-            :wpa_psk
-
-          "none" ->
-            :none
-
-          key_mgmt ->
-            Mix.raise("Invalid key_mgmt: #{key_mgmt}, only 'wpa_psk' and 'none' are supported.")
-        end)
-        |> Enum.sort()
-        |> Enum.map(fn {key, value} ->
-          {{:__block__, [format: :keyword], [key]}, {:__block__, [], [value]}}
-        end)
-        |> then(&{:%{}, [], &1})
+      options = options_ast(options)
 
       Config.configure(
         igniter,
@@ -139,7 +123,7 @@ if Code.ensure_loaded?(Igniter) do
             Igniter.Code.List.move_to_list_item(zipper, fn zipper ->
               with true <- Igniter.Code.Tuple.tuple?(zipper),
                    {:ok, first} <- Igniter.Code.Tuple.tuple_elem(zipper, 0) do
-                Igniter.Code.Common.nodes_equal?(first, interface)
+                Common.nodes_equal?(first, interface)
               else
                 _ ->
                   false
@@ -152,10 +136,31 @@ if Code.ensure_loaded?(Igniter) do
             zipper,
             :networks,
             [options],
-            &{:ok, Igniter.Code.List.append_to_list(&1, options)}
+            &Igniter.Code.List.append_to_list(&1, options)
           )
         end
       )
+    end
+
+    @spec options_ast(options :: Keyword.t()) :: Macro.t()
+    defp options_ast(options) do
+      options
+      |> Keyword.take(~w(ssid key_mgmt psk)a)
+      |> Keyword.update!(:key_mgmt, fn
+        "wpa_psk" ->
+          :wpa_psk
+
+        "none" ->
+          :none
+
+        key_mgmt ->
+          Mix.raise("Invalid key_mgmt: #{key_mgmt}, only 'wpa_psk' and 'none' are supported.")
+      end)
+      |> Enum.sort()
+      |> Enum.map(fn {key, value} ->
+        {{:__block__, [format: :keyword], [key]}, {:__block__, [], [value]}}
+      end)
+      |> then(&{:%{}, [], &1})
     end
   end
 else
