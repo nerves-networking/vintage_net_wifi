@@ -20,20 +20,25 @@ defmodule VintageNetWiFi.MixProject do
       dialyzer: dialyzer(),
       docs: docs(),
       package: package(),
-      description: description(),
-      preferred_cli_env: %{
-        docs: :docs,
-        "hex.publish": :docs,
-        "hex.build": :docs,
-        credo: :test,
-        "coveralls.circle": :test
-      }
+      description: description()
     ]
   end
 
   def application do
     [
       extra_applications: [:crypto, :logger]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: %{
+        docs: :docs,
+        "hex.publish": :docs,
+        "hex.build": :docs,
+        credo: :test,
+        "coveralls.circle": :test
+      }
     ]
   end
 

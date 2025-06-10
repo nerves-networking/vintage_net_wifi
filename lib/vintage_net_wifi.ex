@@ -581,7 +581,7 @@ defmodule VintageNetWiFi do
   end
 
   defp wifi_opt_to_config_string(_wifi, :ssid, ssid) do
-    process_ssid = ssid |> escape_string |> do_wpa_supplicant_ssid_hack()
+    process_ssid = ssid |> escape_string() |> do_wpa_supplicant_ssid_hack()
     "ssid=#{process_ssid}"
   end
 
@@ -1025,7 +1025,7 @@ defmodule VintageNetWiFi do
   defp get_wps_credentials(start_time, timeout) do
     case VintageNet.get(["interface", "wlan0", "wifi", "wps_credentials"]) do
       nil ->
-        unless now() > start_time + timeout do
+        if not (now() > start_time + timeout) do
           Process.sleep(1000)
           get_wps_credentials(start_time, timeout)
         end

@@ -76,25 +76,25 @@ defmodule VintageNetWiFi.Event do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
-    %__MODULE__{event | name: name}
+    %{event | name: name}
   end
 
   def new("CTRL-EVENT-SSID-REENABLED" = name, params) do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
-    %__MODULE__{event | name: name}
+    %{event | name: name}
   end
 
   def new("CTRL-EVENT-SSID-TEMP-DISABLED" = name, params) do
     params = sanitize_params(params)
     event = struct(__MODULE__, params)
 
-    %__MODULE__{event | name: name}
+    %{event | name: name}
   end
 
   def new("CTRL-EVENT-NETWORK-NOT-FOUND" = name, _params) do
-    %__MODULE__{name: name}
+    %{name: name}
   end
 
   @integer_keys [
