@@ -5,9 +5,6 @@
 This release makes VintageNet compliant with the [REUSE Specification](https://reuse.software/).
 
 * Fixes
-  * Removed dependency on `GenStateMachine` and use `:gen_statem` directly.
-    There's no change in functionality, but it will remove the compilation
-    warnings when building the `GenStateMachine` dependency.
   * Fix Elixir 1.19 warning
 
 * Changed
