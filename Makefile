@@ -53,12 +53,16 @@ else
     else
 
         # Use pkg-config to find libnl
-        PKG_CONFIG = $(shell which pkg-config)
+        PKG_CONFIG := $(shell which pkg-config)
         ifeq ($(PKG_CONFIG),)
             $(error pkg-config required to build. Install by running "brew install pkg-config")
         endif
 
-        CFLAGS += $(shell $(PKG_CONFIG) --cflags libnl-genl-3.0)
+        LIBNL_CFLAGS := $(shell $(PKG_CONFIG) --cflags libnl-genl-3.0)
+        ifeq ($(LIBNL_CFLAGS),)
+            $(error libnl-genl-3.0 not found. For Buildroot or Nerves, add BR2_PACKAGE_LIBNL=y to your configuration)
+        endif
+        CFLAGS += $(LIBNL_CFLAGS)
     endif
 endif
 DEFAULT_TARGETS ?= $(PREFIX) \
