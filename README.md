@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: 2019 Frank Hunleth
+  SPDX-License-Identifier: CC-BY-4.0
+-->
+
 ![vintage net logo](assets/logo.png)
 
 [![Hex version](https://img.shields.io/hexpm/v/vintage_net_wifi.svg "Hex version")](https://hex.pm/packages/vintage_net_wifi)
