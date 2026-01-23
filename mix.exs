@@ -93,6 +93,7 @@ defmodule VintageNetWiFi.MixProject do
 
   defp docs do
     [
+      assets: %{"assets" => "assets"},
       extras: ["README.md", "CHANGELOG.md"],
       main: "readme",
       source_ref: "v#{@version}",
