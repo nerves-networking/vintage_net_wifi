@@ -5,6 +5,13 @@
 
 # Changelog
 
+## v0.12.8 - 2026-04-08
+
+* Changes
+  * Support specifying `wps: false` to turn off WPS support. This makes it
+    possible to use VintageNetWiFi with a `wpa_supplicant` that's been compiled
+    without WPS support. (@ityonemo)
+
 ## v0.12.7 - 2025-06-21
 
 This release makes VintageNet compliant with the [REUSE Specification](https://reuse.software/).
