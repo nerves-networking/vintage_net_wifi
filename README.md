@@ -145,6 +145,9 @@ The `:vintage_net_wifi` key has the following common fields:
     (in MHz). For example, specify 2412 for channel 1.
   * `:ieee80211w` - Whether management frame protection is enabled. Set to `0`,
     `1`, `2` or `:disabled`, `:optional`, `:required`.
+  * `:wps` - Set to `false` to disable WPS functionality. This is required if
+    your `wpa_supplicant` is compiled without WPS support since VintageNetWiFi
+    sets `wps_cred_processing` by default.
 
 These keys fairly directly map to the keys in the [official
 docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf).
