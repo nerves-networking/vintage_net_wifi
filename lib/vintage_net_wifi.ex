@@ -115,6 +115,7 @@ defmodule VintageNetWiFi do
     :user_mpm,
     :root_interface,
     :wpa_supplicant_conf_path,
+    :wps,
     :wps_cred_processing
   ]
 
@@ -450,8 +451,8 @@ defmodule VintageNetWiFi do
       "ctrl_interface=#{control_interface_dir}",
       "country=#{wifi[:regulatory_domain] || regulatory_domain}",
       # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
-      # instead of deferring to wpa_supplicant
-      "wps_cred_processing=1",
+      # instead of deferring to wpa_supplicant. Only include if wps is enabled (default: true).
+      if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
       into_config_string(wifi, :user_mpm)
