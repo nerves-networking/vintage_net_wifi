@@ -8,9 +8,9 @@ latest: &latest
 
 tags: &tags
   [
-    1.19.5-erlang-28.3-alpine-3.22.2,
-    1.18.3-erlang-27.3.3-alpine-3.21.3,
-    1.17.0-erlang-27.0-alpine-3.20.0,
+    1.19.5-erlang-28.4.1-alpine-3.23.3,
+    1.18.4-erlang-28.4.1-alpine-3.23.3,
+    1.17.3-erlang-27.3.4.9-alpine-3.23.3,
     1.16.2-erlang-26.2.3-alpine-3.19.1,
     1.15.7-erlang-26.1.2-alpine-3.18.4,
     1.14.5-erlang-25.3.2-alpine-3.18.0
@@ -67,7 +67,7 @@ jobs:
 
   automerge:
     docker:
-      - image: alpine:3.22.2
+      - image: alpine:3.23.3
     steps:
       - run:
           name: Install GitHub CLI
