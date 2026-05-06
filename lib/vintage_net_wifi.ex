@@ -19,6 +19,12 @@ defmodule VintageNetWiFi do
 
   * `:vintage_net_wifi` - WiFi options
   * `:ipv4` - IPv4 options. See VintageNet.IP.IPv4Config.
+  * `:mac_address` - A MAC address string or an MFArgs tuple. VintageNetWiFi
+    will set the MAC address of the WiFi interface to this value before
+    `wpa_supplicant` starts. If an MFArgs tuple is passed, VintageNetWiFi will
+    `apply` it and use the return value as the address. When set, the generated
+    `wpa_supplicant.conf` forces `mac_addr=0` and `preassoc_mac_addr=0` so the
+    supplicant won't randomize away the override at scan or association time.
 
   To scan for WiFi networks it's sufficient to use an empty configuration and call
   the `VintageNet.scan("wlan0")`:
@@ -81,6 +87,7 @@ defmodule VintageNetWiFi do
   alias VintageNet.IP.IPv4Config
   alias VintageNetWiFi.AccessPoint
   alias VintageNetWiFi.Cookbook
+  alias VintageNetWiFi.MacAddressConfig
   alias VintageNetWiFi.WPA2
   alias VintageNetWiFi.WPASupplicant
 
@@ -124,6 +131,7 @@ defmodule VintageNetWiFi do
   @impl VintageNet.Technology
   def normalize(%{type: __MODULE__} = config) do
     config
+    |> MacAddressConfig.normalize()
     |> normalize_wifi()
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
@@ -144,9 +152,10 @@ defmodule VintageNetWiFi do
     %{config | vintage_net_wifi: new_wifi}
   end
 
-  defp normalize_wifi(_config) do
+  defp normalize_wifi(config) do
     # If wifi isn't configured, then only scanning is allowed.
-    %{type: __MODULE__, vintage_net_wifi: %{networks: []}, ipv4: %{method: :disabled}}
+    base = %{type: __MODULE__, vintage_net_wifi: %{networks: []}, ipv4: %{method: :disabled}}
+    Map.merge(base, Map.take(config, [:mac_address]))
   end
 
   defp normalize_first_network(%{ssid: ssid} = wifi) do
@@ -382,7 +391,8 @@ defmodule VintageNetWiFi do
        wifi_to_supplicant_contents(
          normalized_config.vintage_net_wifi,
          control_interface_dir,
-         regulatory_domain
+         regulatory_domain,
+         MacAddressConfig.set?(normalized_config)
        )}
     ]
 
@@ -409,6 +419,7 @@ defmodule VintageNetWiFi do
         {WPASupplicant, wpa_supplicant_options}
       ]
     }
+    |> MacAddressConfig.add_config(normalized_config, opts)
     |> IPv4Config.add_config(normalized_config, opts)
     |> DhcpdConfig.add_config(normalized_config, opts)
     |> DnsdConfig.add_config(normalized_config, opts)
@@ -440,27 +451,48 @@ defmodule VintageNetWiFi do
   defp wifi_to_supplicant_contents(
          %{wpa_supplicant_conf: conf},
          control_interface_dir,
-         _regulatory_domain
+         _regulatory_domain,
+         lock_mac_address?
        ) do
-    [into_newlines(["ctrl_interface=#{control_interface_dir}"]), conf]
+    header = [
+      "ctrl_interface=#{control_interface_dir}"
+      | mac_address_lock_lines(lock_mac_address?)
+    ]
+
+    [into_newlines(header), conf]
     |> IO.chardata_to_string()
   end
 
-  defp wifi_to_supplicant_contents(wifi, control_interface_dir, regulatory_domain) do
-    config = [
-      "ctrl_interface=#{control_interface_dir}",
-      "country=#{wifi[:regulatory_domain] || regulatory_domain}",
-      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
-      # instead of deferring to wpa_supplicant. Only include if wps is enabled (default: true).
-      if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
-      into_config_string(wifi, :bgscan),
-      into_config_string(wifi, :ap_scan),
-      into_config_string(wifi, :user_mpm)
-    ]
+  defp wifi_to_supplicant_contents(
+         wifi,
+         control_interface_dir,
+         regulatory_domain,
+         lock_mac_address?
+       ) do
+    config =
+      [
+        "ctrl_interface=#{control_interface_dir}",
+        "country=#{wifi[:regulatory_domain] || regulatory_domain}"
+      ] ++
+        mac_address_lock_lines(lock_mac_address?) ++
+        [
+          # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
+          # instead of deferring to wpa_supplicant. Only include if wps is enabled (default: true).
+          if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
+          into_config_string(wifi, :bgscan),
+          into_config_string(wifi, :ap_scan),
+          into_config_string(wifi, :user_mpm)
+        ]
 
     iodata = [into_newlines(config), into_wifi_network_config(wifi)]
     IO.chardata_to_string(iodata)
   end
+
+  # When :mac_address is set, force wpa_supplicant's MAC randomization off so
+  # it doesn't override the address we set in up_cmds at scan or association
+  # time.
+  defp mac_address_lock_lines(true), do: ["mac_addr=0", "preassoc_mac_addr=0"]
+  defp mac_address_lock_lines(false), do: []
 
   defp key_mgmt_to_string(key_mgmt) do
     key_mgmt |> List.wrap() |> Enum.map_join(" ", &key_mgmt_item_to_string/1)

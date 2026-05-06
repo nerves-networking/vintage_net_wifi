@@ -2703,6 +2703,119 @@ defmodule VintageNetWiFiTest do
     refute VintageNetWiFi.network_configured?(%{})
   end
 
+  test "setting mac_address adds an ip link command and locks supplicant randomization" do
+    input = %{
+      type: VintageNetWiFi,
+      mac_address: "aa:bb:cc:dd:ee:ff",
+      vintage_net_wifi: %{
+        networks: [
+          %{
+            ssid: "guest",
+            key_mgmt: :none
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+
+    assert raw_config.up_cmds == [
+             {:run_ignore_errors, "ip", ["link", "set", "wlan0", "down"]},
+             {:run, "ip", ["link", "set", "wlan0", "address", "aa:bb:cc:dd:ee:ff"]},
+             {:run, "ip", ["link", "set", "wlan0", "up"]}
+           ]
+
+    [{_path, contents}] = raw_config.files
+
+    assert contents == """
+           ctrl_interface=/tmp/vintage_net/wpa_supplicant
+           country=00
+           mac_addr=0
+           preassoc_mac_addr=0
+           wps_cred_processing=1
+           network={
+           ssid="guest"
+           key_mgmt=NONE
+           mode=0
+           }
+           """
+  end
+
+  test "mac_address accepts an MFArgs tuple resolved at apply time" do
+    input = %{
+      type: VintageNetWiFi,
+      mac_address: {String, :downcase, ["AA:BB:CC:DD:EE:FF"]},
+      vintage_net_wifi: %{
+        networks: [%{ssid: "guest", key_mgmt: :none}]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+
+    assert {:run, "ip", ["link", "set", "wlan0", "address", "aa:bb:cc:dd:ee:ff"]} in raw_config.up_cmds
+  end
+
+  test "mac_address survives normalization in scan-only mode" do
+    input = %{type: VintageNetWiFi, mac_address: "aa:bb:cc:dd:ee:ff"}
+
+    normalized = VintageNetWiFi.normalize(input)
+
+    assert normalized.mac_address == "aa:bb:cc:dd:ee:ff"
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+
+    assert {:run, "ip", ["link", "set", "wlan0", "address", "aa:bb:cc:dd:ee:ff"]} in raw_config.up_cmds
+  end
+
+  test "invalid mac_address raises during normalization" do
+    assert_raise ArgumentError, ~r/Invalid MAC address/, fn ->
+      VintageNetWiFi.normalize(%{type: VintageNetWiFi, mac_address: "not a mac"})
+    end
+  end
+
+  test "an unresolvable MFArgs MAC is logged and ignored" do
+    input = %{
+      type: VintageNetWiFi,
+      mac_address: {Kernel, :inspect, [:not_a_mac]},
+      vintage_net_wifi: %{networks: [%{ssid: "guest", key_mgmt: :none}]},
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    log =
+      capture_log(fn ->
+        raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+
+        # No ip link set address command was added
+        refute Enum.any?(raw_config.up_cmds, fn
+                 {:run, "ip", ["link", "set", _, "address", _]} -> true
+                 _ -> false
+               end)
+      end)
+
+    assert log =~ "ignoring invalid MAC address"
+  end
+
+  test "mac_address still locks supplicant randomization with raw wpa_supplicant_conf" do
+    input = %{
+      type: VintageNetWiFi,
+      mac_address: "aa:bb:cc:dd:ee:ff",
+      vintage_net_wifi: %{wpa_supplicant_conf: "network={\nssid=\"raw\"\nkey_mgmt=NONE\n}\n"},
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+    [{_path, contents}] = raw_config.files
+
+    assert contents =~ "mac_addr=0"
+    assert contents =~ "preassoc_mac_addr=0"
+  end
+
   test "generating QR strings" do
     assert VintageNetWiFi.qr_string("Nerves", "IsCool") ==
              "WIFI:S:Nerves;T:WPA;P:IsCool;;"
