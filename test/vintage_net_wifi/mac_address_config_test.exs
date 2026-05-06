@@ -38,7 +38,8 @@ defmodule VintageNetWiFi.MacAddressConfigTest do
   end
 
   test "resolve applies MFArgs tuples" do
-    assert MacAddressConfig.resolve({Function, :identity, ["11:22:33:44:55:66"]}) == "11:22:33:44:55:66"
+    assert MacAddressConfig.resolve({Function, :identity, ["11:22:33:44:55:66"]}) ==
+             "11:22:33:44:55:66"
   end
 
   test "resolve returns {:error, exception} when MFArgs raises" do
