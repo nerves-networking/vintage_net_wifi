@@ -455,8 +455,11 @@ defmodule VintageNetWiFi do
          lock_mac_address?
        ) do
     header = [
-      "ctrl_interface=#{control_interface_dir}"
-      | mac_address_lock_lines(lock_mac_address?)
+      "ctrl_interface=#{control_interface_dir}",
+      # When :mac_address is set, suppress wpa_supplicant MAC randomization so
+      # it doesn't override the address set in up_cmds at scan/association time.
+      if(lock_mac_address?, do: "mac_addr=0"),
+      if(lock_mac_address?, do: "preassoc_mac_addr=0")
     ]
 
     [into_newlines(header), conf]
@@ -469,30 +472,24 @@ defmodule VintageNetWiFi do
          regulatory_domain,
          lock_mac_address?
        ) do
-    config =
-      [
-        "ctrl_interface=#{control_interface_dir}",
-        "country=#{wifi[:regulatory_domain] || regulatory_domain}"
-      ] ++
-        mac_address_lock_lines(lock_mac_address?) ++
-        [
-          # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
-          # instead of deferring to wpa_supplicant. Only include if wps is enabled (default: true).
-          if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
-          into_config_string(wifi, :bgscan),
-          into_config_string(wifi, :ap_scan),
-          into_config_string(wifi, :user_mpm)
-        ]
+    config = [
+      "ctrl_interface=#{control_interface_dir}",
+      "country=#{wifi[:regulatory_domain] || regulatory_domain}",
+      # When :mac_address is set, suppress wpa_supplicant MAC randomization so
+      # it doesn't override the address set in up_cmds at scan/association time.
+      if(lock_mac_address?, do: "mac_addr=0"),
+      if(lock_mac_address?, do: "preassoc_mac_addr=0"),
+      # By setting this to 1, we always process WPS_CRED_RECEIVED signals ourselves,
+      # instead of deferring to wpa_supplicant. Only include if wps is enabled (default: true).
+      if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
+      into_config_string(wifi, :bgscan),
+      into_config_string(wifi, :ap_scan),
+      into_config_string(wifi, :user_mpm)
+    ]
 
     iodata = [into_newlines(config), into_wifi_network_config(wifi)]
     IO.chardata_to_string(iodata)
   end
-
-  # When :mac_address is set, force wpa_supplicant's MAC randomization off so
-  # it doesn't override the address we set in up_cmds at scan or association
-  # time.
-  defp mac_address_lock_lines(true), do: ["mac_addr=0", "preassoc_mac_addr=0"]
-  defp mac_address_lock_lines(false), do: []
 
   defp key_mgmt_to_string(key_mgmt) do
     key_mgmt |> List.wrap() |> Enum.map_join(" ", &key_mgmt_item_to_string/1)
