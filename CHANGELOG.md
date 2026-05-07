@@ -5,16 +5,6 @@
 
 # Changelog
 
-## Unreleased
-
-* Changes
-  * Support setting a custom MAC address on the WiFi interface at bring-up via
-    the `:mac_address` config key (mirrors `VintageNetEthernet`). Accepts a
-    string like `"aa:bb:cc:dd:ee:ff"` or an MFArgs tuple. When set,
-    VintageNetWiFi also forces `mac_addr=0` and `preassoc_mac_addr=0` in the
-    generated `wpa_supplicant.conf` so the supplicant won't randomize away the
-    override at scan or association time.
-
 ## v0.12.8 - 2026-04-08
 
 * Changes
