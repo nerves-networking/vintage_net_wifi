@@ -80,9 +80,6 @@ defmodule VintageNetWiFi.MacAddressConfig do
 
   @doc """
   Return true if `:mac_address` is set on the config.
-
-  Used to decide whether the generated `wpa_supplicant.conf` needs
-  `mac_addr=0` / `preassoc_mac_addr=0` to suppress randomization.
   """
   @spec set?(map()) :: boolean()
   def set?(config), do: Map.has_key?(config, :mac_address)
