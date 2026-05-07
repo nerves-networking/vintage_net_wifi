@@ -10,7 +10,6 @@ defmodule VintageNetWiFi.Cookbook do
   network (WPA2 Preshared Key networks), pass the SSID and password to `wpa_psk/2`
   """
 
-  alias VintageNetWiFi.MacAddressConfig
   alias VintageNetWiFi.WPA2
 
   @doc """
@@ -164,35 +163,6 @@ defmodule VintageNetWiFi.Cookbook do
        }}
     end
   end
-
-  @doc """
-  Set the WiFi interface's MAC address on an existing recipe configuration
-
-  Designed to compose with the other recipes:
-
-      {:ok, config} =
-        "my_ssid"
-        |> VintageNetWiFi.Cookbook.wpa_psk("my_passphrase")
-        |> VintageNetWiFi.Cookbook.with_mac_address("aa:bb:cc:dd:ee:ff")
-
-  Accepts a MAC string like `"aa:bb:cc:dd:ee:ff"` or an MFArgs tuple
-  (`{module, function, args}`) that returns a MAC string at apply time. Errors
-  from upstream recipes pass through unchanged so the call composes cleanly
-  in a pipeline.
-  """
-  @spec with_mac_address(
-          {:ok, map()} | {:error, term()},
-          String.t() | {module(), atom(), list()}
-        ) :: {:ok, map()} | {:error, term()}
-  def with_mac_address({:ok, config}, mac_address) do
-    if MacAddressConfig.valid_mac?(mac_address) or MacAddressConfig.mfargs?(mac_address) do
-      {:ok, Map.put(config, :mac_address, mac_address)}
-    else
-      {:error, :invalid_mac_address}
-    end
-  end
-
-  def with_mac_address({:error, _} = error, _mac_address), do: error
 
   @doc """
   Return a configuration for creating an open access point
