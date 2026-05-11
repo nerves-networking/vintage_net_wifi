@@ -5,6 +5,16 @@
 
 # Changelog
 
+## Unreleased
+
+* Fixes
+  * `VintageNetWiFi.quick_scan/1` no longer crashes when `wpa_supplicant`
+    returns `FAIL-BUSY` because another scan is already in flight. It now
+    subscribes to the access-point property and waits for an update event,
+    falling back to whatever the property contains on timeout. As a side
+    effect, the function returns as soon as fresh scan results land instead
+    of always sleeping the full `timeout_ms`.
+
 ## v0.12.8 - 2026-04-08
 
 * Changes

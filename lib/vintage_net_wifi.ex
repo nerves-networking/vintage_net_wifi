@@ -960,14 +960,35 @@ defmodule VintageNetWiFi do
   easier to manage list of access points for presentation to users.
   """
   @spec quick_scan(non_neg_integer()) :: [AccessPoint.t()]
-  def quick_scan(wait_time_ms \\ 2_000) do
-    :ok = ioctl("wlan0", :scan, [])
+  def quick_scan(timeout_ms \\ 2_000) do
+    property = ["interface", "wlan0", "wifi", "access_points"]
+    :ok = VintageNet.subscribe(property)
 
-    # Wait a little for the access points to come in
-    Process.sleep(wait_time_ms)
+    try do
+      # Trigger a scan. If another scan is already in flight, wpa_supplicant
+      # replies FAIL-BUSY — its results land in the same property so we just
+      # wait for them. Any other ioctl error is non-fatal: we'll fall back to
+      # whatever the property already contains after the timeout.
+      _ = ioctl("wlan0", :scan, [])
 
-    VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
-    |> summarize_access_points()
+      receive do
+        {VintageNet, ^property, _old, access_points, _meta} -> access_points
+      after
+        timeout_ms -> VintageNet.get(property) || []
+      end
+      |> summarize_access_points()
+    after
+      VintageNet.unsubscribe(property)
+      flush_property_messages(property)
+    end
+  end
+
+  defp flush_property_messages(property) do
+    receive do
+      {VintageNet, ^property, _old, _new, _meta} -> flush_property_messages(property)
+    after
+      0 -> :ok
+    end
   end
 
   @doc """
