@@ -962,13 +962,18 @@ defmodule VintageNetWiFi do
   @spec quick_scan(non_neg_integer()) :: [AccessPoint.t()]
   def quick_scan(timeout_ms \\ 2_000) do
     property = ["interface", "wlan0", "wifi", "access_points"]
-    :ok = VintageNet.subscribe(property)
 
-    try do
-      # Trigger a scan. If another scan is already in flight, wpa_supplicant
-      # replies FAIL-BUSY — its results land in the same property so we just
-      # wait for them. Any other ioctl error is non-fatal: we'll fall back to
-      # whatever the property already contains after the timeout.
+    # Run the subscribe/scan/receive cycle inside a Task so the subscription
+    # and any property-update messages stay contained in the task's mailbox.
+    # When the task exits, the BEAM cleans up, so the caller never sees stray
+    # `{VintageNet, ...}` tuples and there's no manual unsubscribe/flush.
+    Task.async(fn ->
+      VintageNet.subscribe(property)
+
+      # If another scan is already in flight, wpa_supplicant replies FAIL-BUSY
+      # — its results land in the same property so we just wait for them. Any
+      # other ioctl error is non-fatal: we'll fall back to whatever the property
+      # already contains after the timeout.
       _ = ioctl("wlan0", :scan, [])
 
       receive do
@@ -976,19 +981,9 @@ defmodule VintageNetWiFi do
       after
         timeout_ms -> VintageNet.get(property) || []
       end
-      |> summarize_access_points()
-    after
-      VintageNet.unsubscribe(property)
-      flush_property_messages(property)
-    end
-  end
-
-  defp flush_property_messages(property) do
-    receive do
-      {VintageNet, ^property, _old, _new, _meta} -> flush_property_messages(property)
-    after
-      0 -> :ok
-    end
+    end)
+    |> Task.await(timeout_ms + 500)
+    |> summarize_access_points()
   end
 
   @doc """
