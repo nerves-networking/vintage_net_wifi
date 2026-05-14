@@ -960,13 +960,29 @@ defmodule VintageNetWiFi do
   easier to manage list of access points for presentation to users.
   """
   @spec quick_scan(non_neg_integer()) :: [AccessPoint.t()]
-  def quick_scan(wait_time_ms \\ 2_000) do
-    :ok = ioctl("wlan0", :scan, [])
+  def quick_scan(timeout_ms \\ 2_000) do
+    property = ["interface", "wlan0", "wifi", "access_points"]
 
-    # Wait a little for the access points to come in
-    Process.sleep(wait_time_ms)
+    # Run the subscribe/scan/receive cycle inside a Task so the subscription
+    # and any property-update messages stay contained in the task's mailbox.
+    # When the task exits, the BEAM cleans up, so the caller never sees stray
+    # `{VintageNet, ...}` tuples and there's no manual unsubscribe/flush.
+    Task.async(fn ->
+      VintageNet.subscribe(property)
 
-    VintageNet.get(["interface", "wlan0", "wifi", "access_points"])
+      # If another scan is already in flight, wpa_supplicant replies FAIL-BUSY
+      # — its results land in the same property so we just wait for them. Any
+      # other ioctl error is non-fatal: we'll fall back to whatever the property
+      # already contains after the timeout.
+      _ = ioctl("wlan0", :scan, [])
+
+      receive do
+        {VintageNet, ^property, _old, access_points, _meta} -> access_points
+      after
+        timeout_ms -> VintageNet.get(property) || []
+      end
+    end)
+    |> Task.await(timeout_ms + 500)
     |> summarize_access_points()
   end
 
