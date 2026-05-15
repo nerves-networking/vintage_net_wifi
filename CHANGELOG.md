@@ -5,6 +5,11 @@
 
 # Changelog
 
+## v0.12.9 - 2026-05-15
+
+* Fixes
+  * Fix quick_scan/1 crash on FAIL-BUSY. (@gordoneliel)
+
 ## v0.12.8 - 2026-04-08
 
 * Changes
