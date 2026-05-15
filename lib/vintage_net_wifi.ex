@@ -87,7 +87,7 @@ defmodule VintageNetWiFi do
   alias VintageNet.IP.IPv4Config
   alias VintageNetWiFi.AccessPoint
   alias VintageNetWiFi.Cookbook
-  alias VintageNetWiFi.MacAddressConfig
+  alias VintageNetWiFi.MacAddress
   alias VintageNetWiFi.WPA2
   alias VintageNetWiFi.WPASupplicant
 
@@ -131,12 +131,25 @@ defmodule VintageNetWiFi do
   @impl VintageNet.Technology
   def normalize(%{type: __MODULE__} = config) do
     config
-    |> MacAddressConfig.normalize()
+    |> normalize_mac_address()
     |> normalize_wifi()
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
     |> DnsdConfig.normalize()
   end
+
+  defp normalize_mac_address(%{mac_address: mac_address} = config) do
+    if MacAddress.valid?(mac_address) or mfargs?(mac_address) do
+      config
+    else
+      raise ArgumentError, "Invalid MAC address #{inspect(mac_address)}"
+    end
+  end
+
+  defp normalize_mac_address(config), do: config
+
+  defp mfargs?({m, f, a}) when is_atom(m) and is_atom(f) and is_list(a), do: true
+  defp mfargs?(_), do: false
 
   defp normalize_wifi(%{vintage_net_wifi: %{wpa_supplicant_conf: conf}} = config) do
     %{config | vintage_net_wifi: %{wpa_supplicant_conf: conf}}
@@ -392,7 +405,7 @@ defmodule VintageNetWiFi do
          normalized_config.vintage_net_wifi,
          control_interface_dir,
          regulatory_domain,
-         MacAddressConfig.set?(normalized_config)
+         Map.has_key?(normalized_config, :mac_address)
        )}
     ]
 
@@ -419,11 +432,49 @@ defmodule VintageNetWiFi do
         {WPASupplicant, wpa_supplicant_options}
       ]
     }
-    |> MacAddressConfig.add_config(normalized_config, opts)
+    |> add_mac_address_config(normalized_config)
     |> IPv4Config.add_config(normalized_config, opts)
     |> DhcpdConfig.add_config(normalized_config, opts)
     |> DnsdConfig.add_config(normalized_config, opts)
   end
+
+  defp add_mac_address_config(raw_config, %{mac_address: mac_address}) do
+    resolved_mac = resolve_mac(mac_address)
+
+    if MacAddress.valid?(resolved_mac) do
+      Logger.info(
+        "vintage_net_wifi: setting #{raw_config.ifname} MAC to #{resolved_mac}; forcing mac_addr=0/preassoc_mac_addr=0 in wpa_supplicant.conf"
+      )
+
+      # Bring the interface down before changing the MAC. Some WiFi drivers
+      # reject address changes while the interface is up. IPv4Config.add_config
+      # appends `ip link set <ifname> up` afterwards, and the WPASupplicant
+      # child_spec only starts after up_cmds run, so the supplicant sees the
+      # new MAC.
+      new_up_cmds =
+        raw_config.up_cmds ++
+          [
+            {:run_ignore_errors, "ip", ["link", "set", raw_config.ifname, "down"]},
+            {:run, "ip", ["link", "set", raw_config.ifname, "address", resolved_mac]}
+          ]
+
+      %{raw_config | up_cmds: new_up_cmds}
+    else
+      Logger.warning("vintage_net_wifi: ignoring invalid MAC address '#{inspect(resolved_mac)}'")
+
+      raw_config
+    end
+  end
+
+  defp add_mac_address_config(raw_config, _config), do: raw_config
+
+  defp resolve_mac({m, f, args}) do
+    apply(m, f, args)
+  rescue
+    e -> {:error, e}
+  end
+
+  defp resolve_mac(mac_address), do: mac_address
 
   @impl VintageNet.Technology
   def ioctl(ifname, :scan, _args) do
