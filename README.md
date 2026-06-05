@@ -99,6 +99,11 @@ The `:ipv4` key is handled by `vintage_net` to set the IP address on the
 connection. Most of the time, you'll want to use DHCP to dynamically get an IP
 address.
 
+The optional `:mac_address` key sets the WiFi interface's hardware address
+before `wpa_supplicant` starts. It accepts a string like
+`"aa:bb:cc:dd:ee:ff"` or an MFArgs tuple (`{module, function, args}`) that
+returns a MAC string at apply time. See `VintageNetWiFi`'s module documentation for details.
+
 The `:vintage_net_wifi` key has the following common fields:
 
 * `:ap_scan` -  See `wpa_supplicant` documentation. The default for this, 1,
