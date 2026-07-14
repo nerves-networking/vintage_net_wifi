@@ -90,6 +90,7 @@ config :vintage_net,
           ]
         },
         ipv4: %{method: :dhcp},
+        # mac_address: "aa:bb:cc:dd:ee:ff" or {SomeModule, :get_mac, []}
       }
     }
   ]
@@ -97,7 +98,10 @@ config :vintage_net,
 
 The `:ipv4` key is handled by `vintage_net` to set the IP address on the
 connection. Most of the time, you'll want to use DHCP to dynamically get an IP
-address.
+address. You can also specify a `:mac_address` key here to set the MAC address.
+The `:mac_address` option is set on the network interface and WPA Supplicant
+options for randomized or network-specific addresses are disabled. See the
+`:mac_addr` and `:mac_value` options for other MAC address configuration.
 
 The `:vintage_net_wifi` key has the following common fields:
 
@@ -118,6 +122,12 @@ The `:vintage_net_wifi` key has the following common fields:
   * 0:  Hunting-and-pecking only (default)
   * 1:  Hash-to-element (H2E) only
   * 2:  Both hunting-and-pecking and H2E
+* `:mac_addr` - Global MAC address policy (0-2)
+  * 0: use permanent MAC address (default)
+  * 1: use random MAC
+  * 2: use random MAC, but maintain OUI
+* `:preassoc_mac_addr` - Global pre-association MAC address policy. Same
+  options as `:mac_addr`
 * `:networks` - A list of Wi-Fi networks to configure. In client mode,
   VintageNet connects to the first available network in the list. In host mode,
   the list should have one entry with SSID and password information.
@@ -153,6 +163,9 @@ The `:vintage_net_wifi` key has the following common fields:
   * `:wps` - Set to `false` to disable WPS functionality. This is required if
     your `wpa_supplicant` is compiled without WPS support since VintageNetWiFi
     sets `wps_cred_processing` by default.
+  * `:mac_addr` - MAC address policy (0-3). `0` - use permanent MAC address,
+    `1` - use random MAC. `2` - use random MAC, but maintain OUI, `3` use `:mac_value`
+  * `:mac_value` - either a MAC address string or an MFArgs
 
 These keys fairly directly map to the keys in the [official
 docs](https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf).

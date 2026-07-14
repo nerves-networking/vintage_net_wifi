@@ -7,6 +7,7 @@
 # SPDX-FileCopyrightText: 2023 Ace Yanagida
 # SPDX-FileCopyrightText: 2023 Jon Carstens
 # SPDX-FileCopyrightText: 2024 Thomas Jack
+# SPDX-FileCopyrightText: 2026 Eliel A. Gordon
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,6 +20,9 @@ defmodule VintageNetWiFi do
 
   * `:vintage_net_wifi` - WiFi options
   * `:ipv4` - IPv4 options. See VintageNet.IP.IPv4Config.
+  * `:mac_address` - A MAC address string or an MFArgs tuple. VintageNetWiFi
+    passes the MAC address to the `wpa_supplicant`. If an MFArgs tuple is passed,
+    VintageNetWiFi will `apply` it and use the return value as the address.
 
   To scan for WiFi networks it's sufficient to use an empty configuration and call
   the `VintageNet.scan("wlan0")`:
@@ -26,7 +30,6 @@ defmodule VintageNetWiFi do
   ```elixir
   %{type: VintageNetWiFi}
   ```
-
 
   Here's a typical configuration for connecting to a WPA2-protected Wi-Fi network:
 
@@ -81,6 +84,7 @@ defmodule VintageNetWiFi do
   alias VintageNet.IP.IPv4Config
   alias VintageNetWiFi.AccessPoint
   alias VintageNetWiFi.Cookbook
+  alias VintageNetWiFi.MacAddress
   alias VintageNetWiFi.WPA2
   alias VintageNetWiFi.WPASupplicant
 
@@ -99,6 +103,8 @@ defmodule VintageNetWiFi do
     :priority,
     :scan_ssid,
     :frequency,
+    :mac_addr,
+    :mac_value,
     :mesh_hwmp_rootmode,
     :mesh_gate_announcements,
     :ieee80211w,
@@ -108,6 +114,9 @@ defmodule VintageNetWiFi do
 
   @root_level_keys [
     :ap_scan,
+    :mac_addr,
+    :rand_addr_lifetime,
+    :preassoc_mac_addr,
     :networks,
     :bgscan,
     :passive_scan,
@@ -126,10 +135,28 @@ defmodule VintageNetWiFi do
   def normalize(%{type: __MODULE__} = config) do
     config
     |> normalize_wifi()
+    |> normalize_mac_address()
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
     |> DnsdConfig.normalize()
   end
+
+  # This must be called after normalize_wifi
+  defp normalize_mac_address(%{mac_address: mac_address} = config) do
+    if MacAddress.valid?(mac_address) or mfargs?(mac_address) do
+      # When :mac_address is set, suppress wpa_supplicant MAC randomization so
+      # it doesn't override the address set in up_cmds at scan/association time.
+      new_wifi = Map.merge(config.vintage_net_wifi, %{mac_addr: 0, preassoc_mac_addr: 0})
+      %{config | vintage_net_wifi: new_wifi}
+    else
+      raise ArgumentError, "Invalid MAC address #{inspect(mac_address)}"
+    end
+  end
+
+  defp normalize_mac_address(config), do: config
+
+  defp mfargs?({m, f, a}) when is_atom(m) and is_atom(f) and is_list(a), do: true
+  defp mfargs?(_), do: false
 
   defp normalize_wifi(%{vintage_net_wifi: %{wpa_supplicant_conf: conf}} = config) do
     %{config | vintage_net_wifi: %{wpa_supplicant_conf: conf}}
@@ -145,9 +172,10 @@ defmodule VintageNetWiFi do
     %{config | vintage_net_wifi: new_wifi}
   end
 
-  defp normalize_wifi(_config) do
-    # If wifi isn't configured, then only scanning is allowed.
-    %{type: __MODULE__, vintage_net_wifi: %{networks: []}, ipv4: %{method: :disabled}}
+  defp normalize_wifi(config) do
+    # If wifi isn't configured, then make it explicit that there are no networks
+    # and only scanning is allowed.
+    Map.merge(config, %{vintage_net_wifi: %{networks: []}, ipv4: %{method: :disabled}})
   end
 
   defp normalize_first_network(%{ssid: ssid} = wifi) do
@@ -410,10 +438,49 @@ defmodule VintageNetWiFi do
         {WPASupplicant, wpa_supplicant_options}
       ]
     }
+    |> add_mac_address_config(normalized_config)
     |> IPv4Config.add_config(normalized_config, opts)
     |> DhcpdConfig.add_config(normalized_config, opts)
     |> DnsdConfig.add_config(normalized_config, opts)
   end
+
+  defp add_mac_address_config(raw_config, %{mac_address: mac_address}) do
+    resolved_mac = resolve_mac(mac_address)
+
+    if MacAddress.valid?(resolved_mac) do
+      Logger.info(
+        "vintage_net_wifi: setting #{raw_config.ifname} MAC to #{resolved_mac}; forcing mac_addr=0/preassoc_mac_addr=0 in wpa_supplicant.conf"
+      )
+
+      # Bring the interface down before changing the MAC. Some WiFi drivers
+      # reject address changes while the interface is up. IPv4Config.add_config
+      # appends `ip link set <ifname> up` afterwards, and the WPASupplicant
+      # child_spec only starts after up_cmds run, so the supplicant sees the
+      # new MAC.
+      new_up_cmds =
+        raw_config.up_cmds ++
+          [
+            {:run_ignore_errors, "ip", ["link", "set", raw_config.ifname, "down"]},
+            {:run, "ip", ["link", "set", raw_config.ifname, "address", resolved_mac]}
+          ]
+
+      %{raw_config | up_cmds: new_up_cmds}
+    else
+      Logger.warning("vintage_net_wifi: ignoring invalid MAC address '#{inspect(resolved_mac)}'")
+
+      raw_config
+    end
+  end
+
+  defp add_mac_address_config(raw_config, _config), do: raw_config
+
+  defp resolve_mac({m, f, args}) do
+    apply(m, f, args)
+  rescue
+    e -> {:error, e}
+  end
+
+  defp resolve_mac(mac_address), do: mac_address
 
   @impl VintageNet.Technology
   def ioctl(ifname, :scan, _args) do
@@ -456,6 +523,10 @@ defmodule VintageNetWiFi do
       if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
+      into_config_string(wifi, :mac_addr),
+      into_config_string(wifi, :mac_value),
+      into_config_string(wifi, :rand_addr_lifetime),
+      into_config_string(wifi, :preassoc_mac_addr),
       into_config_string(wifi, :sae_pwe),
       into_config_string(wifi, :user_mpm)
     ]
@@ -512,6 +583,8 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :mode),
       into_config_string(wifi, :frequency),
       into_config_string(wifi, :ieee80211w),
+      into_config_string(wifi, :mac_addr),
+      into_config_string(wifi, :mac_value),
 
       # WPA-PSK settings
       into_config_string(wifi, :psk),
@@ -611,6 +684,26 @@ defmodule VintageNetWiFi do
 
   defp wifi_opt_to_config_string(_wifi, :ap_scan, value) do
     "ap_scan=#{value}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :mac_addr, value) do
+    "mac_addr=#{value}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :mac_value, value) when is_binary(value) do
+    "mac_value=#{value}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :mac_value, {m, f, a}) do
+    "mac_value=#{apply(m, f, a)}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :rand_addr_lifetime, value) do
+    "rand_addr_lifetime=#{value}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :preassoc_mac_addr, value) do
+    "preassoc_mac_addr=#{value}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :scan_ssid, value) do
