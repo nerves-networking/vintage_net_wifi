@@ -113,6 +113,11 @@ The `:vintage_net_wifi` key has the following common fields:
   * 1:  Do passive scans.
 * `:regulatory_domain`: Two character country code. Technology configuration
   will take priority over Application configuration
+* `:sae_pwe` - How the SAE password element is derived for WPA3 networks. See
+  the Debugging section if a WPA3 network rejects authentication.
+  * 0:  Hunting-and-pecking only (default)
+  * 1:  Hash-to-element (H2E) only
+  * 2:  Both hunting-and-pecking and H2E
 * `:networks` - A list of Wi-Fi networks to configure. In client mode,
   VintageNet connects to the first available network in the list. In host mode,
   the list should have one entry with SSID and password information.
@@ -534,3 +539,38 @@ Double check that all of your parameters are set correctly. The `:psk` cannot be
 checked here, so if you suspect that's wrong, double check your `config.exs`.
 The next step is to look at log messages for connection errors. On Nerves
 devices, run `RingLogger.next` at the `IEx` prompt.
+
+### WPA3 network rejects authentication
+
+If a WPA3 (SAE) network stays disconnected with repeated
+`CTRL-EVENT-ASSOC-REJECT status_code=16` events even though the password is
+correct, the AP may be rejecting a mismatch between the SAE method used and the
+capabilities the Wi-Fi driver advertises. Some drivers (e.g. `brcmfmac` on
+Raspberry Pis) advertise hash-to-element (H2E) support on their own, while
+`wpa_supplicant` defaults to the older hunting-and-pecking method. APs with H2E
+enabled reject the inconsistency. If the AP runs hostapd, its log shows:
+
+```text
+SAE: <mac> indicates support for SAE H2E, but did not use it
+```
+
+Fix this by adding `sae_pwe: 2` to the `:vintage_net_wifi` map so that
+`wpa_supplicant` may use either method:
+
+```elixir
+%{
+  type: VintageNetWiFi,
+  vintage_net_wifi: %{
+    sae_pwe: 2,
+    networks: [
+      %{
+        ssid: "my_network_ssid",
+        key_mgmt: :sae,
+        sae_password: "a_password",
+        ieee80211w: 2
+      }
+    ]
+  },
+  ipv4: %{method: :dhcp}
+}
+```
