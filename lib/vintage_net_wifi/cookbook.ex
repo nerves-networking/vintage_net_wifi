@@ -7,10 +7,40 @@ defmodule VintageNetWiFi.Cookbook do
   Recipes for common WiFi network configurations
 
   For example, if you want the standard configuration for the most common type of WiFi
-  network (WPA2 Preshared Key networks), pass the SSID and password to `wpa_psk/2`
+  network (WPA2 Preshared Key networks), pass the SSID and password to `wpa_psk/2`.
+
+  It's possible to inject extra configuration into the cookbook configurations
+  to modify the returned configs. Extra configuration is looked up by function
+  name and then deep merged with whatever is there (maps are merged recursively;
+  non-map values, like lists, are replaced).
+
+  ```elixir
+  config :vintage_net_wifi,
+    cookbook_extras: %{
+      generic: %{vintage_net_wifi: %{sae_pwe: 2}}
+    }
+  ```
   """
 
   alias VintageNetWiFi.WPA2
+
+  # Handle additional cookbook configuration from the app environment
+  defmacrop merge_extras(config) do
+    {name, _arity} = __CALLER__.function
+
+    quote bind_quoted: [name: name, config: config] do
+      merge_extras(name, config)
+    end
+  end
+
+  defp merge_extras(name, config) do
+    all_extras = Application.get_env(:vintage_net_wifi, :cookbook_extras, %{})
+    extras = Map.get(all_extras, name, %{})
+    deep_merge(nil, config, extras)
+  end
+
+  defp deep_merge(_key, %{} = a, %{} = b), do: Map.merge(a, b, &deep_merge/3)
+  defp deep_merge(_key, _a, b), do: b
 
   @doc """
   Return a generic configuration for connecting to preshared-key networks
@@ -28,22 +58,23 @@ defmodule VintageNetWiFi.Cookbook do
   def generic(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
     with :ok <- WPA2.validate_ssid(ssid),
          :ok <- WPA2.validate_passphrase(passphrase) do
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               ssid: ssid,
-               psk: passphrase,
-               sae_password: passphrase,
-               key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
-               ieee80211w: 1
-             }
-           ]
-         },
-         ipv4: %{method: :dhcp}
-       }}
+      base = %{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [
+            %{
+              ssid: ssid,
+              psk: passphrase,
+              sae_password: passphrase,
+              key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
+              ieee80211w: 1
+            }
+          ]
+        },
+        ipv4: %{method: :dhcp}
+      }
+
+      {:ok, merge_extras(base)}
     end
   end
 
@@ -57,19 +88,20 @@ defmodule VintageNetWiFi.Cookbook do
   @spec open_wifi(String.t()) :: {:ok, map()} | {:error, WPA2.invalid_ssid_error()}
   def open_wifi(ssid) when is_binary(ssid) do
     with :ok <- WPA2.validate_ssid(ssid) do
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               key_mgmt: :none,
-               ssid: ssid
-             }
-           ]
-         },
-         ipv4: %{method: :dhcp}
-       }}
+      base = %{
+        type: VintageNetWiFi,
+        vintage_net_wifi: %{
+          networks: [
+            %{
+              key_mgmt: :none,
+              ssid: ssid
+            }
+          ]
+        },
+        ipv4: %{method: :dhcp}
+      }
+
+      {:ok, merge_extras(base)}
     end
   end
 
@@ -85,20 +117,22 @@ defmodule VintageNetWiFi.Cookbook do
   def wpa_psk(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
     with :ok <- WPA2.validate_ssid(ssid),
          :ok <- WPA2.validate_passphrase(passphrase) do
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               key_mgmt: :wpa_psk,
-               ssid: ssid,
-               psk: passphrase
-             }
-           ]
-         },
-         ipv4: %{method: :dhcp}
-       }}
+      base =
+        %{
+          type: VintageNetWiFi,
+          vintage_net_wifi: %{
+            networks: [
+              %{
+                key_mgmt: :wpa_psk,
+                ssid: ssid,
+                psk: passphrase
+              }
+            ]
+          },
+          ipv4: %{method: :dhcp}
+        }
+
+      {:ok, merge_extras(base)}
     end
   end
 
@@ -114,21 +148,23 @@ defmodule VintageNetWiFi.Cookbook do
   def wpa3_sae(ssid, passphrase) when is_binary(ssid) and is_binary(passphrase) do
     with :ok <- WPA2.validate_ssid(ssid),
          :ok <- WPA2.validate_passphrase(passphrase) do
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               key_mgmt: :sae,
-               ieee80211w: 2,
-               sae_password: passphrase,
-               ssid: ssid
-             }
-           ]
-         },
-         ipv4: %{method: :dhcp}
-       }}
+      base =
+        %{
+          type: VintageNetWiFi,
+          vintage_net_wifi: %{
+            networks: [
+              %{
+                key_mgmt: :sae,
+                ieee80211w: 2,
+                sae_password: passphrase,
+                ssid: ssid
+              }
+            ]
+          },
+          ipv4: %{method: :dhcp}
+        }
+
+      {:ok, merge_extras(base)}
     end
   end
 
@@ -144,23 +180,25 @@ defmodule VintageNetWiFi.Cookbook do
   def wpa_eap_peap(ssid, username, passphrase)
       when is_binary(ssid) and is_binary(username) and is_binary(passphrase) do
     with :ok <- WPA2.validate_ssid(ssid) do
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               key_mgmt: :wpa_eap,
-               ssid: ssid,
-               identity: username,
-               password: passphrase,
-               eap: "PEAP",
-               phase2: "auth=MSCHAPV2"
-             }
-           ]
-         },
-         ipv4: %{method: :dhcp}
-       }}
+      base =
+        %{
+          type: VintageNetWiFi,
+          vintage_net_wifi: %{
+            networks: [
+              %{
+                key_mgmt: :wpa_eap,
+                ssid: ssid,
+                identity: username,
+                password: passphrase,
+                eap: "PEAP",
+                phase2: "auth=MSCHAPV2"
+              }
+            ]
+          },
+          ipv4: %{method: :dhcp}
+        }
+
+      {:ok, merge_extras(base)}
     end
   end
 
@@ -178,28 +216,30 @@ defmodule VintageNetWiFi.Cookbook do
       dhcp_start = {a, b, c, 10}
       dhcp_end = {a, b, c, 250}
 
-      {:ok,
-       %{
-         type: VintageNetWiFi,
-         vintage_net_wifi: %{
-           networks: [
-             %{
-               mode: :ap,
-               ssid: ssid,
-               key_mgmt: :none
-             }
-           ]
-         },
-         ipv4: %{
-           method: :static,
-           address: our_address,
-           netmask: {255, 255, 255, 0}
-         },
-         dhcpd: %{
-           start: dhcp_start,
-           end: dhcp_end
-         }
-       }}
+      base =
+        %{
+          type: VintageNetWiFi,
+          vintage_net_wifi: %{
+            networks: [
+              %{
+                mode: :ap,
+                ssid: ssid,
+                key_mgmt: :none
+              }
+            ]
+          },
+          ipv4: %{
+            method: :static,
+            address: our_address,
+            netmask: {255, 255, 255, 0}
+          },
+          dhcpd: %{
+            start: dhcp_start,
+            end: dhcp_end
+          }
+        }
+
+      {:ok, merge_extras(base)}
     end
   end
 end

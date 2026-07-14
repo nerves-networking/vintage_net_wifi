@@ -7,23 +7,51 @@ defmodule VintageNetWiFi.CookbookTest do
 
   alias VintageNetWiFi.Cookbook
 
-  test "generic/2" do
-    assert {:ok,
-            %{
-              type: VintageNetWiFi,
-              ipv4: %{method: :dhcp},
-              vintage_net_wifi: %{
-                networks: [
-                  %{
-                    key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
-                    psk: "my_passphrase",
-                    ssid: "my_ssid",
-                    ieee80211w: 1,
-                    sae_password: "my_passphrase"
-                  }
-                ]
-              }
-            }} == Cookbook.generic("my_ssid", "my_passphrase")
+  describe "generic/2" do
+    test "defaults" do
+      assert {:ok,
+              %{
+                type: VintageNetWiFi,
+                ipv4: %{method: :dhcp},
+                vintage_net_wifi: %{
+                  networks: [
+                    %{
+                      key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
+                      psk: "my_passphrase",
+                      ssid: "my_ssid",
+                      ieee80211w: 1,
+                      sae_password: "my_passphrase"
+                    }
+                  ]
+                }
+              }} == Cookbook.generic("my_ssid", "my_passphrase")
+    end
+
+    test "with extras" do
+      on_exit(fn -> Application.delete_env(:vintage_net_wifi, :cookbook_extras) end)
+
+      Application.put_env(:vintage_net_wifi, :cookbook_extras, %{
+        generic: %{vintage_net_wifi: %{sae_pwe: 2}}
+      })
+
+      assert {:ok,
+              %{
+                type: VintageNetWiFi,
+                ipv4: %{method: :dhcp},
+                vintage_net_wifi: %{
+                  sae_pwe: 2,
+                  networks: [
+                    %{
+                      key_mgmt: [:wpa_psk, :wpa_psk_sha256, :sae],
+                      psk: "my_passphrase",
+                      ssid: "my_ssid",
+                      ieee80211w: 1,
+                      sae_password: "my_passphrase"
+                    }
+                  ]
+                }
+              }} == Cookbook.generic("my_ssid", "my_passphrase")
+    end
   end
 
   test "open_wifi/2" do

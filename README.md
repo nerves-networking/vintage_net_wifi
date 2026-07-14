@@ -587,3 +587,14 @@ Fix this by adding `sae_pwe: 2` to the `:vintage_net_wifi` map so that
   ipv4: %{method: :dhcp}
 }
 ```
+
+If you use `VintageNetWiFi.Cookbook` or `VintageNetWiFi.quick_configure/2`, you
+can add `sae_pwe: 2` automatically by adding the following to your `config.exs`:
+
+```elixir
+config :vintage_net_wifi,
+  cookbook_extras: %{
+    generic: %{vintage_net_wifi: %{sae_pwe: 2}},
+    wpa3_sae: %{vintage_net_wifi: %{sae_pwe: 2}}
+  }
+```
