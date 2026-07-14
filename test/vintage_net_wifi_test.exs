@@ -476,6 +476,29 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
+  test "sae_pwe is written to the wpa_supplicant configuration" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        sae_pwe: 2,
+        networks: [
+          %{
+            ssid: "testing",
+            sae_password: "hunter2",
+            key_mgmt: :sae,
+            ieee80211w: 2
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+    {_path, contents} = hd(config.files)
+    assert contents =~ "sae_pwe=2"
+  end
+
   test "create a mixed WPA2-PSK/WPA3-SAE WiFi configuration" do
     input = %{
       type: VintageNetWiFi,
