@@ -112,6 +112,7 @@ defmodule VintageNetWiFi do
     :bgscan,
     :passive_scan,
     :regulatory_domain,
+    :sae_pwe,
     :user_mpm,
     :root_interface,
     :wpa_supplicant_conf_path,
@@ -455,6 +456,7 @@ defmodule VintageNetWiFi do
       if(Map.get(wifi, :wps, true), do: "wps_cred_processing=1"),
       into_config_string(wifi, :bgscan),
       into_config_string(wifi, :ap_scan),
+      into_config_string(wifi, :sae_pwe),
       into_config_string(wifi, :user_mpm)
     ]
 
@@ -741,6 +743,10 @@ defmodule VintageNetWiFi do
 
   defp wifi_opt_to_config_string(_wifi, :sae_password, value) do
     "sae_password=\"#{value}\""
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :sae_pwe, value) do
+    "sae_pwe=#{value}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :ieee80211w, value) do
