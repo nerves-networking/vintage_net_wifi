@@ -5,6 +5,13 @@
 
 # Changelog
 
+## v0.12.10 - 2026-07-14
+
+* Changes
+  * Add `sae_pwe` wpa_supplicant option to fix WPA3 support on Broadcom WiFi
+    modules like those on the Raspberry Pi's. See https://github.com/nerves-networking/vintage_net_wifi/pull/315. (@BryanLeong)
+  * Support setting the WiFi MAC address similar to VintageNetEthernet.  (@gordoneliel)
+
 ## v0.12.9 - 2026-05-15
 
 * Fixes
