@@ -5,6 +5,23 @@
 
 # Changelog
 
+## v0.12.11 - 2026-07-15
+
+This release adds a mechanism for per-device customizations to cookbook
+configurations. For example, to apply the `sae_pwe` fix for WPA3 support on
+Raspberry Pi 5, add this to your `config.exs`:
+
+```elixir
+config :vintage_net_wifi,
+  cookbook_extras: %{
+    generic: %{vintage_net_wifi: %{sae_pwe: 2}},
+    wpa3_sae: %{vintage_net_wifi: %{sae_pwe: 2}}
+  }
+```
+
+* Changes
+  * Add `cookbook_extras` for device-specific cookbook config customizations
+
 ## v0.12.10 - 2026-07-14
 
 * Changes
