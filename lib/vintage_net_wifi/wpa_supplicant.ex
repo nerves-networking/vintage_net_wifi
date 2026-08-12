@@ -32,6 +32,9 @@ defmodule VintageNetWiFi.WPASupplicant do
     make sure it's still alive (defaults to 60,000 seconds)
   * `:ap_mode` - true if the WiFi module and wpa_supplicant are
     in access point mode
+  * `:driver_flags` - the value passed to `wpa_supplicant`'s `-D` option
+    (defaults to `"nl80211,wext"`). Set to `"nl80211"` for drivers or kernels
+    without wireless-extensions support (e.g. WiFi HaLow / S1G radios).
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(args) do
@@ -92,6 +95,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     keep_alive_interval = Keyword.get(args, :keep_alive_interval, 60000)
     ap_mode = Keyword.get(args, :ap_mode, false)
     verbose = Keyword.get(args, :verbose, false)
+    driver_flags = Keyword.get(args, :driver_flags, "nl80211,wext")
 
     state = %{
       wpa_supplicant: wpa_supplicant,
@@ -101,6 +105,7 @@ defmodule VintageNetWiFi.WPASupplicant do
       ifname: ifname,
       ap_mode: ap_mode,
       verbose: verbose,
+      driver_flags: driver_flags,
       access_points: %{},
       clients: [],
       peers: [],
@@ -135,13 +140,13 @@ defmodule VintageNetWiFi.WPASupplicant do
         verbose_flag = if state.verbose, do: ["-dd"], else: []
 
         # -i ifname      // which interface
-        # -Dnl80211,wext // try the nl80211 driver first, then wext
+        # -D<flags>      // driver flags (default: nl80211,wext)
         # -c config_file // use our config file
         # -dd            // verbose
         args = [
           "-i",
           state.ifname,
-          "-Dnl80211,wext",
+          "-D#{state.driver_flags}",
           "-c",
           state.wpa_supplicant_conf_path | verbose_flag
         ]
