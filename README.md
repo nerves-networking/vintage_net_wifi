@@ -1,5 +1,6 @@
 <!--
   SPDX-FileCopyrightText: 2019 Frank Hunleth
+  SPDX-FileCopyrightText: 2026 Cocoa Xu
   SPDX-License-Identifier: CC-BY-4.0
 -->
 
@@ -117,6 +118,10 @@ The `:vintage_net_wifi` key has the following common fields:
   * 1:  Do passive scans.
 * `:regulatory_domain`: Two character country code. Technology configuration
   will take priority over Application configuration
+* `:tx_power` - Transmit power. `:auto` (default) leaves it to the driver,
+  `{:limit, dbm}` caps it, and `{:fixed, dbm}` asks the driver to use exactly
+  that level. Drivers differ: most treat both as a cap within regulatory
+  limits, some only support one of them, and most only accept whole dBm
 * `:sae_pwe` - How the SAE password element is derived for WPA3 networks. See
   the Debugging section if a WPA3 network rejects authentication.
   * 0:  Hunting-and-pecking only (default)
@@ -536,6 +541,18 @@ Example output:
   width: "40 MHz"
 }}
 ```
+
+## Transmit power
+
+To change the transmit power at runtime, run:
+
+```elixir
+VintageNet.ioctl("wlan0", :tx_power, [{:limit, 3.0}])
+VintageNet.ioctl("wlan0", :tx_power, [{:fixed, 3.0}])
+VintageNet.ioctl("wlan0", :tx_power, [:auto])
+```
+
+The `:tx_power` setting is applied again when the interface is reconfigured.
 
 ## Debugging
 
