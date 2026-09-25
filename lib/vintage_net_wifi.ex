@@ -8,6 +8,7 @@
 # SPDX-FileCopyrightText: 2023 Jon Carstens
 # SPDX-FileCopyrightText: 2024 Thomas Jack
 # SPDX-FileCopyrightText: 2026 Eliel A. Gordon
+# SPDX-FileCopyrightText: 2026 Cocoa Xu
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -126,7 +127,8 @@ defmodule VintageNetWiFi do
     :root_interface,
     :wpa_supplicant_conf_path,
     :wps,
-    :wps_cred_processing
+    :wps_cred_processing,
+    :tx_power
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -135,6 +137,7 @@ defmodule VintageNetWiFi do
   def normalize(%{type: __MODULE__} = config) do
     config
     |> normalize_wifi()
+    |> normalize_tx_power()
     |> normalize_mac_address()
     |> IPv4Config.normalize()
     |> DhcpdConfig.normalize()
@@ -154,6 +157,21 @@ defmodule VintageNetWiFi do
   end
 
   defp normalize_mac_address(config), do: config
+
+  defp normalize_tx_power(%{vintage_net_wifi: %{tx_power: tx_power}} = config) do
+    assert_tx_power(tx_power)
+    config
+  end
+
+  defp normalize_tx_power(config), do: config
+
+  defp assert_tx_power(:auto), do: :ok
+  defp assert_tx_power({type, dbm}) when type in [:limit, :fixed] and is_number(dbm), do: :ok
+
+  defp assert_tx_power(other) do
+    raise ArgumentError,
+          "Invalid tx_power #{inspect(other)}. Specify :auto, {:limit, dbm}, or {:fixed, dbm}"
+  end
 
   defp mfargs?({m, f, a}) when is_atom(m) and is_atom(f) and is_list(a), do: true
   defp mfargs?(_), do: false
@@ -442,6 +460,34 @@ defmodule VintageNetWiFi do
     |> IPv4Config.add_config(normalized_config, opts)
     |> DhcpdConfig.add_config(normalized_config, opts)
     |> DnsdConfig.add_config(normalized_config, opts)
+    |> add_tx_power_config(normalized_config)
+  end
+
+  defp add_tx_power_config(raw_config, %{vintage_net_wifi: %{tx_power: {_type, _dbm} = setting}}) do
+    %{
+      raw_config
+      | up_cmds: raw_config.up_cmds ++ [tx_power_cmd(raw_config.ifname, setting)],
+        down_cmds: [tx_power_cmd(raw_config.ifname, :auto) | raw_config.down_cmds]
+    }
+  end
+
+  defp add_tx_power_config(raw_config, _config), do: raw_config
+
+  defp tx_power_cmd(ifname, setting),
+    do: {:run_ignore_errors, tx_power_path(), [ifname | tx_power_args(setting)]}
+
+  defp tx_power_path(), do: Application.app_dir(:vintage_net_wifi, ["priv", "tx_power"])
+
+  defp tx_power_args(:auto), do: ["auto"]
+
+  defp tx_power_args({type, dbm}),
+    do: [Atom.to_string(type), Integer.to_string(round(dbm * 100))]
+
+  defp run_tx_power(ifname, setting) do
+    case System.cmd(tx_power_path(), [ifname | tx_power_args(setting)], stderr_to_stdout: true) do
+      {_output, 0} -> :ok
+      {output, _nonzero} -> {:error, String.trim(output)}
+    end
   end
 
   defp add_mac_address_config(raw_config, %{mac_address: mac_address}) do
@@ -493,6 +539,11 @@ defmodule VintageNetWiFi do
 
   def ioctl(ifname, :wps_pbc, _args) do
     WPASupplicant.wps_pbc(ifname)
+  end
+
+  def ioctl(ifname, :tx_power, [setting]) do
+    assert_tx_power(setting)
+    run_tx_power(ifname, setting)
   end
 
   def ioctl(_ifname, _command, _args) do
