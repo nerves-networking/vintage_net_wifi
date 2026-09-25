@@ -5,6 +5,7 @@
 # SPDX-FileCopyrightText: 2023 Jon Carstens
 # SPDX-FileCopyrightText: 2024 Masatoshi Nishiguchi
 # SPDX-FileCopyrightText: 2026 Eliel A. Gordon
+# SPDX-FileCopyrightText: 2026 Cocoa Xu
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -2845,5 +2846,23 @@ defmodule VintageNetWiFiTest do
 
     # Ambiguous hex string example from docs
     assert VintageNetWiFi.qr_string("abcd", "abcd") == "WIFI:S:\"abcd\";T:WPA;P:\"abcd\";;"
+  end
+
+  test "tx_power sets a fixed transmit power and restores it on teardown" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{tx_power: 3, networks: [%{ssid: "guest", key_mgmt: :none}]},
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+    tx_power = Application.app_dir(:vintage_net_wifi, ["priv", "tx_power"])
+
+    assert List.last(raw_config.up_cmds) == {:run_ignore_errors, tx_power, ["wlan0", "300"]}
+    assert hd(raw_config.down_cmds) == {:run_ignore_errors, tx_power, ["wlan0", "auto"]}
+
+    [{_path, contents}] = raw_config.files
+    refute contents =~ "tx_power"
   end
 end
