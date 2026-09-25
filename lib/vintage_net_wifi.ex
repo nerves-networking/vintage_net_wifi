@@ -8,6 +8,7 @@
 # SPDX-FileCopyrightText: 2023 Jon Carstens
 # SPDX-FileCopyrightText: 2024 Thomas Jack
 # SPDX-FileCopyrightText: 2026 Eliel A. Gordon
+# SPDX-FileCopyrightText: 2026 Cocoa Xu
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -126,7 +127,8 @@ defmodule VintageNetWiFi do
     :root_interface,
     :wpa_supplicant_conf_path,
     :wps,
-    :wps_cred_processing
+    :wps_cred_processing,
+    :tx_power
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -442,7 +444,27 @@ defmodule VintageNetWiFi do
     |> IPv4Config.add_config(normalized_config, opts)
     |> DhcpdConfig.add_config(normalized_config, opts)
     |> DnsdConfig.add_config(normalized_config, opts)
+    |> add_tx_power_config(normalized_config)
   end
+
+  defp add_tx_power_config(raw_config, %{vintage_net_wifi: %{tx_power: dbm}})
+       when is_number(dbm) do
+    %{
+      raw_config
+      | up_cmds: raw_config.up_cmds ++ [tx_power_cmd(raw_config.ifname, dbm)],
+        down_cmds: [tx_power_cmd(raw_config.ifname, :auto) | raw_config.down_cmds]
+    }
+  end
+
+  defp add_tx_power_config(raw_config, _config), do: raw_config
+
+  defp tx_power_cmd(ifname, setting),
+    do: {:run_ignore_errors, tx_power_path(), [ifname, tx_power_arg(setting)]}
+
+  defp tx_power_path(), do: Application.app_dir(:vintage_net_wifi, ["priv", "tx_power"])
+
+  defp tx_power_arg(:auto), do: "auto"
+  defp tx_power_arg(dbm), do: Integer.to_string(round(dbm * 100))
 
   defp add_mac_address_config(raw_config, %{mac_address: mac_address}) do
     resolved_mac = resolve_mac(mac_address)
@@ -493,6 +515,13 @@ defmodule VintageNetWiFi do
 
   def ioctl(ifname, :wps_pbc, _args) do
     WPASupplicant.wps_pbc(ifname)
+  end
+
+  def ioctl(ifname, :tx_power, [setting]) when is_number(setting) or setting == :auto do
+    case System.cmd(tx_power_path(), [ifname, tx_power_arg(setting)], stderr_to_stdout: true) do
+      {_output, 0} -> :ok
+      {output, _nonzero} -> {:error, String.trim(output)}
+    end
   end
 
   def ioctl(_ifname, _command, _args) do

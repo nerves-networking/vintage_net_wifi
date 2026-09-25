@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2019 Frank Hunleth
 # SPDX-FileCopyrightText: 2020 Connor Rigby
+# SPDX-FileCopyrightText: 2026 Cocoa Xu
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -68,7 +69,8 @@ endif
 DEFAULT_TARGETS ?= $(PREFIX) \
 		   $(PREFIX)/force_ap_scan \
 		   $(PREFIX)/mesh_mode \
-		   $(PREFIX)/mesh_param
+		   $(PREFIX)/mesh_param \
+		   $(PREFIX)/tx_power
 
 # Enable for debug messages
 # CFLAGS += -DDEBUG
@@ -104,6 +106,10 @@ $(PREFIX)/mesh_param: $(BUILD)/mesh_param.o
 	@echo " LD $(notdir $@)"
 	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
 
+$(PREFIX)/tx_power: $(BUILD)/tx_power.o
+	@echo " LD $(notdir $@)"
+	$(CC) $^ $(LDFLAGS) -lnl-3 -lnl-genl-3 -o $@
+
 $(PREFIX) $(BUILD):
 	mkdir -p $@
 
@@ -111,6 +117,7 @@ mix_clean:
 	$(RM) $(PREFIX)/force_ap_scan \
 	    $(PREFIX)/mesh_mode \
 	    $(PREFIX)/mesh_param \
+	    $(PREFIX)/tx_power \
 	    $(BUILD)/*.o
 clean:
 	mix clean
