@@ -160,17 +160,17 @@ defmodule VintageNetWiFi.WPASupplicant do
       end
 
     # Wait for the wpa_supplicant to create its control files.
-    primary_path =
+    {primary_path, secondary_ll} =
       case wait_for_control_file(control_paths) do
         [primary_path, secondary_path] ->
           {:ok, secondary_ll} =
             WPASupplicantLL.start_link(path: secondary_path, notification_pid: self())
 
           {:ok, "OK\n"} = WPASupplicantLL.control_request(secondary_ll, "ATTACH")
-          primary_path
+          {primary_path, secondary_ll}
 
         [primary_path] ->
-          primary_path
+          {primary_path, nil}
 
         _ ->
           raise RuntimeError,
@@ -180,7 +180,11 @@ defmodule VintageNetWiFi.WPASupplicant do
     {:ok, ll} = WPASupplicantLL.start_link(path: primary_path, notification_pid: self())
     {:ok, "OK\n"} = WPASupplicantLL.control_request(ll, "ATTACH")
 
-    {:ok, bssid_requester} = BSSIDRequester.start_link(ll: ll, notification_pid: self())
+    # Scan results live in the BSS table of the interface that scanned. In AP
+    # mode with a P2P-capable driver the primary socket is the P2P device, whose
+    # table stays empty, so BSS queries go to the interface's own socket.
+    bss_ll = secondary_ll || ll
+    {:ok, bssid_requester} = BSSIDRequester.start_link(ll: bss_ll, notification_pid: self())
 
     # Request a new AP list
     BSSIDRequester.get_all_access_points(bssid_requester, &update_all_access_points/2)
