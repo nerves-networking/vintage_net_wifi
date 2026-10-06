@@ -88,6 +88,9 @@ all: install
 
 install: $(BUILD) $(PREFIX) $(DEFAULT_TARGETS)
 
+$(OBJ): | $(BUILD)
+$(NIF): | $(PREFIX)
+
 $(BUILD)/%.o: c_src/%.c
 	@echo " CC $(notdir $@)"
 	$(CC) -c $(CFLAGS) -o $@ $<
