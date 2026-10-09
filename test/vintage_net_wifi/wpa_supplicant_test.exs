@@ -197,6 +197,51 @@ defmodule VintageNetWiFi.WPASupplicantTest do
     refute_receive {VintageNet, ^clients_property, _old, [], _metadata}
   end
 
+  test "ap-mode scan results come from the interface, not the p2p device", context do
+    # The BSS table is per-interface, so after a forced AP scan the results are
+    # on the interface's socket and the P2P device's table is empty.
+    MockWPASupplicant.set_responses(context.mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "BSS 0" =>
+        "id=0\nbssid=78:8a:20:82:7a:50\nfreq=2437\nlevel=-71\nflags=[WPA2-PSK-CCMP][ESS]\nssid=TestLAN\n",
+      "BSS 1" => ""
+    })
+
+    MockWPASupplicant.set_responses(context.p2p_dev_mock, %{
+      "ATTACH" => "OK\n",
+      "PING" => "PONG\n",
+      "BSS 0" => ""
+    })
+
+    ap_property = ["interface", "test_wlan0", "wifi", "access_points"]
+    PropertyTable.delete(VintageNet, ap_property)
+    VintageNet.subscribe(ap_property)
+
+    clients_property = ["interface", "test_wlan0", "wifi", "clients"]
+    PropertyTable.delete(VintageNet, clients_property)
+    VintageNet.subscribe(clients_property)
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path,
+         ap_mode: true}
+      )
+
+    # Wait for the WPASupplicant to attach before sending events
+    assert_receive {VintageNet, ^clients_property, nil, [], _metadata}
+
+    MockWPASupplicant.send_message(context.mock, "<2>CTRL-EVENT-SCAN-RESULTS ")
+
+    assert_receive {VintageNet, ^ap_property, _old,
+                    [%VintageNetWiFi.AccessPoint{bssid: "78:8a:20:82:7a:50", ssid: "TestLAN"}],
+                    _metadata}
+  end
+
   test "handles scan failures", context do
     MockWPASupplicant.set_responses(context.mock, %{
       "ATTACH" => "OK\n",
