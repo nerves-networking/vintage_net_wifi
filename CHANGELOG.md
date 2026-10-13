@@ -5,6 +5,20 @@
 
 # Changelog
 
+## v0.12.12 - 2026-10-13
+
+* Changes
+  * Support configuring WiFi transmit power with the `:tx_power` option.
+    Settings include `:auto`, `{:limit, dbm}`, and `{:fixed, dbm}`. This can
+    also be changed via `VintageNet.ioctl/3`.  (@cocoa-xu)
+  * Remove the one-second `wpa_supplicant` startup delay outside AP mode.
+    (@gordoneliel)
+
+* Fixes
+  * Fix empty AP-mode scan results on drivers that create a P2P device by reading
+    scan results from the WiFi interface's control socket. (@ringlej)
+  * Fix intermittent build failures when running parallel `make`.
+
 ## v0.12.11 - 2026-07-15
 
 This release adds a mechanism for per-device customizations to cookbook
