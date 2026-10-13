@@ -4,8 +4,9 @@
 # SPDX-FileCopyrightText: 2023 Ace Yanagida
 # SPDX-FileCopyrightText: 2023 Jon Carstens
 # SPDX-FileCopyrightText: 2024 Masatoshi Nishiguchi
-# SPDX-FileCopyrightText: 2026 Eliel A. Gordon
+# SPDX-FileCopyrightText: 2026 Bryan Leong
 # SPDX-FileCopyrightText: 2026 Cocoa Xu
+# SPDX-FileCopyrightText: 2026 Eliel A. Gordon
 #
 # SPDX-License-Identifier: Apache-2.0
 #

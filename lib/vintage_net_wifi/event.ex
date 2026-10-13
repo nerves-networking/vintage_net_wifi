@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2021 Dömötör Gulyás
 # SPDX-FileCopyrightText: 2022 Connor Rigby
+# SPDX-FileCopyrightText: 2025 Frank Hunleth
 #
 # SPDX-License-Identifier: Apache-2.0
 #

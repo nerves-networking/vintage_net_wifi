@@ -1,5 +1,13 @@
 <!--
   SPDX-FileCopyrightText: 2019 Frank Hunleth
+  SPDX-FileCopyrightText: 2020 Connor Rigby
+  SPDX-FileCopyrightText: 2020 Justin Schneck
+  SPDX-FileCopyrightText: 2020 Pavel Sorejs
+  SPDX-FileCopyrightText: 2021 Dömötör Gulyás
+  SPDX-FileCopyrightText: 2022 Jason Axelson
+  SPDX-FileCopyrightText: 2023 Rockwell Schrock
+  SPDX-FileCopyrightText: 2024 Ray Chang
+  SPDX-FileCopyrightText: 2026 Bryan Leong
   SPDX-FileCopyrightText: 2026 Cocoa Xu
   SPDX-License-Identifier: CC-BY-4.0
 -->
