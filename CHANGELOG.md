@@ -5,6 +5,17 @@
 
 # Changelog
 
+## Unreleased
+
+* Changes
+  * Move the `wpa_supplicant` plumbing to `vintage_net_supplicant` so that
+    `vintage_net_ethernet` can use it too.
+  * Support private keys in an HSM for EAP networks with the
+    `:pkcs11_engine_path` and `:pkcs11_module_path` options, and checking the
+    authentication server's name with `:domain_suffix_match`.
+  * Backwards incompatible: `VintageNetWiFi.WPASupplicantLL` is now
+    `VintageNetSupplicant.WPASupplicantLL`. Its notifications use the new name.
+
 ## v0.12.12 - 2026-10-13
 
 * Changes

@@ -707,4 +707,32 @@ defmodule VintageNetWiFi.WPASupplicantTest do
 
     assert {:ok, "TEST_RESPONSE\n"} = WPASupplicant.raw_command("test_wlan0", "TEST_COMMAND")
   end
+
+  test "WPS credentials are decoded", context do
+    MockWPASupplicant.set_responses(context.mock, %{"ATTACH" => "OK\n", "BSS 0" => ""})
+
+    property = ["interface", "test_wlan0", "wifi", "wps_credentials"]
+    PropertyTable.delete(VintageNet, property)
+    VintageNet.subscribe(property)
+
+    _supplicant =
+      start_supervised!(
+        {WPASupplicant,
+         wpa_supplicant: "",
+         wpa_supplicant_conf_path: "/dev/null",
+         ifname: "test_wlan0",
+         control_path: context.socket_path}
+      )
+
+    Process.sleep(100)
+
+    MockWPASupplicant.send_message(
+      context.mock,
+      "<2>WPS-CRED-RECEIVED 100e003e10260001011045000b574c414e2d414539343536100300020020100f00020008102700104142434445463936363039353639353710200006b217eac18f1d"
+    )
+
+    assert_receive {VintageNet, ^property, _old,
+                    {:ok, %{credential: %{ssid: "WLAN-AE9456", network_key: "ABCDEF9660956957"}}},
+                    _metadata}
+  end
 end

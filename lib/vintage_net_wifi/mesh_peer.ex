@@ -9,7 +9,8 @@ defmodule VintageNetWiFi.MeshPeer do
 
   This is a superset of the fields available on VintageNetWiFi.AccessPoint.
   """
-  alias VintageNetWiFi.{AccessPoint, Utils, WPASupplicantDecoder}
+  alias VintageNetSupplicant.WPASupplicantDecoder
+  alias VintageNetWiFi.{AccessPoint, Utils}
   alias VintageNetWiFi.MeshPeer.{Capabilities, FormationInformation}
 
   defstruct [
