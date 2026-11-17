@@ -130,7 +130,9 @@ defmodule VintageNetWiFi do
     :wpa_supplicant_conf_path,
     :wps,
     :wps_cred_processing,
-    :tx_power
+    :tx_power,
+    :pkcs11_engine_path,
+    :pkcs11_module_path
   ]
 
   @mesh_param_keys [:mesh_hwmp_rootmode, :mesh_gate_announcements]
@@ -380,6 +382,7 @@ defmodule VintageNetWiFi do
       :ca_cert2,
       :client_cert,
       :client_cert2,
+      :domain_suffix_match,
       :eap,
       :eapol_flags,
       :group,
@@ -581,7 +584,9 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :rand_addr_lifetime),
       into_config_string(wifi, :preassoc_mac_addr),
       into_config_string(wifi, :sae_pwe),
-      into_config_string(wifi, :user_mpm)
+      into_config_string(wifi, :user_mpm),
+      into_config_string(wifi, :pkcs11_engine_path),
+      into_config_string(wifi, :pkcs11_module_path)
     ]
 
     iodata = [into_newlines(config), into_wifi_network_config(wifi)]
@@ -668,6 +673,7 @@ defmodule VintageNetWiFi do
       into_config_string(wifi, :ocsp),
       into_config_string(wifi, :openssl_ciphers),
       into_config_string(wifi, :erp),
+      into_config_string(wifi, :domain_suffix_match),
 
       # SAE settings
       into_config_string(wifi, :sae_password),
@@ -841,6 +847,19 @@ defmodule VintageNetWiFi do
 
   defp wifi_opt_to_config_string(_wifi, :pin, value) do
     "pin=#{inspect(value)}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :domain_suffix_match, value) do
+    "domain_suffix_match=#{escape_string(value)}"
+  end
+
+  # wpa_supplicant doesn't unquote the global PKCS #11 paths
+  defp wifi_opt_to_config_string(_wifi, :pkcs11_engine_path, value) do
+    "pkcs11_engine_path=#{value}"
+  end
+
+  defp wifi_opt_to_config_string(_wifi, :pkcs11_module_path, value) do
+    "pkcs11_module_path=#{value}"
   end
 
   defp wifi_opt_to_config_string(_wifi, :wep_tx_keyidx, value) do

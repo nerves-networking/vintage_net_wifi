@@ -18,7 +18,8 @@ defmodule VintageNetWiFi.WPASupplicant do
   use GenServer
 
   alias VintageNet.Interface.EAPStatus
-  alias VintageNetWiFi.{BSSIDRequester, WPASupplicantDecoder, WPASupplicantLL}
+  alias VintageNetSupplicant.{Daemon, EAP, WPASupplicantDecoder, WPASupplicantLL}
+  alias VintageNetWiFi.{BSSIDRequester, WPSData}
   require Logger
 
   @doc """
@@ -133,27 +134,14 @@ defmodule VintageNetWiFi.WPASupplicant do
           Process.sleep(1000)
         end
 
-        # Erase old old control paths just in case they exist
-        Enum.each(control_paths, &File.rm/1)
-
-        verbose_flag = if state.verbose, do: ["-dd"], else: []
-
-        # -i ifname      // which interface
-        # -Dnl80211,wext // try the nl80211 driver first, then wext
-        # -c config_file // use our config file
-        # -dd            // verbose
-        args = [
-          "-i",
-          state.ifname,
-          "-Dnl80211,wext",
-          "-c",
-          state.wpa_supplicant_conf_path | verbose_flag
-        ]
-
-        MuonTrap.Daemon.start_link(
-          state.wpa_supplicant,
-          args,
-          VintageNet.Command.add_muon_options(stderr_to_stdout: true, log_output: :debug)
+        Daemon.start_link(
+          wpa_supplicant: state.wpa_supplicant,
+          wpa_supplicant_conf_path: state.wpa_supplicant_conf_path,
+          ifname: state.ifname,
+          # try the nl80211 driver first, then wext
+          driver: "nl80211,wext",
+          control_paths: control_paths,
+          verbose: state.verbose
         )
       else
         # No wpa_supplicant. The assumption is that someone else started it.
@@ -163,7 +151,7 @@ defmodule VintageNetWiFi.WPASupplicant do
 
     # Wait for the wpa_supplicant to create its control files.
     {primary_path, secondary_ll} =
-      case wait_for_control_file(control_paths) do
+      case Daemon.wait_for_control_files(control_paths) do
         [primary_path, secondary_path] ->
           {:ok, secondary_ll} =
             WPASupplicantLL.start_link(path: secondary_path, notification_pid: self())
@@ -259,7 +247,7 @@ defmodule VintageNetWiFi.WPASupplicant do
     end
   end
 
-  def handle_info({VintageNetWiFi.WPASupplicantLL, _priority, message}, state) do
+  def handle_info({WPASupplicantLL, _priority, message}, state) do
     notification = WPASupplicantDecoder.decode_notification(message)
 
     new_state = handle_notification(notification, state)
@@ -393,90 +381,16 @@ defmodule VintageNetWiFi.WPASupplicant do
     state
   end
 
-  defp handle_notification({:event, "CTRL-EVENT-EAP-STATUS", %{"status" => "started"}}, state) do
-    new_state = %{
-      state
-      | eap_status: %{state.eap_status | status: :started, timestamp: DateTime.utc_now()}
-    }
+  defp handle_notification({:event, "CTRL-EVENT-EAP-STATUS", _info} = notification, state) do
+    case EAP.update_status(state.eap_status, notification) do
+      {:ok, eap_status} ->
+        EAP.put_status_property(state.ifname, eap_status)
+        %{state | eap_status: eap_status}
 
-    update_eap_status_property(new_state)
-    new_state
-  end
-
-  defp handle_notification(
-         {:event, "CTRL-EVENT-EAP-STATUS",
-          %{"parameter" => method, "status" => "accept proposed method"}},
-         state
-       ) do
-    new_state = %{
-      state
-      | eap_status: %{state.eap_status | method: method, timestamp: DateTime.utc_now()}
-    }
-
-    update_eap_status_property(new_state)
-    new_state
-  end
-
-  defp handle_notification(
-         {:event, "CTRL-EVENT-EAP-STATUS",
-          %{"parameter" => "success", "status" => "remote certificate verification"}},
-         state
-       ) do
-    new_state = %{
-      state
-      | eap_status: %{
-          state.eap_status
-          | remote_certificate_verified?: true,
-            timestamp: DateTime.utc_now()
-        }
-    }
-
-    update_eap_status_property(new_state)
-    new_state
-  end
-
-  defp handle_notification(
-         {:event, "CTRL-EVENT-EAP-STATUS",
-          %{"parameter" => "failure", "status" => "remote certificate verification"}},
-         state
-       ) do
-    new_state = %{
-      state
-      | eap_status: %{
-          state.eap_status
-          | remote_certificate_verified?: false,
-            timestamp: DateTime.utc_now()
-        }
-    }
-
-    update_eap_status_property(new_state)
-    new_state
-  end
-
-  defp handle_notification(
-         {:event, "CTRL-EVENT-EAP-STATUS", %{"parameter" => "failure", "status" => "completion"}},
-         state
-       ) do
-    new_state = %{
-      state
-      | eap_status: %{state.eap_status | status: :failure, timestamp: DateTime.utc_now()}
-    }
-
-    update_eap_status_property(new_state)
-    new_state
-  end
-
-  defp handle_notification(
-         {:event, "CTRL-EVENT-EAP-STATUS", %{"parameter" => "success", "status" => "completion"}},
-         state
-       ) do
-    new_state = %{
-      state
-      | eap_status: %{state.eap_status | status: :success, timestamp: DateTime.utc_now()}
-    }
-
-    update_eap_status_property(new_state)
-    new_state
+      :unknown ->
+        Logger.debug("WPASupplicant ignoring #{inspect(notification)}")
+        state
+    end
   end
 
   defp handle_notification(
@@ -507,8 +421,8 @@ defmodule VintageNetWiFi.WPASupplicant do
     state
   end
 
-  defp handle_notification({:event, "WPS-CRED-RECEIVED", msg}, state) do
-    update_wps_credentials(state.ifname, msg)
+  defp handle_notification({:event, "WPS-CRED-RECEIVED", hex_string}, state) do
+    update_wps_credentials(state.ifname, WPSData.decode(hex_string))
     state
   end
 
@@ -668,14 +582,6 @@ defmodule VintageNetWiFi.WPASupplicant do
     )
   end
 
-  defp update_eap_status_property(state) do
-    PropertyTable.put(
-      VintageNet,
-      ["interface", state.ifname, "eap_status"],
-      state.eap_status
-    )
-  end
-
   defp update_wps_credentials(ifname, credentials) do
     PropertyTable.put(
       VintageNet,
@@ -698,29 +604,5 @@ defmodule VintageNetWiFi.WPASupplicant do
 
   defp get_control_paths(%{control_dir: dir, ifname: ifname}) do
     [Path.join(dir, ifname)]
-  end
-
-  defp wait_for_control_file(paths, time_left \\ 3000)
-
-  defp wait_for_control_file(_paths, time_left) when time_left <= 0 do
-    []
-  end
-
-  defp wait_for_control_file(paths, time_left) do
-    case Enum.filter(paths, &File.exists?/1) do
-      [] ->
-        Process.sleep(250)
-        wait_for_control_file(paths, time_left - 250)
-
-      found_paths when length(found_paths) < length(paths) ->
-        # I don't think that it's guaranteed that all paths are always created,
-        # so all this to work, but with a penalty just in case the others show
-        # up momentarily.
-        Process.sleep(100)
-        Enum.filter(paths, &File.exists?/1)
-
-      found_paths ->
-        found_paths
-    end
   end
 end

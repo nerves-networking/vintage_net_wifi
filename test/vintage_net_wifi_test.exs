@@ -1220,6 +1220,60 @@ defmodule VintageNetWiFiTest do
     assert output == VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
   end
 
+  test "EAP-TLS with the private key in an HSM" do
+    input = %{
+      type: VintageNetWiFi,
+      vintage_net_wifi: %{
+        pkcs11_engine_path: "/usr/lib/engines-3/libpkcs11.so",
+        pkcs11_module_path: "/srv/erlang/lib/nerves_key_pkcs11-1.2.0/priv/nerves_key_pkcs11.so",
+        networks: [
+          %{
+            ssid: "example",
+            key_mgmt: :wpa_eap,
+            eap: "TLS",
+            identity: "host/device.example.com",
+            ca_cert: "/etc/cert/ca.pem",
+            domain_suffix_match: "radius.example.com",
+            client_cert: "/etc/cert/device.pem",
+            private_key: "pkcs11:token=1",
+            pin: "1234"
+          }
+        ]
+      },
+      ipv4: %{method: :dhcp},
+      hostname: "unit_test"
+    }
+
+    normalized = VintageNetWiFi.normalize(input)
+    assert normalized.vintage_net_wifi.pkcs11_engine_path == "/usr/lib/engines-3/libpkcs11.so"
+    assert hd(normalized.vintage_net_wifi.networks).domain_suffix_match == "radius.example.com"
+
+    raw_config = VintageNetWiFi.to_raw_config("wlan0", input, default_opts())
+
+    assert raw_config.files == [
+             {"/tmp/vintage_net/wpa_supplicant.conf.wlan0",
+              """
+              ctrl_interface=/tmp/vintage_net/wpa_supplicant
+              country=00
+              wps_cred_processing=1
+              pkcs11_engine_path=/usr/lib/engines-3/libpkcs11.so
+              pkcs11_module_path=/srv/erlang/lib/nerves_key_pkcs11-1.2.0/priv/nerves_key_pkcs11.so
+              network={
+              ssid="example"
+              key_mgmt=WPA-EAP
+              mode=0
+              identity="host/device.example.com"
+              eap=TLS
+              domain_suffix_match="radius.example.com"
+              ca_cert="/etc/cert/ca.pem"
+              client_cert="/etc/cert/device.pem"
+              private_key="pkcs11:token=1"
+              pin="1234"
+              }
+              """}
+           ]
+  end
+
   test "EAP-PEAP/MSCHAPv2 configuration for RADIUS servers that use the new peaplabel" do
     input = %{
       type: VintageNetWiFi,

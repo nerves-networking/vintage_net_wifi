@@ -12,7 +12,7 @@ defmodule VintageNetWiFi.BSSIDRequester do
   """
   use GenServer
 
-  alias VintageNetWiFi.{WPASupplicantDecoder, WPASupplicantLL}
+  alias VintageNetSupplicant.{WPASupplicantDecoder, WPASupplicantLL}
   require Logger
 
   @doc """
