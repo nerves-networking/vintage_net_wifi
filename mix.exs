@@ -74,7 +74,11 @@ defmodule VintageNetWiFi.MixProject do
 
   defp deps do
     [
-      {:vintage_net, "~> 0.12.0 or ~> 0.13.0"},
+      # TODO(igniter): revert to the Hex requirement once vintage_net with
+      # VintageNet.Generator is released
+      # {:vintage_net, "~> 0.12.0 or ~> 0.13.0"},
+      {:vintage_net, path: "../vintage_net", override: true},
+      {:igniter, "~> 0.6", optional: true, runtime: false},
       {:credo, "~> 1.2", only: :test, runtime: false},
       {:credo_binary_patterns, "~> 0.2.2", only: :test, runtime: false},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
@@ -87,7 +91,8 @@ defmodule VintageNetWiFi.MixProject do
   defp dialyzer() do
     [
       flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling, :underspecs],
-      plt_file: {:no_warn, "_build/plts/dialyzer.plt"}
+      plt_file: {:no_warn, "_build/plts/dialyzer.plt"},
+      plt_add_apps: [:igniter, :sourceror, :rewrite, :glob_ex, :mix]
     ]
   end
 
