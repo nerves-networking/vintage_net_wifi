@@ -52,6 +52,106 @@ end
 > If you are using access point mode, check that `CONFIG_UDHCPD` is enabled
 > in Busybox and `BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT` is enabled in Buildroot.
 
+### Igniter
+
+If your project uses [Igniter](https://hex.pm/packages/igniter), you can add
+`:vintage_net_wifi` and its configuration by running:
+
+```sh
+mix igniter.install vintage_net_wifi
+```
+
+This adds `{"wlan0", %{type: VintageNetWiFi}}` to the network interfaces and the
+WiFi regulatory domain to the `:vintage_net` configuration in
+`config/target.exs`:
+
+```elixir
+config :vintage_net,
+  regulatory_domain: "00",
+  config: [
+    {"wlan0", %{type: VintageNetWiFi}}
+  ]
+```
+
+That's the same as what new Nerves projects start with. Configuration that's
+already there is kept.
+
+If other dependencies in your `mix.exs` are restricted to devices with a module
+attribute like `targets: @all_targets`, the `:vintage_net_wifi` dependency
+gets the same option.
+
+Options:
+
+* `--wifi-ifname` - the name of the WiFi network interface. Defaults to `wlan0`.
+* `--regulatory-domain` - the 2-letter country code for where the device is
+  used. E.g., `US`. When specified, it replaces a regulatory domain that's
+  already configured. If the project doesn't have one, `"00"` (world) is
+  written and you're reminded to update it. The regulatory domain only applies
+  to WiFi, so this is the installer that sets it even though the key is part of
+  the `:vintage_net` configuration.
+* `--wifi-provisioning` - set the project up for setting WiFi credentials when
+  writing firmware to a MicroSD card. See below. Defaults to off.
+
+The installer doesn't write SSIDs or passphrases to your project. Configure
+networks at runtime as described below or use `--wifi-provisioning`.
+
+#### WiFi provisioning
+
+Devices that can only be reached over WiFi need WiFi credentials before you can
+get to an IEx prompt to call `VintageNetWiFi.quick_configure/2`. Putting them in
+your project's configuration isn't a good idea since they'd end up in version
+control and in every firmware file. [Nerves
+Livebook](https://github.com/nerves-livebook/nerves_livebook) and other
+projects have `fwup` store them on the MicroSD card when it's written instead.
+To set up your project the same way, run:
+
+```sh
+mix igniter.install vintage_net_wifi --wifi-provisioning
+```
+
+Then pass the credentials when writing the firmware to a MicroSD card:
+
+```sh
+NERVES_WIFI_SSID='my_access_point' NERVES_WIFI_PASSPHRASE='secret_passphrase' mix burn
+```
+
+If you write MicroSD cards by running `fwup` directly, pass the environment
+variables to it. E.g., `sudo NERVES_WIFI_SSID='my_access_point'
+NERVES_WIFI_PASSPHRASE='secret_passphrase' fwup my_app.fw`.
+
+The option adds the following to your project:
+
+* `config/provisioning.conf` - a `fwup` provisioning file that stores the
+  environment variables below in the U-Boot environment block of the MicroSD
+  card. It includes the provisioning file of your Nerves system, so
+  `NERVES_SERIAL_NUMBER` and anything else that the system provisions keeps
+  working.
+* `config :nerves, :firmware, provisioning: "config/provisioning.conf"` in
+  `config/config.exs`. If your project already has a `:provisioning` setting,
+  it's kept and you're shown the lines to add to your provisioning file.
+* A `MyApp.WiFiProvisioning` module in `lib/my_app/wifi_provisioning.ex`. Its
+  `setup/0` function reads the credentials using `Nerves.Runtime.KV` and calls
+  `VintageNetWiFi.quick_configure/2` if `"wlan0"` doesn't have a network
+  configured. It does nothing when the project is compiled for the host.
+* A call to `MyApp.WiFiProvisioning.setup()` at the start of the `start/2`
+  function of your OTP application.
+
+Environment variable     | `Nerves.Runtime.KV` key | Description
+ ----------------------- | ----------------------- | -----------
+`NERVES_WIFI_SSID`       | `wifi_ssid`             | The SSID to use if WiFi hasn't been configured
+`NERVES_WIFI_PASSPHRASE` | `wifi_passphrase`       | The passphrase to use if WiFi hasn't been configured. Leave it out for open networks.
+`NERVES_WIFI_FORCE`      | `wifi_force`            | Set to `true` to apply the credentials on every boot even if WiFi was configured some other way
+
+The credentials are only on the MicroSD card. They aren't in the firmware
+file, so they're not sent in firmware updates either. `VintageNet` persists the
+WiFi configuration once it's applied, and configuring WiFi with
+`VintageNetWiFi.quick_configure/2` or `VintageNet.configure/3` afterwards takes
+precedence unless `NERVES_WIFI_FORCE` was set.
+
+`VintageNetWiFi.quick_configure/2` creates WPA2 PSK configurations by default.
+See its documentation if your WiFi module supports WPA3. The installer doesn't
+change this since not all WiFi modules do.
+
 ## Usage
 
 The easiest way to configure WiFi is to using
